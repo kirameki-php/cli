@@ -2,29 +2,59 @@
 
 namespace Kirameki\Cli;
 
-abstract class CommandBuilder
+use Kirameki\Cli\Parameters\Argument;
+use Kirameki\Cli\Parameters\ParameterBuilder;
+use Kirameki\Cli\Parameters\Option;
+
+class CommandBuilder
 {
-    protected string $name;
+    /**
+     * @param CommandDefinition $definition
+     */
+    public function __construct(
+        protected CommandDefinition $definition,
+    )
+    {
+    }
 
-    protected array $arguments;
-
-    protected array $options;
-
+    /**
+     * @param string $name
+     * @return $this
+     */
     public function name(string $name): static
     {
-        $this->name = $name;
+        $this->definition->name = $name;
         return $this;
     }
 
-    public function argument(string $name, string $default = null): static
+    /**
+     * @param string $name
+     * @return ParameterBuilder
+     */
+    public function argument(string $name): ParameterBuilder
     {
-
-        return $this;
+        return new ParameterBuilder(
+            $this->definition->arguments[$name] = new Argument($name),
+        );
     }
 
-    public function option(string $long, string $short = null, string $default = null): static
+    /**
+     * @param string $name
+     * @param string|null $short
+     * @return ParameterBuilder
+     */
+    public function option(string $name, ?string $short = null): ParameterBuilder
     {
-        $this->arguments[$long] = $default;
-        return $this;
+        return new ParameterBuilder(
+            $this->definition->options[$name] = new Option($name, $short),
+        );
+    }
+
+    /**
+     * @return CommandDefinition
+     */
+    public function getDefinition(): CommandDefinition
+    {
+        return $this->definition;
     }
 }

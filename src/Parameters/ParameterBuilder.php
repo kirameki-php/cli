@@ -1,8 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Cli\Input\Builders;
-
-use Kirameki\Cli\Input\Parameter;
+namespace Kirameki\Cli\Parameters;
 
 /**
  * @template TParameter of Parameter

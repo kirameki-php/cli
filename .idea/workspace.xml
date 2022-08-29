@@ -5,19 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="82d166ca-f9ce-42e6-ab80-e6fbe3a495cf" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/Command.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/CommandBuilder.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Input/Argument.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Input/Builders/ArgumentBuilder.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Input/Builders/OptionBuilder.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Input/Builders/ParameterBuilder.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Input/Option.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Input/Parameter.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/cli.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/cli.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/CommandDefinition.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/docker/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CliHandler.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/CliHandler.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Command.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Command.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CommandBuilder.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/CommandBuilder.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Input/Argument.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Input/Argument.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Input/Builders/ArgumentBuilder.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Input/Builders/OptionBuilder.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Input/Builders/ParameterBuilder.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Input/ParameterBuilder.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Input/Option.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Input/Option.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,7 +84,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "/Users/taka-mac/Projects/kirameki/cli/src/Input",
+    "last_opened_file_path": "/Users/taka-mac/Projects/kirameki/cli/src",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -99,8 +95,8 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/src/Input" />
       <recent name="$PROJECT_DIR$/src" />
+      <recent name="$PROJECT_DIR$/src/Input" />
       <recent name="$PROJECT_DIR$/src/Builders" />
     </key>
   </component>
@@ -114,7 +110,7 @@
       <updated>1658839986014</updated>
       <workItem from="1658839987153" duration="26000" />
       <workItem from="1660312064191" duration="279000" />
-      <workItem from="1660312347695" duration="6202000" />
+      <workItem from="1660312347695" duration="13272000" />
     </task>
     <servers />
   </component>
