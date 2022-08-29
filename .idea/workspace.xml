@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="82d166ca-f9ce-42e6-ab80-e6fbe3a495cf" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitattributes" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LICENSE" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker/docker-compose.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker/files/etc/profile.d/aliases.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker/files/etc/profile.d/git-prompt-apply.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker/files/etc/profile.d/git-prompt.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/phpstan.neon" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/phpunit.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/CliHandler.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/src/TestCase.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Command.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/CommandBuilder.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Input/Argument.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Input/Builders/ArgumentBuilder.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Input/Builders/OptionBuilder.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Input/Builders/ParameterBuilder.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Input/Option.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Input/Parameter.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/cli.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/cli.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/docker/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CliHandler.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/CliHandler.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ComposerSettings" doNotAsk="true">
+  <component name="ComposerSettings" doNotAsk="true" synchronizationState="SYNCHRONIZE">
     <pharConfigPath>$PROJECT_DIR$/composer.json</pharConfigPath>
     <execution />
   </component>
@@ -75,6 +75,7 @@
       <path value="$PROJECT_DIR$/vendor/phpspec/prophecy" />
       <path value="$PROJECT_DIR$/vendor/webmozart/assert" />
       <path value="$PROJECT_DIR$/vendor/composer" />
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-mbstring" />
     </include_path>
   </component>
   <component name="ProjectId" id="2CTwfT72afQFInR5vabHVLYRYDp" />
@@ -87,10 +88,22 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "/Users/taka-mac/Projects/kirameki/cli",
+    "last_opened_file_path": "/Users/taka-mac/Projects/kirameki/cli/src/Input",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "settings.editor.selected.configurable": "preferences.lookFeel",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/Input" />
+      <recent name="$PROJECT_DIR$/src" />
+      <recent name="$PROJECT_DIR$/src/Builders" />
+    </key>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -101,6 +114,7 @@
       <updated>1658839986014</updated>
       <workItem from="1658839987153" duration="26000" />
       <workItem from="1660312064191" duration="279000" />
+      <workItem from="1660312347695" duration="6202000" />
     </task>
     <servers />
   </component>
