@@ -10,7 +10,7 @@ abstract class Command
     /**
      * @var CommandDefinition
      */
-    protected CommandDefinition $definition;
+    protected readonly CommandDefinition $definition;
 
     public function __construct()
     {
@@ -52,15 +52,6 @@ abstract class Command
     public function getArgument(string $name): Argument
     {
         return $this->definition->arguments[$name];
-    }
-
-    /**
-     * @param string $name
-     * @return bool
-     */
-    public function hasArgument(string $name): bool
-    {
-        return array_key_exists($name, $this->definition->arguments);
     }
 
     /**

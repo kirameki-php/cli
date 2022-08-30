@@ -1,3 +1,6 @@
+# Idea
+.idea/workspace.xml
+
 # Framework
 composer.lock
 coverage

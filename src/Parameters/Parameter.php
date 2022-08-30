@@ -5,27 +5,59 @@ namespace Kirameki\Cli\Parameters;
 abstract class Parameter
 {
     /**
-     * @var string
+     * @param string $name
+     * @param string $description
+     * @param bool $multiple
+     * @param bool $optional
+     * @param string|null $default
      */
-    public string $name;
+    public function __construct(
+        protected readonly string $name,
+        protected readonly string $description = '',
+        protected readonly bool $multiple = false,
+        protected readonly bool $optional = false,
+        protected readonly ?string $default = null,
+    )
+    {
+    }
 
     /**
-     * @var bool
+     * @return string
      */
-    public bool $multiple = false;
+    public function getName(): string
+    {
+        return $this->name;
+    }
 
     /**
-     * @var string
+     * @return string
      */
-    public string $description = '';
+    public function getDescription(): string
+    {
+        return $this->description;
+    }
 
     /**
-     * @var bool
+     * @return bool
      */
-    public bool $optional = false;
+    public function getMultiple(): bool
+    {
+        return $this->multiple;
+    }
 
     /**
-     * @var string|null
+     * @return bool
      */
-    public ?string $default = null;
+    public function getOptional(): bool
+    {
+        return $this->optional;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getDefault(): ?string
+    {
+        return $this->default;
+    }
 }

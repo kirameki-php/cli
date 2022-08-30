@@ -2,12 +2,26 @@
 
 namespace Kirameki\Cli;
 
-use Kirameki\Cli\Parameters\Argument;
-use Kirameki\Cli\Parameters\ParameterBuilder;
-use Kirameki\Cli\Parameters\Option;
+use Kirameki\Cli\Parameters\ArgumentBuilder;
+use Kirameki\Cli\Parameters\OptionBuilder;
 
 class CommandBuilder
 {
+    /**
+     * @var string
+     */
+    protected string $name;
+
+    /**
+     * @var array<string, ArgumentBuilder>
+     */
+    protected array $arguments = [];
+
+    /**
+     * @var array<string, OptionBuilder>
+     */
+    protected array $options = [];
+
     /**
      * @param CommandDefinition $definition
      */
@@ -23,31 +37,27 @@ class CommandBuilder
      */
     public function name(string $name): static
     {
-        $this->definition->name = $name;
+        $this->name = $name;
         return $this;
     }
 
     /**
      * @param string $name
-     * @return ParameterBuilder
+     * @return ArgumentBuilder
      */
-    public function argument(string $name): ParameterBuilder
+    public function argument(string $name): ArgumentBuilder
     {
-        return new ParameterBuilder(
-            $this->definition->arguments[$name] = new Argument($name),
-        );
+        return $this->arguments[$name] = new ArgumentBuilder($name);
     }
 
     /**
      * @param string $name
      * @param string|null $short
-     * @return ParameterBuilder
+     * @return OptionBuilder
      */
-    public function option(string $name, ?string $short = null): ParameterBuilder
+    public function option(string $name, ?string $short = null): OptionBuilder
     {
-        return new ParameterBuilder(
-            $this->definition->options[$name] = new Option($name, $short),
-        );
+        return $this->options[$name] = new OptionBuilder($name, $short);
     }
 
     /**

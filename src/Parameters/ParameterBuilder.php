@@ -8,10 +8,27 @@ namespace Kirameki\Cli\Parameters;
 class ParameterBuilder
 {
     /**
-     * @param TParameter $params
+     * @var bool
      */
+    protected bool $multiple = false;
+
+    /**
+     * @var string
+     */
+    protected string $description = '';
+
+    /**
+     * @var bool
+     */
+    protected bool $optional = false;
+
+    /**
+     * @var string|null
+     */
+    protected ?string $default = null;
+
     public function __construct(
-        protected Parameter $params,
+        protected string $name
     )
     {
     }
@@ -22,7 +39,7 @@ class ParameterBuilder
      */
     public function multiple(bool $toggle = true): static
     {
-        $this->params->multiple = $toggle;
+        $this->multiple = $toggle;
         return $this;
     }
 
@@ -32,7 +49,7 @@ class ParameterBuilder
      */
     public function description(string $text): static
     {
-        $this->params->description = $text;
+        $this->description = $text;
         return $this;
     }
 
@@ -42,8 +59,8 @@ class ParameterBuilder
      */
     public function optional(string $default = null): static
     {
-        $this->params->optional = true;
-        $this->params->default = $default;
+        $this->optional = true;
+        $this->default = $default;
         return $this;
     }
 }

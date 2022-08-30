@@ -6,9 +6,27 @@ class Option extends Parameter
 {
     public function __construct(
         string $name,
-        public ?string $short = null,
+        protected ?string $short = null,
+        string $description = '',
+        bool $multiple = false,
+        bool $optional = false,
+        ?string $default = null,
     )
     {
-        $this->name = $name;
+        parent::__construct(
+            $name,
+            $description,
+            $multiple,
+            $optional,
+            $default,
+        );
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getShort(): ?string
+    {
+        return $this->short;
     }
 }
