@@ -2,23 +2,51 @@
 
 namespace Kirameki\Cli;
 
-use Kirameki\Cli\Parameters\Argument;
-use Kirameki\Cli\Parameters\Option;
+use Kirameki\Cli\Definitions\Argument;
+use Kirameki\Cli\Definitions\Option;
 
 class CommandDefinition
 {
     /**
-     * @var string
+     * @param string $name
+     * @param array<string, Argument> $arguments
+     * @param array<string, Option> $options
      */
-    public string $name;
+    public function __construct(
+        protected string $name,
+        protected array $arguments,
+        protected array $options,
+    )
+    {
+    }
 
     /**
-     * @var array<string, Argument>
+     * @return string
      */
-    public array $arguments = [];
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getArgumentByName(string $name)
+    {
+        return $this->arguments[$name];
+    }
 
     /**
-     * @var array<string, Option>
+     * @param string $name
+     * @return Option
      */
-    public array $options = [];
+    public function getOption(string $name): Option
+    {
+        return $this->options[$name];
+    }
+
+    /**
+     * @return array<string, Option>
+     */
+    public function getOptions(): array
+    {
+        return $this->options;
+    }
 }

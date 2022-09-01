@@ -2,34 +2,27 @@
 
 namespace Kirameki\Cli;
 
-use Kirameki\Cli\Parameters\ArgumentBuilder;
-use Kirameki\Cli\Parameters\OptionBuilder;
+use Kirameki\Cli\Definitions\ArgumentBuilder;
+use Kirameki\Cli\Definitions\OptionBuilder;
+use RuntimeException;
+use function array_map;
 
 class CommandBuilder
 {
     /**
-     * @var string
+     * @var string|null
      */
-    protected string $name;
+    protected ?string $name = null;
 
     /**
      * @var array<string, ArgumentBuilder>
      */
-    protected array $arguments = [];
+    protected array $argumentBuilders = [];
 
     /**
      * @var array<string, OptionBuilder>
      */
-    protected array $options = [];
-
-    /**
-     * @param CommandDefinition $definition
-     */
-    public function __construct(
-        protected CommandDefinition $definition,
-    )
-    {
-    }
+    protected array $optionBuilders = [];
 
     /**
      * @param string $name
@@ -47,7 +40,7 @@ class CommandBuilder
      */
     public function argument(string $name): ArgumentBuilder
     {
-        return $this->arguments[$name] = new ArgumentBuilder($name);
+        return $this->argumentBuilders[$name] = new ArgumentBuilder($name);
     }
 
     /**
@@ -57,14 +50,28 @@ class CommandBuilder
      */
     public function option(string $name, ?string $short = null): OptionBuilder
     {
-        return $this->options[$name] = new OptionBuilder($name, $short);
+        $builder = new OptionBuilder($name, $short);
+        $this->optionBuilders[$name] = $builder;
+        $this->optionBuilders[$short] = $builder;
+        return $builder;
     }
 
-    /**
-     * @return CommandDefinition
-     */
-    public function getDefinition(): CommandDefinition
+    public function build(): CommandDefinition
     {
-        return $this->definition;
+        if ($this->name === null) {
+            throw new RuntimeException('Name of command must be defined!');
+        }
+
+        $arguments = array_map(
+            fn(ArgumentBuilder $builder) => $builder->build(),
+            $this->argumentBuilders
+        );
+
+        $options = array_map(
+            fn(OptionBuilder $builder) => $builder->build(),
+            $this->optionBuilders
+        );
+
+        return new CommandDefinition($this->name, $arguments, $options);
     }
 }

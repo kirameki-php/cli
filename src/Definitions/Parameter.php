@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Cli\Parameters;
+namespace Kirameki\Cli\Definitions;
 
 abstract class Parameter
 {
@@ -40,7 +40,7 @@ abstract class Parameter
     /**
      * @return bool
      */
-    public function getMultiple(): bool
+    public function isArray(): bool
     {
         return $this->multiple;
     }
@@ -48,7 +48,7 @@ abstract class Parameter
     /**
      * @return bool
      */
-    public function getOptional(): bool
+    public function isOptional(): bool
     {
         return $this->optional;
     }

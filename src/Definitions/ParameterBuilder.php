@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Cli\Parameters;
+namespace Kirameki\Cli\Definitions;
 
 /**
  * @template TParameter of Parameter
@@ -37,7 +37,7 @@ class ParameterBuilder
      * @param bool $toggle
      * @return $this
      */
-    public function multiple(bool $toggle = true): static
+    public function allowMultiple(bool $toggle = true): static
     {
         $this->multiple = $toggle;
         return $this;
