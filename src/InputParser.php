@@ -19,16 +19,6 @@ use function substr;
 class InputParser
 {
     /**
-     * @var array<string, Argument>
-     */
-    protected array $enteredArguments = [];
-
-    /**
-     * @var array<string, Option>
-     */
-    protected array $enteredOptions = [];
-
-    /**
      * @var int
      */
     protected int $parameterCursor = 0;
@@ -37,6 +27,16 @@ class InputParser
      * @var int
      */
     protected int $argumentCursor = 0;
+
+    /**
+     * @var array<string, Argument>
+     */
+    protected array $enteredArguments = [];
+
+    /**
+     * @var array<string, Option>
+     */
+    protected array $enteredOptions = [];
 
     /**
      * @param CommandDefinition $definition
@@ -69,8 +69,17 @@ class InputParser
         }
 
         return [
+            'arguments' => $this->enteredArguments,
             'options' => $this->enteredOptions,
         ];
+    }
+
+    /**
+     * @return bool
+     */
+    protected function hasMoreParameters(): bool
+    {
+        return $this->parameterCursor < count($this->parameters);
     }
 
     /**
@@ -124,7 +133,7 @@ class InputParser
             throw new RuntimeException(sprintf('Undefined option: %s', $name));
         }
 
-        if ($value === null) {
+        if ($value === null && $this->hasMoreParameters()) {
             // look at the next parameter to check if it's a value
             $nextParameter = $this->nextParameter();
             if ($nextParameter !== null && $this->isNotAnOption($nextParameter)) {
@@ -162,12 +171,14 @@ class InputParser
 
             // on the last char, no need to go further.
             if ($nextChar === false) {
-                $nextParameter = $this->nextParameter();
-                if($nextParameter !== null && $this->isNotAnOption($nextParameter)) {
-                    $this->addToOption($defined, $char, $nextParameter);
-                    $this->parameterCursor++;
-                } else {
-                    $this->addToOption($defined, $char, null);
+                if ($this->hasMoreParameters()) {
+                    $nextParameter = $this->nextParameter();
+                    if($nextParameter !== null && $this->isNotAnOption($nextParameter)) {
+                        $this->addToOption($defined, $char, $nextParameter);
+                        $this->parameterCursor++;
+                    } else {
+                        $this->addToOption($defined, $char, null);
+                    }
                 }
                 break;
             }
