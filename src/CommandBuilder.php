@@ -22,7 +22,12 @@ class CommandBuilder
     /**
      * @var array<string, OptionBuilder>
      */
-    protected array $optionBuilders = [];
+    protected array $longOptionBuilders = [];
+
+    /**
+     * @var array<string, OptionBuilder>
+     */
+    protected array $shortOptionBuilders = [];
 
     /**
      * @param string $name
@@ -51,8 +56,10 @@ class CommandBuilder
     public function option(string $name, ?string $short = null): OptionBuilder
     {
         $builder = new OptionBuilder($name, $short);
-        $this->optionBuilders[$name] = $builder;
-        $this->optionBuilders[$short] = $builder;
+        $this->longOptionBuilders[$name] = $builder;
+        if ($short !== null) {
+            $this->shortOptionBuilders[$short] = $builder;
+        }
         return $builder;
     }
 
@@ -67,11 +74,21 @@ class CommandBuilder
             $this->argumentBuilders
         );
 
-        $options = array_map(
+        $longOptions = array_map(
             fn(OptionBuilder $builder) => $builder->build(),
-            $this->optionBuilders
+            $this->longOptionBuilders
         );
 
-        return new CommandDefinition($this->name, $arguments, $options);
+        $shortOptions = array_map(
+            fn(OptionBuilder $builder) => $builder->build(),
+            $this->shortOptionBuilders
+        );
+
+        return new CommandDefinition(
+            $this->name,
+            $arguments,
+            $longOptions,
+            $shortOptions,
+        );
     }
 }

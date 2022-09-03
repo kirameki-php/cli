@@ -2,7 +2,7 @@
 
 namespace Kirameki\Cli\Definitions;
 
-class Option extends Parameter
+class DefinedOption extends DefinedParameter
 {
     public function __construct(
         string $name,
@@ -26,7 +26,7 @@ class Option extends Parameter
     /**
      * @return string|null
      */
-    public function getShort(): ?string
+    public function getShortName(): ?string
     {
         return $this->short;
     }

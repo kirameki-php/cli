@@ -44,11 +44,11 @@ class OptionBuilder extends ParameterBuilder
     }
 
     /**
-     * @return Option
+     * @return DefinedOption
      */
-    public function build(): Option
+    public function build(): DefinedOption
     {
-        return new Option(
+        return new DefinedOption(
             $this->name,
             $this->short,
             $this->description,

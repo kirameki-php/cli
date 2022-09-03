@@ -2,7 +2,7 @@
 
 namespace Kirameki\Cli\Definitions;
 
-abstract class Parameter
+abstract class DefinedParameter
 {
     /**
      * @param string $name

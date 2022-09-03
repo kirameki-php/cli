@@ -2,6 +2,6 @@
 
 namespace Kirameki\Cli\Definitions;
 
-class Argument extends Parameter
+class DefinedArgument extends DefinedParameter
 {
 }

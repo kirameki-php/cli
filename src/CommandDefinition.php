@@ -2,20 +2,23 @@
 
 namespace Kirameki\Cli;
 
-use Kirameki\Cli\Definitions\Argument;
-use Kirameki\Cli\Definitions\Option;
+use Kirameki\Cli\Definitions\DefinedArgument;
+use Kirameki\Cli\Definitions\DefinedOption;
+use function array_key_exists;
 
 class CommandDefinition
 {
     /**
      * @param string $name
-     * @param array<string, Argument> $arguments
-     * @param array<string, Option> $options
+     * @param array<string, DefinedArgument> $arguments
+     * @param array<string, DefinedOption> $longOptions
+     * @param array<string, DefinedOption> $shortOptions
      */
     public function __construct(
         protected string $name,
-        protected array $arguments,
-        protected array $options,
+        protected array  $arguments,
+        protected array  $longOptions,
+        protected array  $shortOptions,
     )
     {
     }
@@ -35,18 +38,28 @@ class CommandDefinition
 
     /**
      * @param string $name
-     * @return Option
+     * @return DefinedOption
      */
-    public function getOption(string $name): Option
+    public function getLongOption(string $name): DefinedOption
     {
-        return $this->options[$name];
+        return $this->longOptions[$name];
     }
 
     /**
-     * @return array<string, Option>
+     * @param string $name
+     * @return bool
      */
-    public function getOptions(): array
+    public function hasShortOption(string $name): bool
     {
-        return $this->options;
+        return array_key_exists($name, $this->shortOptions);
+    }
+
+    /**
+     * @param string $name
+     * @return DefinedOption
+     */
+    public function getShortOption(string $name): DefinedOption
+    {
+        return $this->shortOptions[$name];
     }
 }

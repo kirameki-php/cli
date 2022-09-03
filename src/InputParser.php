@@ -2,44 +2,65 @@
 
 namespace Kirameki\Cli;
 
-use Kirameki\Cli\Definitions\Option;
+use Kirameki\Cli\Definitions\DefinedArgument;
+use Kirameki\Cli\Definitions\DefinedOption;
+use Kirameki\Cli\Input\Argument;
+use Kirameki\Cli\Input\Option;
+use RuntimeException;
 use function array_key_exists;
 use function count;
 use function explode;
-use function is_array;
 use function preg_match;
+use function sprintf;
 use function str_starts_with;
+use function strlen;
 use function substr;
 
 class InputParser
 {
-    protected array $definedOptions;
+    /**
+     * @var array<string, Argument>
+     */
+    protected array $enteredArguments = [];
 
-    public array $enteredOptions = [];
+    /**
+     * @var array<string, Option>
+     */
+    protected array $enteredOptions = [];
 
-    protected int $currentIndex = 0;
+    /**
+     * @var int
+     */
+    protected int $cursor = 0;
 
+    /**
+     * @param CommandDefinition $definition
+     * @param list<string> $parameters
+     */
     public function __construct(
-        CommandDefinition $definition,
+        protected CommandDefinition $definition,
         protected array $parameters,
     )
     {
-        $this->definedOptions = $definition->getOptions();
     }
 
     /**
-     * @return array<string, array<>>
+     * @return array<string, mixed>
      */
     public function parse(): array
     {
         $parameterCount = count($this->parameters);
 
-        while($this->currentIndex < $parameterCount) {
-            if ($this->isLongOption($this->currentParameter())) {
-                $this->processLongOption();
-            }
+        while ($this->cursor < $parameterCount) {
+            $parameter = $this->parameters[$this->cursor];
 
-            $this->currentIndex++;
+            match (true) {
+                $this->isLongOption($parameter) => $this->processLongOption($parameter),
+                $this->isShortOption($parameter) => $this->processShortOptions($parameter),
+                default => $this->processArgument($parameter),
+            };
+
+            $this->cursor++;
         }
 
         return [
@@ -48,38 +69,30 @@ class InputParser
     }
 
     /**
-     * @param string $raw
+     * @param string $parameter
      * @return bool
      */
-    protected function isOptionValue(string $raw): bool
+    protected function isLongOption(string $parameter): bool
     {
-        return str_starts_with($raw, '-');
+        return (bool)preg_match('/--\w+/', $parameter);
     }
 
     /**
-     * @param string $raw
+     * @param string $parameter
      * @return bool
      */
-    protected function isLongOption(string $raw): bool
+    protected function isShortOption(string $parameter): bool
     {
-        return (bool)preg_match('/--\w+/', $raw);
+        return (bool)preg_match('/-\w+/', $parameter);
     }
 
     /**
-     * @param string $raw
+     * @param string $parameter
      * @return bool
      */
-    protected function isShortOption(string $raw): bool
+    protected function isNotAnOption(string $parameter): bool
     {
-        return (bool)preg_match('/-\w+/', $raw);
-    }
-
-    /**
-     * @return string
-     */
-    protected function currentParameter(): string
-    {
-        return $this->parameters[$this->currentIndex];
+        return !str_starts_with($parameter, '-');
     }
 
     /**
@@ -87,69 +100,149 @@ class InputParser
      */
     protected function nextParameter(): ?string
     {
-        return $this->parameters[$this->currentIndex + 1] ?? null;
+        return $this->parameters[$this->cursor + 1] ?? null;
     }
 
     /**
+     * @param string $parameter
      * @return void
      */
-    protected function processLongOption(): void
+    protected function processLongOption(string $parameter): void
     {
-        $parts = explode('=', substr($this->currentParameter(), 2));
+        $parts = explode('=', substr($parameter, 2));
         $name = $parts[0];
         $value = $parts[1] ?? null;
 
-        $option = $this->pullDefinedOption($name);
+        $defined = $this->getDefinedLongOption($name);
 
-        // option was defined with =
-        if ($value !== null) {
-            $this->addToOption($name, $value);
-            return;
+        if ($defined === null) {
+            throw new RuntimeException(sprintf('Undefined option: %s', $name));
         }
 
-        // look at the next parameter to check if it's a value
-        $next = $this->nextParameter();
+        if ($value === null) {
+            // look at the next parameter to check if it's a value
+            $nextParameter = $this->nextParameter();
 
-        // $next is null, which means it reached the end of parameter list
-        if ($next === null) {
-            $this->addToOption($name, $option->getDefault());
-            return;
+            if ($nextParameter !== null && $this->isNotAnOption($nextParameter)) {
+                $value = $nextParameter;
+                $this->cursor++;
+            }
         }
 
-        // next value retrieved was non-option string which can be
-        // interpreted as the value for option.
-        if (!str_starts_with($next, '-')) {
-            $this->addToOption($name, $next);
-            return;
+        $value ??= $defined->getDefault();
+
+        if ($defined->requireValue()) {
+            throw new RuntimeException(sprintf('Value is required for option: %s', $name));
         }
 
-        // no option value was defined.
-        $this->addToOption($name, null);
+        $this->addToOption($defined, $name, $value);
     }
 
-    protected function pullDefinedOption(string $name): Option
+    /**
+     * @param string $parameter
+     * @return void
+     */
+    protected function processShortOptions(string $parameter): void
     {
-        $option = $this->definedOptions[$name];
+        $chars = substr($parameter, 1);
 
-        if (!$option->isArray()) {
-            unset($this->definedOptions[$name]);
+        for ($i = 0, $size = strlen($chars); $i < $size; $i++) {
+            $char = $chars[$i];
+            $defined = $this->getDefinedShortOption($char);
+
+            if ($i === 0 && $defined === null) {
+                throw new RuntimeException(sprintf('Undefined option: %s', $char));
+            }
+
+            $nextChar = $chars[$i + 1] ?? false;
+
+            // on the last char, no need to go further.
+            if ($nextChar === false) {
+                $nextParameter = $this->nextParameter();
+                ($nextParameter !== null && $this->isNotAnOption($nextParameter))
+                    ? $this->addToOption($defined, $char, $nextParameter)
+                    : $this->addToOption($defined, $char, null);
+                break;
+            }
+
+            // if next char is not an option, assume it's an argument.
+            if (!$this->definition->hasShortOption($nextChar)) {
+                $value = substr($chars, $i);
+                $this->addToOption($defined, $char, $value);
+                break;
+            }
+
+            // if next char is another option, add the current option and move on.
+            $this->addToOption($defined, $char, null);
+        }
+    }
+
+    protected function processArgument(string $parameter): void
+    {
+
+    }
+
+    /**
+     * @param string $name
+     * @return DefinedOption|null
+     */
+    protected function getDefinedLongOption(string $name): ?DefinedOption
+    {
+        return $this->checkOptionCount($this->definition->getLongOption($name));
+    }
+
+    /**
+     * @param string $name
+     * @return DefinedOption|null
+     */
+    protected function getDefinedShortOption(string $name): ?DefinedOption
+    {
+        return $this->checkOptionCount($this->definition->getShortOption($name));
+    }
+
+    /**
+     * @param DefinedOption $option
+     * @return DefinedOption
+     */
+    protected function checkOptionCount(DefinedOption $option): DefinedOption
+    {
+        $longName = $option->getName();
+
+        if (array_key_exists($longName, $this->enteredOptions) && !$option->isArray()) {
+            throw new RuntimeException(sprintf('Option: %s cannot be entered more than once', $longName));
         }
 
         return $option;
     }
 
-    protected function addToOption(string $name, mixed $value): void
+    /**
+     * @param DefinedOption $defined
+     * @param string $entered
+     * @param mixed $value
+     * @return Option
+     */
+    protected function addToOption(DefinedOption $defined, string $entered, mixed $value): Option
     {
-        if (!array_key_exists($name, $this->enteredOptions)) {
-            $this->enteredOptions[$name] = $value;
-            return;
-        }
+        $longName = $defined->getName();
 
-        if (is_array($this->enteredOptions[$name])) {
-            $this->enteredOptions[$name][] = $value;
-            return;
-        }
+        $this->enteredOptions[$longName] ??= new Option($defined, $entered);
+        $this->enteredOptions[$longName]->addValue($value);
 
-        $this->enteredOptions[$name] = [$this->enteredOptions[$name], $value];
+        return $this->enteredOptions[$longName];
+    }
+
+    /**
+     * @param DefinedArgument $argument
+     * @param mixed $value
+     * @return Argument
+     */
+    protected function addToArgument(DefinedArgument $argument, mixed $value): Argument
+    {
+        $name = $argument->getName();
+
+        $this->enteredArguments[$name] ??= new Argument($argument);
+        $this->enteredArguments[$name]->addValue($value);
+
+        return $this->enteredArguments[$name];
     }
 }

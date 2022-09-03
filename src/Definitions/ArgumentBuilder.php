@@ -5,11 +5,11 @@ namespace Kirameki\Cli\Definitions;
 class ArgumentBuilder extends ParameterBuilder
 {
     /**
-     * @return Argument
+     * @return DefinedArgument
      */
-    public function build(): Argument
+    public function build(): DefinedArgument
     {
-        return new Argument(
+        return new DefinedArgument(
             $this->name,
             $this->description,
             $this->multiple,
