@@ -5,9 +5,20 @@ namespace Kirameki\Cli;
 use Kirameki\Cli\Definitions\DefinedArgument;
 use Kirameki\Cli\Definitions\DefinedOption;
 use function array_key_exists;
+use function array_values;
 
 class CommandDefinition
 {
+    /**
+     * @var array<int, DefinedArgument>
+     */
+    protected array $argumentsByIndex;
+
+    /**
+     * @var array<string, DefinedArgument>
+     */
+    protected array $argumentsByName;
+
     /**
      * @param string $name
      * @param array<string, DefinedArgument> $arguments
@@ -16,11 +27,13 @@ class CommandDefinition
      */
     public function __construct(
         protected string $name,
-        protected array  $arguments,
-        protected array  $longOptions,
-        protected array  $shortOptions,
+        array $arguments,
+        protected array $longOptions,
+        protected array $shortOptions,
     )
     {
+        $this->argumentsByIndex = array_values($arguments);
+        $this->argumentsByName = $arguments;
     }
 
     /**
@@ -31,9 +44,30 @@ class CommandDefinition
         return $this->name;
     }
 
-    public function getArgumentByName(string $name)
+    /**
+     * @return array<string, DefinedArgument>
+     */
+    public function getArguments(): array
     {
-        return $this->arguments[$name];
+        return $this->argumentsByName;
+    }
+
+    /**
+     * @param int $index
+     * @return DefinedArgument
+     */
+    public function getArgumentByIndex(int $index): DefinedArgument
+    {
+        return $this->argumentsByIndex[$index];
+    }
+
+    /**
+     * @param string $name
+     * @return DefinedArgument
+     */
+    public function getArgumentByName(string $name): DefinedArgument
+    {
+        return $this->argumentsByName[$name];
     }
 
     /**
@@ -49,7 +83,7 @@ class CommandDefinition
      * @param string $name
      * @return bool
      */
-    public function hasShortOption(string $name): bool
+    public function shortOptionExists(string $name): bool
     {
         return array_key_exists($name, $this->shortOptions);
     }

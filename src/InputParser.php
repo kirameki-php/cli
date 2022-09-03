@@ -31,7 +31,12 @@ class InputParser
     /**
      * @var int
      */
-    protected int $cursor = 0;
+    protected int $parameterCursor = 0;
+
+    /**
+     * @var int
+     */
+    protected int $argumentCursor = 0;
 
     /**
      * @param CommandDefinition $definition
@@ -51,8 +56,8 @@ class InputParser
     {
         $parameterCount = count($this->parameters);
 
-        while ($this->cursor < $parameterCount) {
-            $parameter = $this->parameters[$this->cursor];
+        while ($this->parameterCursor < $parameterCount) {
+            $parameter = $this->parameters[$this->parameterCursor];
 
             match (true) {
                 $this->isLongOption($parameter) => $this->processLongOption($parameter),
@@ -60,12 +65,20 @@ class InputParser
                 default => $this->processArgument($parameter),
             };
 
-            $this->cursor++;
+            $this->parameterCursor++;
         }
 
         return [
             'options' => $this->enteredOptions,
         ];
+    }
+
+    /**
+     * @return string|null
+     */
+    protected function nextParameter(): ?string
+    {
+        return $this->parameters[$this->parameterCursor + 1] ?? null;
     }
 
     /**
@@ -96,14 +109,6 @@ class InputParser
     }
 
     /**
-     * @return string|null
-     */
-    protected function nextParameter(): ?string
-    {
-        return $this->parameters[$this->cursor + 1] ?? null;
-    }
-
-    /**
      * @param string $parameter
      * @return void
      */
@@ -122,10 +127,9 @@ class InputParser
         if ($value === null) {
             // look at the next parameter to check if it's a value
             $nextParameter = $this->nextParameter();
-
             if ($nextParameter !== null && $this->isNotAnOption($nextParameter)) {
                 $value = $nextParameter;
-                $this->cursor++;
+                $this->parameterCursor++;
             }
         }
 
@@ -159,27 +163,42 @@ class InputParser
             // on the last char, no need to go further.
             if ($nextChar === false) {
                 $nextParameter = $this->nextParameter();
-                ($nextParameter !== null && $this->isNotAnOption($nextParameter))
-                    ? $this->addToOption($defined, $char, $nextParameter)
-                    : $this->addToOption($defined, $char, null);
+                if($nextParameter !== null && $this->isNotAnOption($nextParameter)) {
+                    $this->addToOption($defined, $char, $nextParameter);
+                    $this->parameterCursor++;
+                } else {
+                    $this->addToOption($defined, $char, null);
+                }
                 break;
             }
 
             // if next char is not an option, assume it's an argument.
-            if (!$this->definition->hasShortOption($nextChar)) {
+            if (!$this->definition->shortOptionExists($nextChar)) {
                 $value = substr($chars, $i);
                 $this->addToOption($defined, $char, $value);
                 break;
             }
 
             // if next char is another option, add the current option and move on.
-            $this->addToOption($defined, $char, null);
+            $this->addToOption($defined, $char, $defined->getDefault());
         }
     }
 
+    /**
+     * @param string $parameter
+     * @return void
+     */
     protected function processArgument(string $parameter): void
     {
+        $defined = $this->definition->getArgumentByIndex($this->argumentCursor);
 
+        $this->addToArgument($defined, $parameter);
+
+        if (!$defined->isArray()) {
+            $this->argumentCursor++;
+        }
+
+        $this->parameterCursor++;
     }
 
     /**
