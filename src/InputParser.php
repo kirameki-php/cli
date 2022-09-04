@@ -50,7 +50,10 @@ class InputParser
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array{
+     *     arguments: array<string, Argument>,
+     *     options: array<string, Option>,
+     * }
      */
     public function parse(): array
     {

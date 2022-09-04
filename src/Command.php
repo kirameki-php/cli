@@ -9,6 +9,11 @@ abstract class Command
      */
     protected readonly CommandDefinition $definition;
 
+    /**
+     * @var Inputs
+     */
+    protected Inputs $inputs;
+
     public function __construct()
     {
         $builder = new CommandBuilder();
@@ -21,6 +26,23 @@ abstract class Command
      * @return void
      */
     abstract protected function setup(CommandBuilder $builder): void;
+
+    /**
+     * @param list<string> $parameters
+     * @return int
+     */
+    public function execute(array $parameters): int
+    {
+        $parser = new InputParser($this->definition, $parameters);
+        $parsed = $parser->parse();
+
+        $this->inputs = new Inputs(
+            $parsed['arguments'],
+            $parsed['options'],
+        );
+
+        return $this->run();
+    }
 
     /**
      * @return int

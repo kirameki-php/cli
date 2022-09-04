@@ -4,11 +4,9 @@ namespace Kirameki\Cli;
 
 class Inputs
 {
-    public array $options = [];
-
     public function __construct(
-        protected CommandDefinition $definition,
-        protected iterable $rawInputs,
+        public readonly array $arguments,
+        public readonly array $options,
     )
     {
     }
