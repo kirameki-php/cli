@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Cli\Input;
+namespace Kirameki\Cli\Parameters;
 
 use Kirameki\Cli\Definitions\DefinedParameter;
 use RuntimeException;

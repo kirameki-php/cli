@@ -1,11 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Cli;
+namespace Kirameki\Cli\Parameters;
 
+use Kirameki\Cli\CommandDefinition;
 use Kirameki\Cli\Definitions\DefinedArgument;
 use Kirameki\Cli\Definitions\DefinedOption;
-use Kirameki\Cli\Input\Argument;
-use Kirameki\Cli\Input\Option;
 use RuntimeException;
 use function array_key_exists;
 use function count;
@@ -16,7 +15,7 @@ use function str_starts_with;
 use function strlen;
 use function substr;
 
-class InputParser
+class ParameterParser
 {
     /**
      * @var int
@@ -166,7 +165,7 @@ class InputParser
             $char = $chars[$i];
             $defined = $this->getDefinedShortOption($char);
 
-            if ($i === 0 && $defined === null) {
+            if ($defined === null) {
                 throw new RuntimeException(sprintf('Undefined option: %s', $char));
             }
 
@@ -186,15 +185,20 @@ class InputParser
                 break;
             }
 
+            // if next char is another option, add the current option and move on.
+            if ($this->definition->shortOptionExists($nextChar)) {
+                $this->addToOption($defined, $char, $defined->getDefault());
+                continue;
+            }
+
             // if next char is not an option, assume it's an argument.
-            if (!$this->definition->shortOptionExists($nextChar)) {
-                $value = substr($chars, $i);
-                $this->addToOption($defined, $char, $value);
+            $remainingChars = substr($chars, $i);
+            if ($defined->requireValue()) {
+                $this->addToOption($defined, $char, $remainingChars);
                 break;
             }
 
-            // if next char is another option, add the current option and move on.
-            $this->addToOption($defined, $char, $defined->getDefault());
+            throw new RuntimeException(sprintf('option: "-%s" does not accept values: "%s"', $char, $remainingChars));
         }
     }
 

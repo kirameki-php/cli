@@ -2,6 +2,8 @@
 
 namespace Kirameki\Cli;
 
+use Kirameki\Cli\Parameters\ParameterParser;
+
 abstract class Command
 {
     /**
@@ -10,9 +12,11 @@ abstract class Command
     protected readonly CommandDefinition $definition;
 
     /**
-     * @var Inputs
+     * @var Parameters
      */
-    protected Inputs $inputs;
+    protected Parameters $parameters;
+
+    protected Output $output;
 
     public function __construct()
     {
@@ -28,24 +32,25 @@ abstract class Command
     abstract protected function setup(CommandBuilder $builder): void;
 
     /**
-     * @param list<string> $parameters
+     * @param Output $output
+     * @param list<string> $rawParameters
      * @return int
      */
-    public function execute(array $parameters): int
+    public function execute(Output $output, array $rawParameters): int
     {
-        $parser = new InputParser($this->definition, $parameters);
+        $parser = new ParameterParser($this->definition, $rawParameters);
         $parsed = $parser->parse();
 
-        $this->inputs = new Inputs(
+        $this->parameters = new Parameters(
             $parsed['arguments'],
             $parsed['options'],
         );
 
-        return $this->run();
+        return $this->handle();
     }
 
     /**
      * @return int
      */
-    abstract public function run(): int;
+    abstract public function handle(): int;
 }
