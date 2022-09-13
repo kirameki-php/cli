@@ -6,6 +6,9 @@ use BackedEnum;
 use Kirameki\Cli\Output\Ansi\C0;
 use Kirameki\Cli\Output\Ansi\Color;
 use Kirameki\Cli\Output\Ansi\Csi;
+use Kirameki\Cli\Output\Ansi\Csi\Cursor;
+use Kirameki\Cli\Output\Ansi\Csi\Erase;
+use Kirameki\Cli\Output\Ansi\Csi\Scroll;
 use Kirameki\Cli\Output\Ansi\Fe;
 use Kirameki\Cli\Output\Ansi\Sgr;
 use Stringable;
@@ -90,7 +93,7 @@ class Ansi
      */
     public function cursorUp(int $cells = 1): static
     {
-        return $this->sequence(C0::Escape, Fe::CSI, $cells, Csi::CursorUp);
+        return $this->sequence(C0::Escape, Fe::CSI, Cursor::up($cells));
     }
 
     /**
@@ -99,7 +102,7 @@ class Ansi
      */
     public function cursorDown(int $cells = 1): static
     {
-        return $this->sequence(C0::Escape, Fe::CSI, $cells, Csi::CursorDown);
+        return $this->sequence(C0::Escape, Fe::CSI, Cursor::down($cells));
     }
 
     /**
@@ -108,7 +111,7 @@ class Ansi
      */
     public function cursorForward(int $cells = 1): static
     {
-        return $this->sequence(C0::Escape, Fe::CSI, $cells, Csi::CursorForward);
+        return $this->sequence(C0::Escape, Fe::CSI, Cursor::forward($cells));
     }
 
     /**
@@ -117,7 +120,7 @@ class Ansi
      */
     public function cursorBack(int $cells = 1): static
     {
-        return $this->sequence(C0::Escape, Fe::CSI, $cells, Csi::CursorBack);
+        return $this->sequence(C0::Escape, Fe::CSI, Cursor::back($cells));
     }
 
     /**
@@ -126,7 +129,7 @@ class Ansi
      */
     public function cursorNextLine(int $cells = 1): static
     {
-        return $this->sequence(C0::Escape, Fe::CSI, $cells, Csi::CursorNextLine);
+        return $this->sequence(C0::Escape, Fe::CSI, Cursor::nextLine($cells));
     }
 
     /**
@@ -135,7 +138,7 @@ class Ansi
      */
     public function cursorPreviousLine(int $cells = 1): static
     {
-        return $this->sequence(C0::Escape, Fe::CSI, $cells, Csi::CursorPrevLine);
+        return $this->sequence(C0::Escape, Fe::CSI, Cursor::prevLine($cells));
     }
 
     /**
@@ -145,24 +148,47 @@ class Ansi
      */
     public function cursorPosition(int $rows = 1, int $columns = 1): static
     {
-        return $this->sequence(C0::Escape, Fe::CSI, "$rows;$columns", Csi::CursorPosition);
-    }
-
-    /**
-     * @param int $cells
-     * @return $this
-     */
-    public function eraseInDisplay(int $cells = 1): static
-    {
-        return $this->sequence(C0::Escape, Fe::CSI, $cells, Csi::EraseInDisplay);
+        return $this->sequence(C0::Escape, Fe::CSI, Cursor::position($rows, $columns));
     }
 
     /**
      * @return $this
      */
-    public function eraseInLine(): static
+    public function eraseScreen(): static
     {
-        return $this->sequence(C0::Escape, Fe::CSI, 2, Csi::EraseInLine);
+        return $this->sequence(C0::Escape, Fe::CSI, Erase::screen());
+    }
+
+    /**
+     * @return $this
+     */
+    public function eraseToEndOfScreen(): static
+    {
+        return $this->sequence(C0::Escape, Fe::CSI, Erase::toEndOfScreen());
+    }
+
+    /**
+     * @return $this
+     */
+    public function eraseFromStartOfScreen(): static
+    {
+        return $this->sequence(C0::Escape, Fe::CSI, Erase::fromStartOfScreen());
+    }
+
+    /**
+     * @return $this
+     */
+    public function eraseSavedLines(): static
+    {
+        return $this->sequence(C0::Escape, Fe::CSI, Erase::savedLines());
+    }
+
+    /**
+     * @return $this
+     */
+    public function eraseLine(): static
+    {
+        return $this->sequence(C0::Escape, Fe::CSI, Erase::line());
     }
 
     /**
@@ -170,15 +196,15 @@ class Ansi
      */
     public function eraseToEndOfLine(): static
     {
-        return $this->sequence(C0::Escape, Fe::CSI, 0, Csi::EraseInLine);
+        return $this->sequence(C0::Escape, Fe::CSI, Erase::toEndOfLine());
     }
 
     /**
      * @return $this
      */
-    public function eraseToStartOfLine(): static
+    public function eraseFromStartOfLine(): static
     {
-        return $this->sequence(C0::Escape, Fe::CSI, 1, Csi::EraseInLine);
+        return $this->sequence(C0::Escape, Fe::CSI, Erase::fromStartOfLine());
     }
 
     /**
@@ -189,7 +215,7 @@ class Ansi
      */
     public function scrollUp(int $lines = 1): static
     {
-        return $this->sequence(C0::Escape, Fe::CSI, $lines, Csi::ScrollUp);
+        return $this->sequence(C0::Escape, Fe::CSI, Scroll::up($lines));
     }
 
     /**
@@ -200,7 +226,7 @@ class Ansi
      */
     public function scrollDown(int $lines = 1): static
     {
-        return $this->sequence(C0::Escape, Fe::CSI, $lines, Csi::ScrollDown);
+        return $this->sequence(C0::Escape, Fe::CSI, Scroll::down($lines));
     }
 
     /**
@@ -209,7 +235,7 @@ class Ansi
      */
     public function foreground(Color $color): static
     {
-        return $this->color($color);
+        return $this->color($color, Sgr::SetForegroundColor);
     }
 
     /**
@@ -227,7 +253,7 @@ class Ansi
      * @param Sgr $section
      * @return $this
      */
-    public function color(Color $color, Sgr $section = Sgr::SetForegroundColor): static
+    public function color(Color $color, Sgr $section): static
     {
         return $this->sequence(C0::Escape, Fe::CSI, $section, $color, Csi::Sgr);
     }

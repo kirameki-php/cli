@@ -22,71 +22,76 @@ class Output
 
     /**
      * @param string $text
-     * @return Ansi
+     * @return $this
      */
-    public function text(string $text): Ansi
+    public function text(string $text): static
     {
-        return $this->ansi
+        $this->ansi
             ->text($text)
             ->noStyle()
             ->flush();
+        return $this;
     }
 
     /**
      * @param string $text
-     * @return Ansi
+     * @return $this
      */
-    public function line(string $text): Ansi
+    public function line(string $text): static
     {
-        return $this->ansi
+        $this->ansi
             ->line($text)
             ->flush();
+        return $this;
     }
 
     /**
      * @param string $text
-     * @return Ansi
+     * @return $this
      */
-    public function debug(string $text): Ansi
+    public function debug(string $text): static
     {
-        return $this->ansi
+        $this->ansi
             ->foreground(Color::Gray)
             ->line($text)
             ->flush();
+        return $this;
     }
 
     /**
      * @param string $text
-     * @return Ansi
+     * @return $this
      */
-    public function info(string $text): Ansi
+    public function info(string $text): static
     {
         return $this->line($text);
     }
 
     /**
      * @param string $text
-     * @return Ansi
+     * @return $this
      */
-    public function warning(string $text): Ansi
+    public function warning(string $text): static
     {
-        return $this->ansi
+        $this->ansi
             ->foreground(Color::Yellow)
             ->line($text)
             ->flush();
+        return $this;
     }
 
     /**
      * @param string $text
-     * @return Ansi
+     * @return $this
      */
-    public function error(string $text): Ansi
+    public function error(string $text): static
     {
-        return $this->ansi
+        $this->ansi
             ->background(Color::Red)
             ->foreground(Color::White)
             ->line($text)
             ->noStyle()
             ->flush();
+        return $this;
     }
 }
