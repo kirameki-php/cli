@@ -4,6 +4,9 @@ namespace Kirameki\Cli\Parameters;
 
 use Kirameki\Cli\Definitions\DefinedOption;
 
+/**
+ * @template-extends Parameter<DefinedOption>
+ */
 class Option extends Parameter
 {
     /**

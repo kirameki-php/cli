@@ -71,6 +71,19 @@ class Output
      * @param string $text
      * @return $this
      */
+    public function notice(string $text): static
+    {
+        $this->ansi
+            ->foreground(Color::Green)
+            ->line($text)
+            ->flush();
+        return $this;
+    }
+
+    /**
+     * @param string $text
+     * @return $this
+     */
     public function warning(string $text): static
     {
         $this->ansi

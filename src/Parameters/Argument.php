@@ -4,6 +4,9 @@ namespace Kirameki\Cli\Parameters;
 
 use Kirameki\Cli\Definitions\DefinedArgument;
 
+/**
+ * @template-extends Parameter<DefinedArgument>
+ */
 class Argument extends Parameter
 {
     /**

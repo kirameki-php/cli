@@ -6,6 +6,9 @@ use Kirameki\Cli\Definitions\DefinedParameter;
 use RuntimeException;
 use function sprintf;
 
+/**
+ * @template TDefined as DefinedParameter
+ */
 abstract class Parameter
 {
     /**
@@ -14,7 +17,7 @@ abstract class Parameter
     protected array $values = [];
 
     /**
-     * @param DefinedParameter $defined
+     * @param TDefined $defined
      */
     public function __construct(
         protected readonly DefinedParameter $defined,
@@ -35,5 +38,21 @@ abstract class Parameter
         }
 
         $this->values[] = $value;
+    }
+
+    /**
+     * @return TDefined
+     */
+    public function getDefinition(): DefinedParameter
+    {
+        return $this->defined;
+    }
+
+    /**
+     * @return list<string|null>
+     */
+    public function getValues(): array
+    {
+        return $this->values;
     }
 }
