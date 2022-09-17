@@ -8,6 +8,8 @@ use RuntimeException;
 use function array_key_exists;
 use function is_string;
 use function str_pad;
+use function strlen;
+use function substr;
 use function trim;
 
 class Input
@@ -129,19 +131,40 @@ class Input
     {
         $this->writeMessage($message);
 
-        return $this->stream->readEach(function (string $char) use ($replacement) {
+        $input = '';
+
+        $success = $this->stream->readEach(function (string $char) use (&$input, $replacement) {
             if ($char === "\r") {
                 $this->output->line();
                 return false;
             }
             elseif ($char === "\x7f") {
-                $this->output->text($char);
+                if (strlen($input) > 0) {
+                    $this->output->ansi->backspace()->flush();
+                    $input = substr($input, 0, -1);
+                }
             }
             else {
+                $input .= $char;
                 $this->output->text($replacement);
             }
             return true;
         });
+
+        return $success
+            ? $input
+            : false;
+    }
+
+    /**
+     * @param string $char
+     * @return void
+     */
+    protected function handleControls(string $char): void
+    {
+        if ($char === "\x7F") {
+
+        }
     }
 
     /**

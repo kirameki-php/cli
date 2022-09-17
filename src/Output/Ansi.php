@@ -12,9 +12,7 @@ use Kirameki\Cli\Output\Ansi\Csi\Scroll;
 use Kirameki\Cli\Output\Ansi\Fe;
 use Kirameki\Cli\Output\Ansi\Sgr;
 use Stringable;
-use function fwrite;
 use function implode;
-use const STDOUT;
 
 class Ansi
 {
@@ -70,8 +68,9 @@ class Ansi
      */
     public function backspace(int $times = 1): static
     {
-        foreach (range(0, $times) as $_) {
-            $this->sequence(C0::Backspace);
+        foreach (range(1, $times) as $_) {
+            $this->sequence(C0::Escape, Fe::CSI, Cursor::back());
+            $this->sequence(C0::Escape, Fe::CSI, Erase::toEndOfLine());
         }
         return $this;
     }
@@ -320,7 +319,7 @@ class Ansi
     public function flush(): static
     {
         $output = implode('', $this->sequences);
-        fwrite(STDOUT, $output);
+        echo $output;
         $this->sequences = [];
         return $this;
     }

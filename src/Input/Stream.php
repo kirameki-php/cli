@@ -47,24 +47,24 @@ class Stream
     }
 
     /**
-     * @param Closure(string, string):bool $callback
+     * @param Closure(string):bool $callback
      * Invoked for each character read. First argument contains the character read and
      * second argument contains a string of all the chars upto the current char.
      *
-     * @return string|false
+     * @return bool
      */
-    public function readEach(Closure $callback): string|false
+    public function readEach(Closure $callback): bool
     {
-        $input = '';
-
         readline_callback_handler_install('', fn() => true);
         try {
-            while (($char = $this->captureStdin()) !== false) {
-                $continue = $callback($char, $input);
+            while (true) {
+                $char = $this->captureStdin();
+                if ($char === false) {
+                    return false;
+                }
+                $continue = $callback($char);
                 Assert::boolean($continue);
-                if ($continue) {
-                    $input .= $char;
-                } else {
+                if (!$continue) {
                     break;
                 }
             }
@@ -73,7 +73,7 @@ class Stream
             readline_callback_handler_remove();
         }
 
-        return $input;
+        return true;
     }
 
     protected function captureStdin(): string|false
