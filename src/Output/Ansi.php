@@ -12,7 +12,9 @@ use Kirameki\Cli\Output\Ansi\Csi\Scroll;
 use Kirameki\Cli\Output\Ansi\Fe;
 use Kirameki\Cli\Output\Ansi\Sgr;
 use Stringable;
+use function fwrite;
 use function implode;
+use const STDOUT;
 
 class Ansi
 {
@@ -318,7 +320,7 @@ class Ansi
     public function flush(): static
     {
         $output = implode('', $this->sequences);
-        echo $output;
+        fwrite(STDOUT, $output);
         $this->sequences = [];
         return $this;
     }

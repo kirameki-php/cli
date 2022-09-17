@@ -26,18 +26,20 @@ class Output
             ->text($text)
             ->noStyle()
             ->flush();
+
         return $this;
     }
 
     /**
-     * @param string $text
+     * @param string|null $text
      * @return $this
      */
-    public function line(string $text): static
+    public function line(?string $text = null): static
     {
-        $this->ansi
-            ->line($text)
-            ->flush();
+        $text !== null
+            ? $this->ansi->line($text)->flush()
+            : $this->ansi->lineFeed()->flush();
+
         return $this;
     }
 
@@ -51,6 +53,7 @@ class Output
             ->foreground(Color::Gray)
             ->line($text)
             ->flush();
+
         return $this;
     }
 

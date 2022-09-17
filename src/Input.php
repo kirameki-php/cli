@@ -57,9 +57,11 @@ class Input
     {
         $maxStrLen = max(array_map(strlen(...), array_keys($choices))) ?: 0;
 
+        $text = '';
         foreach ($choices as $key => $value) {
-            $this->output->line(str_pad($key, $maxStrLen) . '. ' . $value);
+            $text .= str_pad($key, $maxStrLen) . '. ' . $value;
         }
+        $this->output->line($text);
 
         $choice = (string) $this->readLine();
 
@@ -111,7 +113,7 @@ class Input
 
         return $this->stream->readEach(function (string $char) {
             if ($char === "\r") {
-                $this->output->line('');
+                $this->output->line();
                 return false;
             }
             return true;
@@ -129,10 +131,15 @@ class Input
 
         return $this->stream->readEach(function (string $char) use ($replacement) {
             if ($char === "\r") {
-                $this->output->line('');
+                $this->output->line();
                 return false;
             }
-            $this->output->text($replacement);
+            elseif ($char === "\x7f") {
+                $this->output->text($char);
+            }
+            else {
+                $this->output->text($replacement);
+            }
             return true;
         });
     }

@@ -57,24 +57,15 @@ class Stream
     {
         $input = '';
 
-        $read = [STDIN];
-        $write = $except = null;
-
-        readline_callback_handler_install('', function() { });
-
+        readline_callback_handler_install('', fn() => true);
         try {
-            while (stream_select($read, $write, $except, null)) {
-                $char = stream_get_contents(STDIN, 1);
-                if ($char !== false) {
-                    $continue = $callback($char, $input);
-
-                    Assert::boolean($continue);
-
-                    if ($continue) {
-                        $input .= $char;
-                    } else {
-                        break;
-                    }
+            while (($char = $this->captureStdin()) !== false) {
+                $continue = $callback($char, $input);
+                Assert::boolean($continue);
+                if ($continue) {
+                    $input .= $char;
+                } else {
+                    break;
                 }
             }
         }
@@ -83,6 +74,23 @@ class Stream
         }
 
         return $input;
+    }
+
+    protected function captureStdin(): string|false
+    {
+        $read = [STDIN];
+        $write = null;
+        $except = null;
+        stream_select($read, $write, $except, null);
+        $char = stream_get_contents(STDIN, 1);
+
+        // Some inputs input multiple characters with 1 keystroke (like arrow keys),
+        // so we handle that here.
+        while (stream_select($read, $write, $except, 0)) {
+            $char .= stream_get_contents(STDIN, 1);
+        }
+
+        return $char;
     }
 
     public function close(): void
