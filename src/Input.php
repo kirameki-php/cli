@@ -2,8 +2,12 @@
 
 namespace Kirameki\Cli;
 
+use Closure;
 use Kirameki\Cli\Input\Stream;
 use Kirameki\Cli\Output\Ansi;
+use RuntimeException;
+use function is_string;
+use function trim;
 
 class Input
 {
@@ -12,62 +16,81 @@ class Input
      * @param Stream $stream
      */
     public function __construct(
-        readonly protected Ansi $ansi,
+        readonly protected Ansi   $ansi,
         readonly protected Stream $stream,
     )
     {
     }
 
     /**
-     * @param string|null $message
+     * @param int<0, max> $length
      * @return string|false
      */
-    public function hidden(?string $message = null): string|false
+    public function read(int $length = 1): string|false
     {
-        if ($message !== null) {
-            $this->ansi->text($message)->flush();
+        return $this->stream->read($length);
+    }
+
+    /**
+     * @return string|false
+     */
+    public function readLine(): string|false
+    {
+        return $this->stream->readLine();
+    }
+
+    /**
+     * @param Closure(string, string):bool $callback
+     * @return string|false
+     */
+    public function readEach(Closure $callback): string|false
+    {
+        return $this->stream->readEach($callback);
+    }
+
+    /**
+     * @param array<array-key, string> $choices
+     * @return string
+     */
+    public function choice(array $choices): string
+    {
+        $maxStrLen = max(array_map(strlen(...), array_keys($choices))) ?: 0;
+
+        foreach ($choices as $key => $value) {
+            $this->ansi
+                ->text(str_pad($key, $maxStrLen) . '.')
+                ->line($value)
+                ->flush();
         }
 
-        return $this->stream->readTo("\r", function (string $char) {
-            if ($char === "\r") {
-                $this->ansi->lineFeed()->flush();
+        $tries = 1000;
+
+        for($i = 0; $i < $tries; $i++) {
+            $choice = (string) $this->readLine();
+
+            if (array_key_exists($choice, $choices)) {
+                return $choice;
             }
-        });
+
+            $this->ansi
+                ->line("[{$choice}] does not eixst.")
+                ->lineFeed();
+        }
+
+        throw new RuntimeException();
     }
 
     /**
      * @param string|null $message
-     * @param string $substitute
-     * @return string|false
-     */
-    public function masked(?string $message = null, string $substitute = '*'): string|false
-    {
-        if ($message !== null) {
-            $this->ansi->text($message)->flush();
-        }
-
-        return $this->stream->readTo("\r", function (string $char) use ($substitute) {
-            if ($char !== "\r") {
-                $this->ansi->text($substitute)->flush();
-            } else {
-                $this->ansi->lineFeed()->flush();
-            }
-        });
-    }
-
-    /**
-     * @param string|null $message
-     * @param bool $default
+     * @param bool|null $default
      * @return bool
      */
-    public function confirm(?string $message = null, bool $default = false): bool
+    public function confirm(?string $message = null, ?bool $default = null): bool
     {
-        if ($message !== null) {
-            $this->ansi->text($message . ' ');
-        }
+        $this->writeMessage($message);
 
-        $yes = 'yes';
-        $no = 'no';
+        $yes = 'y';
+        $no = 'n';
 
         $this->ansi->text("({$yes}/{$no}) ");
 
@@ -79,13 +102,64 @@ class Input
 
         $this->ansi->flush();
 
-        $input = $this->stream->readLine();
+        $input = $this->readLine();
 
-        if ($input === false) {
-            return $default;
+        if (is_string($input)) {
+            $input = trim($input);
         }
 
-        return $input === $yes;
+        return match ($input) {
+            $yes => true,
+            $no => false,
+            default => $default ?? throw new RuntimeException("Invalid input: '$input'"),
+        };
+    }
+
+    /**
+     * @param string|null $message
+     * @return string|false
+     */
+    public function hidden(?string $message = null): string|false
+    {
+        $this->writeMessage($message);
+
+        return $this->stream->readEach(function (string $char) {
+            if ($char === "\r") {
+                $this->ansi->lineFeed()->flush();
+                return false;
+            }
+            return true;
+        });
+    }
+
+    /**
+     * @param string|null $message
+     * @param string $replacement
+     * @return string|false
+     */
+    public function masked(?string $message = null, string $replacement = '*'): string|false
+    {
+        $this->writeMessage($message);
+
+        return $this->stream->readEach(function (string $char) use ($replacement) {
+            if ($char === "\r") {
+                $this->ansi->lineFeed()->flush();
+                return false;
+            }
+            $this->ansi->text($replacement)->flush();
+            return true;
+        });
+    }
+
+    /**
+     * @param string|null $message
+     * @return void
+     */
+    protected function writeMessage(?string $message = null): void
+    {
+        if ($message !== null) {
+            $this->ansi->text($message)->flush();
+        }
     }
 
     /**

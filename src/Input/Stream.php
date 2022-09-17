@@ -3,9 +3,15 @@
 namespace Kirameki\Cli\Input;
 
 use Closure;
+use RuntimeException;
+use Webmozart\Assert\Assert;
 use function fclose;
 use function fgets;
 use function fread;
+use function readline_callback_handler_install;
+use function readline_callback_handler_remove;
+use function stream_get_contents;
+use function stream_select;
 use const STDIN;
 
 class Stream
@@ -17,6 +23,9 @@ class Stream
         protected $resource,
     )
     {
+        if (!is_resource($resource)) {
+            throw new RuntimeException('Stream only accepts resource.');
+        }
     }
 
     /**
@@ -29,54 +38,41 @@ class Stream
     }
 
     /**
-     * @param int<0, max> $length
-     * @return string|false
-     */
-    public function readSilently(int $length): string|false
-    {
-        $prev = shell_exec('stty -g');
-
-        try {
-            shell_exec('stty -echo');
-            return $this->read($length);
-        }
-        finally {
-            shell_exec('stty ' . $prev);
-        }
-    }
-
-    /**
-     * @param string $break
-     * Character which will terminate the reading process and return the combined string.
-     *
-     * @param Closure(string, string):void|null $callback
+     * @param Closure(string, string):bool $callback
      * Invoked for each character read. First argument contains the character read and
      * second argument contains a string of all the chars upto the current char.
-     * 
+     *
      * @return string|false
      */
-    public function readTo(string $break, ?Closure $callback = null): string|false
+    public function readEach(Closure $callback): string|false
     {
+        $input = '';
+
         $read = [STDIN];
         $write = $except = null;
 
-        $input = '';
         readline_callback_handler_install('', function() { });
-        while (stream_select($read, $write, $except, null)) {
-            $char = stream_get_contents(STDIN, 1);
 
-            if ($char !== false) {
-                if ($callback !== null) {
-                    $callback($char, $input);
+        try {
+            while (stream_select($read, $write, $except, null)) {
+                $char = stream_get_contents(STDIN, 1);
+                if ($char !== false) {
+                    $continue = $callback($char, $input);
+
+                    Assert::boolean($continue);
+
+                    if ($continue) {
+                        $input .= $char;
+                    } else {
+                        break;
+                    }
                 }
-                $input .= $char;
-            }
-
-            if ($char === false || str_contains($break, $char)) {
-                break;
             }
         }
-        readline_callback_handler_remove();
+        finally {
+            readline_callback_handler_remove();
+        }
+
         return $input;
     }
 
