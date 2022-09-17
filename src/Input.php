@@ -4,20 +4,20 @@ namespace Kirameki\Cli;
 
 use Closure;
 use Kirameki\Cli\Input\Stream;
-use Kirameki\Cli\Output\Ansi;
 use RuntimeException;
 use function array_key_exists;
 use function is_string;
+use function str_pad;
 use function trim;
 
 class Input
 {
     /**
-     * @param Ansi $ansi
+     * @param Output $output
      * @param Stream $stream
      */
     public function __construct(
-        readonly protected Ansi   $ansi,
+        readonly protected Output $output,
         readonly protected Stream $stream,
     )
     {
@@ -58,10 +58,7 @@ class Input
         $maxStrLen = max(array_map(strlen(...), array_keys($choices))) ?: 0;
 
         foreach ($choices as $key => $value) {
-            $this->ansi
-                ->text(str_pad($key, $maxStrLen) . '.')
-                ->line($value)
-                ->flush();
+            $this->output->line(str_pad($key, $maxStrLen) . '. ' . $value);
         }
 
         $choice = (string) $this->readLine();
@@ -80,20 +77,16 @@ class Input
      */
     public function confirm(?string $message = null, ?bool $default = null): bool
     {
-        $this->writeMessage($message);
-
         $yes = 'y';
         $no = 'n';
 
-        $this->ansi->text("({$yes}/{$no}) ");
+        $text = ($message ?? '') . "({$yes}/{$no}) ";
 
         if ($default !== null) {
-            $this->ansi->text('[default: ' . ($default ? $yes : $no) . ']');
+            $text .= '[default: ' . ($default ? $yes : $no) . ']';
         }
 
-        $this->ansi->text(': ');
-
-        $this->ansi->flush();
+        $this->output->text($text . ': ');
 
         $input = $this->readLine();
 
@@ -118,7 +111,7 @@ class Input
 
         return $this->stream->readEach(function (string $char) {
             if ($char === "\r") {
-                $this->ansi->lineFeed()->flush();
+                $this->output->line('');
                 return false;
             }
             return true;
@@ -136,10 +129,10 @@ class Input
 
         return $this->stream->readEach(function (string $char) use ($replacement) {
             if ($char === "\r") {
-                $this->ansi->lineFeed()->flush();
+                $this->output->line('');
                 return false;
             }
-            $this->ansi->text($replacement)->flush();
+            $this->output->text($replacement);
             return true;
         });
     }
@@ -151,7 +144,7 @@ class Input
     protected function writeMessage(?string $message = null): void
     {
         if ($message !== null) {
-            $this->ansi->text($message)->flush();
+            $this->output->text($message);
         }
     }
 

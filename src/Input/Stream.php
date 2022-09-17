@@ -38,6 +38,15 @@ class Stream
     }
 
     /**
+     * @param int<0, max>|null $length
+     * @return string|false
+     */
+    public function readLine(?int $length = null): string|false
+    {
+        return fgets($this->resource, $length);
+    }
+
+    /**
      * @param Closure(string, string):bool $callback
      * Invoked for each character read. First argument contains the character read and
      * second argument contains a string of all the chars upto the current char.
@@ -74,15 +83,6 @@ class Stream
         }
 
         return $input;
-    }
-
-    /**
-     * @param int<0, max>|null $length
-     * @return string|false
-     */
-    public function readLine(?int $length = null): string|false
-    {
-        return fgets($this->resource, $length);
     }
 
     public function close(): void

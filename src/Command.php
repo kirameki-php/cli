@@ -3,6 +3,7 @@
 namespace Kirameki\Cli;
 
 use Kirameki\Cli\Parameters\ParameterParser;
+use Webmozart\Assert\Assert;
 
 abstract class Command
 {
@@ -59,15 +60,15 @@ abstract class Command
             $parsed['options'],
         );
 
-        $code = $this->handle();
+        $code = $this->handle() ?? 0;
 
-        $this->input->close();
+        Assert::range($code, 0, 255);
 
         return $code;
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    abstract public function handle(): int;
+    abstract public function handle(): mixed;
 }
