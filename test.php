@@ -1,5 +1,12 @@
 <?php
 
+use Kirameki\Cli\Input;
+use Kirameki\Cli\Output\Ansi;
+
 require './vendor/autoload.php';
 
-dump($argv);
+$input = new Input(new Ansi(), new Input\Stream(STDIN));
+
+$input->masked('Password: ');
+
+$input->confirm('Continue?');

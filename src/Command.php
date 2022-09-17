@@ -16,6 +16,14 @@ abstract class Command
      */
     protected Parameters $parameters;
 
+    /**
+     * @var Input
+     */
+    protected Input $input;
+
+    /**
+     * @var Output
+     */
     protected Output $output;
 
     public function __construct()
@@ -32,12 +40,17 @@ abstract class Command
     abstract protected function setup(CommandBuilder $builder): void;
 
     /**
+     * @param Input $input
      * @param Output $output
      * @param list<string> $rawParameters
      * @return int
      */
-    public function execute(Output $output, array $rawParameters): int
+    public function execute(Input $input, Output $output, array $rawParameters): int
     {
+        $this->input = $input;
+
+        $this->output = $output;
+
         $parser = new ParameterParser($this->definition, $rawParameters);
         $parsed = $parser->parse();
 
@@ -46,7 +59,11 @@ abstract class Command
             $parsed['options'],
         );
 
-        return $this->handle();
+        $code = $this->handle();
+
+        $this->input->close();
+
+        return $code;
     }
 
     /**

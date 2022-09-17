@@ -66,6 +66,17 @@ class Ansi
     /**
      * @return $this
      */
+    public function backspace(int $times = 1): static
+    {
+        foreach (range(0, $times) as $_) {
+            $this->sequence(C0::Backspace);
+        }
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
     public function tab(): static
     {
         return $this->sequence(C0::Tab);
@@ -308,6 +319,7 @@ class Ansi
     {
         $output = implode('', $this->sequences);
         echo $output;
+        $this->sequences = [];
         return $this;
     }
 }

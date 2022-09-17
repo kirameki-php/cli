@@ -8,16 +8,12 @@ use Kirameki\Cli\Output\Ansi\Color;
 class Output
 {
     /**
-     * @var Ansi
+     * @param Ansi $ansi
      */
-    readonly public Ansi $ansi;
-
-    /**
-     * @param Ansi|null $ansi
-     */
-    public function __construct(?Ansi $ansi = null)
+    public function __construct(
+        readonly public Ansi $ansi,
+    )
     {
-        $this->ansi = $ansi ?? new Ansi();
     }
 
     /**
