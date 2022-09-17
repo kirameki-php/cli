@@ -6,6 +6,7 @@ use Closure;
 use Kirameki\Cli\Input\Stream;
 use Kirameki\Cli\Output\Ansi;
 use RuntimeException;
+use function array_key_exists;
 use function is_string;
 use function trim;
 
@@ -63,21 +64,13 @@ class Input
                 ->flush();
         }
 
-        $tries = 1000;
+        $choice = (string) $this->readLine();
 
-        for($i = 0; $i < $tries; $i++) {
-            $choice = (string) $this->readLine();
-
-            if (array_key_exists($choice, $choices)) {
-                return $choice;
-            }
-
-            $this->ansi
-                ->line("[{$choice}] does not eixst.")
-                ->lineFeed();
+        if (array_key_exists($choice, $choices)) {
+            return $choice;
         }
 
-        throw new RuntimeException();
+        throw new RuntimeException("Invalid input: '$choice'");
     }
 
     /**
