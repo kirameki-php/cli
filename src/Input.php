@@ -111,8 +111,8 @@ class Input
      */
     public function hidden(string $prompt = ''): string|false
     {
-        return $this->stream->readEach($prompt, function () {
-            $this->output->ansi->backspace();
+        return $this->stream->readEach($prompt, function (array $info) {
+            $this->output->ansi->backspace($info['point']);
         });
     }
 
@@ -123,23 +123,21 @@ class Input
      */
     public function masked(string $prompt = '', string $replacement = '*'): string|false
     {
-        // abcde
-        // ab_de // e: 5 p: 3
-
-        $size = 0;
-        return $this->stream->readEach($prompt, function (array $info) use (&$size, $replacement) {
-            $newSize = (int) $info['end'];
-            if ($newSize > $size) {
-                $newCharCount = $newSize - $size;
-                // delete inserted character
-                $this->output->ansi->backspace($newCharCount);
-                $this->output->ansi->eraseToEndOfLine();
-                $pad = ($info['end'] - $info['point']) + $newCharCount;
-                $this->output->ansi->text(str_repeat($replacement, $pad));
-                $this->output->ansi->cursorBack($pad - $newCharCount);
-            }
-            $size = $newSize;
+        $line = $this->stream->readEach($prompt, function (array $info) use ($replacement) {
+            $this->output->ansi
+                // Clear all output up to the end of prompt text.
+                ->cursorBack($info['point'])->eraseToEndOfLine()
+                // Write replacement text (will set the cursor to the end).
+                ->text(str_repeat($replacement, $info['end']))
+                // Set the cursor back to the offset position.
+                ->cursorBack($info['end'] - $info['point']);
         });
+
+        // Pressing enter with no input, shows duplicated prompt for some reason,
+        // so we have to clear the line.
+        $this->output->ansi->eraseLine();
+
+        return $line;
     }
 
     /**

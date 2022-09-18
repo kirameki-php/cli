@@ -100,12 +100,10 @@ class Ansi
             return $this;
         }
 
-        foreach (range(1, $times) as $_) {
-            $this->sequence(C0::Escape, Fe::CSI, Cursor::back());
-            $this->sequence(C0::Escape, Fe::CSI, Erase::toEndOfLine());
-        }
-
-        return $this;
+        return $this->buffer()
+            ->cursorBack($times)
+            ->eraseToEndOfLine()
+            ->flush();
     }
 
     /**
@@ -138,7 +136,10 @@ class Ansi
      */
     public function cursorUp(int $cells = 1): static
     {
-        return $this->sequence(C0::Escape, Fe::CSI, Cursor::up($cells));
+        Assert::greaterThanEq($cells, 0);
+        return $cells > 0
+            ? $this->sequence(C0::Escape, Fe::CSI, Cursor::up($cells))
+            : $this;
     }
 
     /**
@@ -147,7 +148,10 @@ class Ansi
      */
     public function cursorDown(int $cells = 1): static
     {
-        return $this->sequence(C0::Escape, Fe::CSI, Cursor::down($cells));
+        Assert::greaterThanEq($cells, 0);
+        return $cells > 0
+            ? $this->sequence(C0::Escape, Fe::CSI, Cursor::down($cells))
+            : $this;
     }
 
     /**
@@ -156,7 +160,10 @@ class Ansi
      */
     public function cursorForward(int $cells = 1): static
     {
-        return $this->sequence(C0::Escape, Fe::CSI, Cursor::forward($cells));
+        Assert::greaterThanEq($cells, 0);
+        return $cells > 0
+            ? $this->sequence(C0::Escape, Fe::CSI, Cursor::forward($cells))
+            : $this;
     }
 
     /**
@@ -177,7 +184,10 @@ class Ansi
      */
     public function cursorNextLine(int $cells = 1): static
     {
-        return $this->sequence(C0::Escape, Fe::CSI, Cursor::nextLine($cells));
+        Assert::greaterThanEq($cells, 0);
+        return $cells > 0
+            ? $this->sequence(C0::Escape, Fe::CSI, Cursor::nextLine($cells))
+            : $this;
     }
 
     /**
@@ -186,7 +196,10 @@ class Ansi
      */
     public function cursorPreviousLine(int $cells = 1): static
     {
-        return $this->sequence(C0::Escape, Fe::CSI, Cursor::prevLine($cells));
+        Assert::greaterThanEq($cells, 0);
+        return $cells > 0
+            ? $this->sequence(C0::Escape, Fe::CSI, Cursor::prevLine($cells))
+            : $this;
     }
 
     /**
