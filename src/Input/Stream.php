@@ -4,12 +4,13 @@ namespace Kirameki\Cli\Input;
 
 use Closure;
 use RuntimeException;
-use Webmozart\Assert\Assert;
 use function fclose;
 use function fgets;
 use function fread;
 use function readline_callback_handler_install;
 use function readline_callback_handler_remove;
+use function readline_callback_read_char;
+use function readline_info;
 use function stream_get_contents;
 use function stream_select;
 use const STDIN;
@@ -47,24 +48,31 @@ class Stream
     }
 
     /**
-     * @param Closure(string):bool $callback
+     * @param Closure(array<string, mixed>, ?bool): (mixed|false) $callback
      * Invoked for each character read. First argument contains the character read and
      * second argument contains a string of all the chars upto the current char.
      *
-     * @return bool
+     * @return string
      */
-    public function readEach(Closure $callback): bool
+    public function readEach(string $prompt, Closure $callback): string
     {
-        readline_callback_handler_install('', fn() => true);
+        $line = '';
+        $done = false;
+        readline_callback_handler_install($prompt, static function(string $buffer) use (&$done, &$line) {
+            $done = true;
+            $line = $buffer;
+        });
+
         try {
+            $read = [STDIN];
+            $write = null;
+            $except = null;
             while (true) {
-                $char = $this->captureStdin();
-                if ($char === false) {
-                    return false;
-                }
-                $continue = $callback($char);
-                Assert::boolean($continue);
-                if (!$continue) {
+                stream_select($read, $write, $except, null);
+                readline_callback_read_char();
+                $info = (array) readline_info();
+                $continue = $callback($info, $done);
+                if ($done || $continue === false) {
                     break;
                 }
             }
@@ -73,15 +81,11 @@ class Stream
             readline_callback_handler_remove();
         }
 
-        return true;
+        return $line;
     }
 
     protected function captureStdin(): string|false
     {
-        $read = [STDIN];
-        $write = null;
-        $except = null;
-        stream_select($read, $write, $except, null);
         $char = stream_get_contents(STDIN, 1);
 
         // Some inputs input multiple characters with 1 keystroke (like arrow keys),

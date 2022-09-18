@@ -72,6 +72,7 @@ class Ansi
             $this->sequence(C0::Escape, Fe::CSI, Cursor::back());
             $this->sequence(C0::Escape, Fe::CSI, Erase::toEndOfLine());
         }
+
         return $this;
     }
 

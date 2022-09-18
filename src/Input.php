@@ -6,10 +6,9 @@ use Closure;
 use Kirameki\Cli\Input\Stream;
 use RuntimeException;
 use function array_key_exists;
+use function grapheme_strlen;
 use function is_string;
 use function str_pad;
-use function strlen;
-use function substr;
 use function trim;
 
 class Input
@@ -43,10 +42,10 @@ class Input
     }
 
     /**
-     * @param Closure(string, string):bool $callback
-     * @return string|false
+     * @param Closure(string):bool $callback
+     * @return bool
      */
-    public function readEach(Closure $callback): string|false
+    public function readEach(Closure $callback): bool
     {
         return $this->stream->readEach($callback);
     }
@@ -57,7 +56,7 @@ class Input
      */
     public function choice(array $choices): string
     {
-        $maxStrLen = max(array_map(strlen(...), array_keys($choices))) ?: 0;
+        $maxStrLen = max(array_map(grapheme_strlen(...), array_keys($choices))) ?: 0;
 
         $text = '';
         foreach ($choices as $key => $value) {
@@ -106,65 +105,29 @@ class Input
     }
 
     /**
-     * @param string|null $message
+     * @param string $prompt
      * @return string|false
      */
-    public function hidden(?string $message = null): string|false
+    public function hidden(string $prompt = ''): string|false
     {
-        $this->writeMessage($message);
-
-        return $this->stream->readEach(function (string $char) {
-            if ($char === "\r") {
-                $this->output->line();
-                return false;
-            }
-            return true;
+        return $this->stream->readEach($prompt, function (array $info) {
+            $buffer = (string) $info['line_buffer'];
         });
     }
 
     /**
-     * @param string|null $message
+     * @param string $prompt
      * @param string $replacement
      * @return string|false
      */
-    public function masked(?string $message = null, string $replacement = '*'): string|false
+    public function masked(?string $prompt = '', string $replacement = '*'): string|false
     {
-        $this->writeMessage($message);
-
-        $input = '';
-
-        $success = $this->stream->readEach(function (string $char) use (&$input, $replacement) {
-            if ($char === "\r") {
-                $this->output->line();
-                return false;
-            }
-            elseif ($char === "\x7f") {
-                if (strlen($input) > 0) {
-                    $this->output->ansi->backspace()->flush();
-                    $input = substr($input, 0, -1);
-                }
-            }
-            else {
-                $input .= $char;
-                $this->output->text($replacement);
-            }
-            return true;
+        $cursor = 0;
+        return $this->stream->readEach($prompt, function (array $info) use (&$cursor, $replacement) {
+            $buffer = (string) $info['line_buffer'];
+//            $this->output->ansi->backspace((int) grapheme_strlen($buffer));
+//            $this->output->ansi->text(str_repeat($replacement, (int) $info['end']))->flush();
         });
-
-        return $success
-            ? $input
-            : false;
-    }
-
-    /**
-     * @param string $char
-     * @return void
-     */
-    protected function handleControls(string $char): void
-    {
-        if ($char === "\x7F") {
-
-        }
     }
 
     /**
