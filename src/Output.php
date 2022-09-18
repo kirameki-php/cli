@@ -23,6 +23,7 @@ class Output
     public function text(string $text): static
     {
         $this->ansi
+            ->buffer()
             ->text($text)
             ->noStyle()
             ->flush();
@@ -37,8 +38,8 @@ class Output
     public function line(?string $text = null): static
     {
         $text !== null
-            ? $this->ansi->line($text)->flush()
-            : $this->ansi->lineFeed()->flush();
+            ? $this->ansi->line($text)
+            : $this->ansi->lineFeed();
 
         return $this;
     }
@@ -50,6 +51,7 @@ class Output
     public function debug(string $text): static
     {
         $this->ansi
+            ->buffer()
             ->foreground(Color::Gray)
             ->line($text)
             ->flush();
@@ -86,6 +88,7 @@ class Output
     public function warning(string $text): static
     {
         $this->ansi
+            ->buffer()
             ->foreground(Color::Yellow)
             ->line($text)
             ->flush();
@@ -99,6 +102,7 @@ class Output
     public function error(string $text): static
     {
         $this->ansi
+            ->buffer()
             ->background(Color::Red)
             ->foreground(Color::White)
             ->line($text)

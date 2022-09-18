@@ -11,7 +11,6 @@ use function readline_callback_handler_install;
 use function readline_callback_handler_remove;
 use function readline_callback_read_char;
 use function readline_info;
-use function stream_get_contents;
 use function stream_select;
 use const STDIN;
 
@@ -48,13 +47,13 @@ class Stream
     }
 
     /**
-     * @param Closure(array<string, mixed>, ?bool): (mixed|false) $callback
+     * @param Closure(array<string, mixed>, ?bool): (mixed|false)|null $callback
      * Invoked for each character read. First argument contains the character read and
      * second argument contains a string of all the chars upto the current char.
      *
      * @return string
      */
-    public function readEach(string $prompt, Closure $callback): string
+    public function readEach(string $prompt, ?Closure $callback = null): string
     {
         $line = '';
         $done = false;
@@ -70,9 +69,15 @@ class Stream
             while (true) {
                 stream_select($read, $write, $except, null);
                 readline_callback_read_char();
-                $info = (array) readline_info();
-                $continue = $callback($info, $done);
-                if ($done || $continue === false) {
+
+                if ($callback !== null) {
+                    $info = (array) readline_info();
+                    if($callback($info, $done) === false) {
+                        break;
+                    }
+                }
+
+                if ($done) {
                     break;
                 }
             }
@@ -82,19 +87,6 @@ class Stream
         }
 
         return $line;
-    }
-
-    protected function captureStdin(): string|false
-    {
-        $char = stream_get_contents(STDIN, 1);
-
-        // Some inputs input multiple characters with 1 keystroke (like arrow keys),
-        // so we handle that here.
-        while (stream_select($read, $write, $except, 0)) {
-            $char .= stream_get_contents(STDIN, 1);
-        }
-
-        return $char;
     }
 
     public function close(): void

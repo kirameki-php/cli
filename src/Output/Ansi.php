@@ -12,6 +12,7 @@ use Kirameki\Cli\Output\Ansi\Csi\Scroll;
 use Kirameki\Cli\Output\Ansi\Fe;
 use Kirameki\Cli\Output\Ansi\Sgr;
 use Stringable;
+use Webmozart\Assert\Assert;
 use function implode;
 
 class Ansi
@@ -21,6 +22,8 @@ class Ansi
      */
     protected array $sequences = [];
 
+    protected bool $buffering = false;
+
     /**
      * @param int|string|Stringable|BackedEnum ...$sequences
      * @return $this
@@ -28,13 +31,35 @@ class Ansi
     public function sequence(int|string|Stringable|BackedEnum ...$sequences): static
     {
         foreach ($sequences as $sequence) {
-            $this->sequences[] = match(true) {
-                $sequence instanceof BackedEnum => (string) $sequence->value,
+            $this->sequences[] = match (true) {
+                $sequence instanceof BackedEnum => (string)$sequence->value,
                 $sequence instanceof Stringable => $sequence->__toString(),
-                default => (string) $sequence,
+                default => (string)$sequence,
             };
         }
+
+        if (!$this->buffering) {
+            $this->flush();
+        }
+
         return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function buffer(): static
+    {
+        $this->buffering = true;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBuffering(): bool
+    {
+        return $this->buffering;
     }
 
     /**
@@ -64,10 +89,17 @@ class Ansi
     }
 
     /**
+     * @param int $times
      * @return $this
      */
     public function backspace(int $times = 1): static
     {
+        Assert::greaterThanEq($times, 0);
+
+        if ($times === 0) {
+            return $this;
+        }
+
         foreach (range(1, $times) as $_) {
             $this->sequence(C0::Escape, Fe::CSI, Cursor::back());
             $this->sequence(C0::Escape, Fe::CSI, Erase::toEndOfLine());
@@ -133,7 +165,10 @@ class Ansi
      */
     public function cursorBack(int $cells = 1): static
     {
-        return $this->sequence(C0::Escape, Fe::CSI, Cursor::back($cells));
+        Assert::greaterThanEq($cells, 0);
+        return $cells > 0
+            ? $this->sequence(C0::Escape, Fe::CSI, Cursor::back($cells))
+            : $this;
     }
 
     /**
@@ -322,6 +357,7 @@ class Ansi
         $output = implode('', $this->sequences);
         echo $output;
         $this->sequences = [];
+        $this->buffering = false;
         return $this;
     }
 }

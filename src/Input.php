@@ -9,6 +9,7 @@ use function array_key_exists;
 use function grapheme_strlen;
 use function is_string;
 use function str_pad;
+use function str_repeat;
 use function trim;
 
 class Input
@@ -110,8 +111,8 @@ class Input
      */
     public function hidden(string $prompt = ''): string|false
     {
-        return $this->stream->readEach($prompt, function (array $info) {
-            $buffer = (string) $info['line_buffer'];
+        return $this->stream->readEach($prompt, function () {
+            $this->output->ansi->backspace();
         });
     }
 
@@ -120,13 +121,24 @@ class Input
      * @param string $replacement
      * @return string|false
      */
-    public function masked(?string $prompt = '', string $replacement = '*'): string|false
+    public function masked(string $prompt = '', string $replacement = '*'): string|false
     {
-        $cursor = 0;
-        return $this->stream->readEach($prompt, function (array $info) use (&$cursor, $replacement) {
-            $buffer = (string) $info['line_buffer'];
-//            $this->output->ansi->backspace((int) grapheme_strlen($buffer));
-//            $this->output->ansi->text(str_repeat($replacement, (int) $info['end']))->flush();
+        // abcde
+        // ab_de // e: 5 p: 3
+
+        $size = 0;
+        return $this->stream->readEach($prompt, function (array $info) use (&$size, $replacement) {
+            $newSize = (int) $info['end'];
+            if ($newSize > $size) {
+                $newCharCount = $newSize - $size;
+                // delete inserted character
+                $this->output->ansi->backspace($newCharCount);
+                $this->output->ansi->eraseToEndOfLine();
+                $pad = ($info['end'] - $info['point']) + $newCharCount;
+                $this->output->ansi->text(str_repeat($replacement, $pad));
+                $this->output->ansi->cursorBack($pad - $newCharCount);
+            }
+            $size = $newSize;
         });
     }
 
