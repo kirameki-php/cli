@@ -22,6 +22,9 @@ class Ansi
      */
     protected array $sequences = [];
 
+    /**
+     * @var bool
+     */
     protected bool $buffering = false;
 
     /**
@@ -89,21 +92,11 @@ class Ansi
     }
 
     /**
-     * @param int $times
      * @return $this
      */
-    public function backspace(int $times = 1): static
+    public function backspace(): static
     {
-        Assert::greaterThanEq($times, 0);
-
-        if ($times === 0) {
-            return $this;
-        }
-
-        return $this->buffer()
-            ->cursorBack($times)
-            ->eraseToEndOfLine()
-            ->flush();
+        return $this->sequence(C0::Backspace);
     }
 
     /**

@@ -3,52 +3,38 @@
 namespace Kirameki\Cli;
 
 use Closure;
-use Kirameki\Cli\Input\Stream;
 use RuntimeException;
 use function array_key_exists;
 use function grapheme_strlen;
-use function is_string;
+use function readline;
+use function readline_callback_handler_install;
+use function readline_callback_handler_remove;
+use function readline_callback_read_char;
+use function readline_info;
+use function shell_exec;
 use function str_pad;
 use function str_repeat;
-use function trim;
+use function stream_select;
+use const STDIN;
 
 class Input
 {
     /**
      * @param Output $output
-     * @param Stream $stream
      */
     public function __construct(
         readonly protected Output $output,
-        readonly protected Stream $stream,
     )
     {
     }
 
     /**
-     * @param int<0, max> $length
-     * @return string|false
+     * @param string $prompt
+     * @return string|false Pressing ctrl-d when there is no input results in false.
      */
-    public function read(int $length = 1): string|false
+    public function readLine(string $prompt = ''): string|false
     {
-        return $this->stream->read($length);
-    }
-
-    /**
-     * @return string|false
-     */
-    public function readLine(): string|false
-    {
-        return $this->stream->readLine();
-    }
-
-    /**
-     * @param Closure(string):bool $callback
-     * @return bool
-     */
-    public function readEach(Closure $callback): bool
-    {
-        return $this->stream->readEach($callback);
+        return readline($prompt);
     }
 
     /**
@@ -63,9 +49,8 @@ class Input
         foreach ($choices as $key => $value) {
             $text .= str_pad($key, $maxStrLen) . '. ' . $value;
         }
-        $this->output->line($text);
 
-        $choice = (string) $this->readLine();
+        $choice = (string) $this->readLine($text);
 
         if (array_key_exists($choice, $choices)) {
             return $choice;
@@ -85,18 +70,11 @@ class Input
         $no = 'n';
 
         $text = ($message ?? '') . "({$yes}/{$no}) ";
-
         if ($default !== null) {
             $text .= '[default: ' . ($default ? $yes : $no) . ']';
         }
 
-        $this->output->text($text . ': ');
-
-        $input = $this->readLine();
-
-        if (is_string($input)) {
-            $input = trim($input);
-        }
+        $input = $this->readLine($text . ': ');
 
         return match ($input) {
             $yes => true,
@@ -111,9 +89,18 @@ class Input
      */
     public function hidden(string $prompt = ''): string|false
     {
-        return $this->stream->readEach($prompt, function (array $info) {
-            $this->output->ansi->backspace($info['point']);
-        });
+        $stty = shell_exec('stty -g');
+        system("stty -echo");
+        $input = $this->readline($prompt);
+        system("stty $stty");
+
+        if ($input !== false) {
+            // Pressing enter with no input, shows duplicated prompt for some reason,
+            // so we have to add a line feed.
+            $this->output->ansi->lineFeed();
+        }
+
+        return $input;
     }
 
     /**
@@ -123,7 +110,7 @@ class Input
      */
     public function masked(string $prompt = '', string $replacement = '*'): string|false
     {
-        $line = $this->stream->readEach($prompt, function (array $info) use ($replacement) {
+        return $this->readEach($prompt, function (array $info) use ($replacement) {
             $this->output->ansi
                 // Clear all output up to the end of prompt text.
                 ->cursorBack($info['point'])->eraseToEndOfLine()
@@ -132,30 +119,58 @@ class Input
                 // Set the cursor back to the offset position.
                 ->cursorBack($info['end'] - $info['point']);
         });
+    }
+
+    /**
+     * @param string $prompt
+     * @param Closure(array<string, mixed>, ?bool): (mixed|false)|null $callback
+     * Invoked for each character read. First argument contains the character read and
+     * second argument contains a string of all the chars upto the current char.
+     *
+     * @return string|false
+     */
+    public function readEach(string $prompt, ?Closure $callback = null): string|false
+    {
+        $line = '';
+        $done = false;
+
+        $installed = readline_callback_handler_install($prompt, static function(string $buffer) use (&$done, &$line) {
+            $done = true;
+            $line = $buffer;
+        });
+
+        if (!$installed) {
+            return false;
+        }
+
+        try {
+            $read = [STDIN];
+            $write = null;
+            $except = null;
+            while (true) {
+                stream_select($read, $write, $except, null);
+                readline_callback_read_char();
+
+                if ($callback !== null) {
+                    $info = (array) readline_info();
+                    if($callback($info, $done) === false) {
+                        break;
+                    }
+                }
+
+                if ($done) {
+                    break;
+                }
+            }
+        }
+        finally {
+            readline_callback_handler_remove();
+        }
 
         // Pressing enter with no input, shows duplicated prompt for some reason,
         // so we have to clear the line.
         $this->output->ansi->eraseLine();
 
         return $line;
-    }
-
-    /**
-     * @param string|null $message
-     * @return void
-     */
-    protected function writeMessage(?string $message = null): void
-    {
-        if ($message !== null) {
-            $this->output->text($message);
-        }
-    }
-
-    /**
-     * @return void
-     */
-    public function close(): void
-    {
-        $this->stream->close();
     }
 }
