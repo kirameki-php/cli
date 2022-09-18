@@ -6,6 +6,7 @@ use Closure;
 use RuntimeException;
 use function array_key_exists;
 use function grapheme_strlen;
+use function is_string;
 use function readline;
 use function readline_callback_handler_install;
 use function readline_callback_handler_remove;
@@ -30,11 +31,12 @@ class Input
 
     /**
      * @param string $prompt
-     * @return string|false Pressing ctrl-d when there is no input results in false.
+     * @return string
      */
-    public function readLine(string $prompt = ''): string|false
+    public function readLine(string $prompt = ''): string
     {
-        return readline($prompt);
+        $line = readline($prompt);
+        return is_string($line) ? $line : '';
     }
 
     /**
@@ -50,7 +52,7 @@ class Input
             $text .= str_pad($key, $maxStrLen) . '. ' . $value;
         }
 
-        $choice = (string) $this->readLine($text);
+        $choice = $this->readLine($text);
 
         if (array_key_exists($choice, $choices)) {
             return $choice;
@@ -85,20 +87,18 @@ class Input
 
     /**
      * @param string $prompt
-     * @return string|false
+     * @return string
      */
-    public function hidden(string $prompt = ''): string|false
+    public function hidden(string $prompt = ''): string
     {
         $stty = shell_exec('stty -g');
         system("stty -echo");
         $input = $this->readline($prompt);
         system("stty $stty");
 
-        if ($input !== false) {
-            // Pressing enter with no input, shows duplicated prompt for some reason,
-            // so we have to add a line feed.
-            $this->output->ansi->lineFeed();
-        }
+        // Pressing enter with no input, shows duplicated prompt for some reason,
+        // so we have to add a line feed.
+        $this->output->ansi->lineFeed();
 
         return $input;
     }
@@ -106,9 +106,9 @@ class Input
     /**
      * @param string $prompt
      * @param string $replacement
-     * @return string|false
+     * @return string
      */
-    public function masked(string $prompt = '', string $replacement = '*'): string|false
+    public function masked(string $prompt = '', string $replacement = '*'): string
     {
         return $this->readEach($prompt, function (array $info) use ($replacement) {
             $this->output->ansi
@@ -127,21 +127,17 @@ class Input
      * Invoked for each character read. First argument contains the character read and
      * second argument contains a string of all the chars upto the current char.
      *
-     * @return string|false
+     * @return string
      */
-    public function readEach(string $prompt, ?Closure $callback = null): string|false
+    public function readEach(string $prompt, ?Closure $callback = null): string
     {
         $line = '';
         $done = false;
 
-        $installed = readline_callback_handler_install($prompt, static function(string $buffer) use (&$done, &$line) {
+        readline_callback_handler_install($prompt, static function(string $buffer) use (&$done, &$line) {
             $done = true;
             $line = $buffer;
         });
-
-        if (!$installed) {
-            return false;
-        }
 
         try {
             $read = [STDIN];
