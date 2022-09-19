@@ -5,8 +5,11 @@ namespace Kirameki\Cli;
 use Closure;
 use RuntimeException;
 use function array_key_exists;
+use function array_keys;
+use function array_map;
 use function grapheme_strlen;
 use function is_string;
+use function max;
 use function readline;
 use function readline_callback_handler_install;
 use function readline_callback_handler_remove;
@@ -16,6 +19,7 @@ use function shell_exec;
 use function str_pad;
 use function str_repeat;
 use function stream_select;
+use function system;
 use const STDIN;
 
 class Input
@@ -98,7 +102,7 @@ class Input
 
         // Pressing enter with no input, shows duplicated prompt for some reason,
         // so we have to add a line feed.
-        $this->output->ansi->lineFeed();
+        $this->output->line();
 
         return $input;
     }
@@ -149,7 +153,7 @@ class Input
 
                 if ($callback !== null) {
                     $info = (array) readline_info();
-                    if($callback($info, $done) === false) {
+                    if ($callback($info, $done) === false) {
                         break;
                     }
                 }
