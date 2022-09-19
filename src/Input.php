@@ -100,8 +100,8 @@ class Input
         $input = $this->readline($prompt);
         system("stty $stty");
 
-        // Pressing enter with no input, shows duplicated prompt for some reason,
-        // so we have to add a line feed.
+        // HACK: Pressing enter with no input shows duplicated prompt
+        // for some reason, so we have to add a line feed.
         $this->output->line();
 
         return $input;
@@ -167,8 +167,8 @@ class Input
             readline_callback_handler_remove();
         }
 
-        // Pressing enter with no input, shows duplicated prompt for some reason,
-        // so we have to clear the line.
+        // HACK: Pressing enter with no input shows duplicated prompt
+        // for some strange reason, so we have to clear the line.
         $this->output->ansi->eraseLine();
 
         return $line;

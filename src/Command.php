@@ -30,17 +30,21 @@ abstract class Command
     public function __construct()
     {
         $builder = new CommandBuilder();
-        $this->setup($builder);
+        $this->define($builder);
         $this->definition = $builder->build();
     }
 
     /**
+     * Define the command and its arguments and options.
+     *
      * @param CommandBuilder $builder
      * @return void
      */
-    abstract protected function setup(CommandBuilder $builder): void;
+    abstract protected function define(CommandBuilder $builder): void;
 
     /**
+     * Parse the raw parameters and run the command.
+     *
      * @param Input $input
      * @param Output $output
      * @param list<string> $rawParameters
@@ -68,6 +72,8 @@ abstract class Command
     }
 
     /**
+     * The method which runs the user defined logic.
+     *
      * @return int|null
      */
     abstract public function handle(): mixed;

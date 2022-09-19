@@ -18,13 +18,23 @@ class Output
 
     /**
      * @param string $text
+     * @param Color|null $foreground
+     * @param Color|null $background
      * @return $this
      */
-    public function text(string $text): static
+    public function text(string $text, ?Color $foreground = null, ?Color $background = null): static
     {
-        $this->ansi
-            ->buffer()
-            ->text($text)
+        $ansi = $this->ansi->buffer();
+
+        if ($foreground !== null) {
+            $ansi->foreground($foreground);
+        }
+
+        if ($background !== null) {
+            $ansi->background($background);
+        }
+
+        $ansi->text($text)
             ->noStyle()
             ->flush();
 
