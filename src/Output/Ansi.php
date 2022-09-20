@@ -13,7 +13,14 @@ use Kirameki\Cli\Output\Ansi\Fe;
 use Kirameki\Cli\Output\Ansi\Sgr;
 use Stringable;
 use Webmozart\Assert\Assert;
+use function compact;
+use function fread;
 use function implode;
+use function shell_exec;
+use function sscanf;
+use function system;
+use function trim;
+use const STDIN;
 
 class Ansi
 {
@@ -196,13 +203,13 @@ class Ansi
     }
 
     /**
-     * @param int $rows
-     * @param int $columns
+     * @param int $row
+     * @param int $column
      * @return $this
      */
-    public function cursorPosition(int $rows = 1, int $columns = 1): static
+    public function cursorPosition(int $row = 1, int $column = 1): static
     {
-        return $this->sequence(C0::Escape, Fe::CSI, Cursor::position($rows, $columns));
+        return $this->sequence(C0::Escape, Fe::CSI, Cursor::position($row, $column));
     }
 
     /**
@@ -353,6 +360,47 @@ class Ansi
     public function blink(bool $toggle = true): static
     {
         return $this->sequence(C0::Escape, Fe::CSI, ($toggle ? Sgr::Blink : Sgr::NotBlinking));
+    }
+
+    /**
+     * @return array{ row: int, column: int }
+     */
+    public function getDeviceStatusReport(): array
+    {
+        // backup original stty mode
+        $stty = trim((string) shell_exec('stty -g'));
+
+        // set stty mode
+        system("stty -icanon -echo");
+
+        try {
+            $this->sequence(C0::Escape, Fe::CSI, Csi::DeviceStatusReport)->flush();
+            $code = trim((string) fread(STDIN, 100));
+            sscanf($code, "\e[%d;%dR", $row, $column);
+            return compact('row', 'column');
+        }
+        finally {
+            system("stty $stty");
+        }
+    }
+
+    /**
+     * @return array{ row: int, column: int }
+     */
+    public function getTerminalSize(): array
+    {
+        $current = $this->getDeviceStatusReport();
+
+        // Move as far away as it can to determine the max cursor position.
+        $this->cursorPosition(9999, 9999);
+
+        // get the max position which is the size of the terminal.
+        $size = $this->getDeviceStatusReport();
+
+        // Restore cursor position.
+        $this->cursorPosition(...$current);
+
+        return $size;
     }
 
     /**

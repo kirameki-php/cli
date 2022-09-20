@@ -16,4 +16,5 @@ enum Csi: string
     case ScrollUp = 'S';
     case ScrollDown = 'T';
     case Sgr = 'm';
+    case DeviceStatusReport = '6n';
 }

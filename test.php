@@ -6,6 +6,9 @@ use Kirameki\Cli\Output\Ansi;
 
 require './vendor/autoload.php';
 
-$input = new Input(new Output($ansi = new Ansi()));
+$output = new Output($ansi = new Ansi());
+$input = new Input($output);
+
+dump($ansi->getWidth());
 
 dump($input->hidden('Password: '));

@@ -20,6 +20,7 @@ use function str_pad;
 use function str_repeat;
 use function stream_select;
 use function system;
+use function trim;
 use const STDIN;
 
 class Input
@@ -95,7 +96,7 @@ class Input
      */
     public function hidden(string $prompt = ''): string
     {
-        $stty = shell_exec('stty -g');
+        $stty = trim((string) shell_exec('stty -g'));
         system("stty -echo");
         $input = $this->readline($prompt);
         system("stty $stty");
