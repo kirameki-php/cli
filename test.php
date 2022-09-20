@@ -9,6 +9,4 @@ require './vendor/autoload.php';
 $output = new Output($ansi = new Ansi());
 $input = new Input($output);
 
-dump($ansi->getWidth());
-
 dump($input->hidden('Password: '));

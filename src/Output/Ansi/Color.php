@@ -260,4 +260,20 @@ enum Color: string
     case Gray85 = '253';
     case Gray89 = '254';
     case Gray93 = '255';
+
+    /**
+     * @param int $code
+     * @return static
+     */
+    public static function code(int $code): self
+    {
+        static $mapped = null;
+        if ($mapped === null) {
+            $mapped = [];
+            foreach (self::cases() as $case) {
+                $mapped[$case->value] = $case;
+            }
+        }
+        return $mapped[(string) $code];
+    }
 }
