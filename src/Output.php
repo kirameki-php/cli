@@ -88,6 +88,7 @@ class Output
             ->foreground(Color::Green)
             ->line($text)
             ->flush();
+
         return $this;
     }
 
@@ -102,6 +103,7 @@ class Output
             ->foreground(Color::Yellow)
             ->line($text)
             ->flush();
+
         return $this;
     }
 
@@ -118,6 +120,7 @@ class Output
             ->line($text)
             ->noStyle()
             ->flush();
+
         return $this;
     }
 }

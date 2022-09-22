@@ -9,4 +9,4 @@ require './vendor/autoload.php';
 $output = new Output($ansi = new Ansi());
 $input = new Input($output);
 
-dump($input->hidden('Password: '));
+$input->readline();

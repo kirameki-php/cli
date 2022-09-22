@@ -3,10 +3,12 @@
 namespace Kirameki\Cli;
 
 use Closure;
+use Kirameki\Cli\Input\InputInfo;
 use RuntimeException;
 use function array_key_exists;
 use function array_keys;
 use function array_map;
+use function dump;
 use function grapheme_strlen;
 use function is_string;
 use function max;
@@ -18,7 +20,9 @@ use function readline_info;
 use function shell_exec;
 use function str_pad;
 use function str_repeat;
+use function stream_get_contents;
 use function stream_select;
+use function substr;
 use function system;
 use function trim;
 use const STDIN;
@@ -38,28 +42,36 @@ class Input
      * @param string $prompt
      * @return string
      */
-    public function readLine(string $prompt = ''): string
+    public function text(string $prompt = ''): string
     {
         $line = readline($prompt);
         return is_string($line) ? $line : '';
     }
 
+    public function number(string $prompt = ''): string
+    {
+        $this->output->text($prompt);
+
+        return $this->readline(function (string $buffer) {
+        });
+    }
+
     /**
-     * @param array<array-key, string> $choices
+     * @param array<array-key, string> $options
      * @return string
      */
-    public function choice(array $choices): string
+    public function select(array $options): string
     {
-        $maxStrLen = max(array_map(grapheme_strlen(...), array_keys($choices))) ?: 0;
+        $maxStrLen = max(array_map(grapheme_strlen(...), array_keys($options))) ?: 0;
 
         $text = '';
-        foreach ($choices as $key => $value) {
+        foreach ($options as $key => $value) {
             $text .= str_pad($key, $maxStrLen) . '. ' . $value;
         }
 
-        $choice = $this->readLine($text);
+        $choice = $this->text($text);
 
-        if (array_key_exists($choice, $choices)) {
+        if (array_key_exists($choice, $options)) {
             return $choice;
         }
 
@@ -81,7 +93,7 @@ class Input
             $text .= '[default: ' . ($default ? $yes : $no) . ']';
         }
 
-        $input = $this->readLine($text . ': ');
+        $input = $this->text($text . ': ');
 
         return match ($input) {
             $yes => true,
@@ -98,7 +110,7 @@ class Input
     {
         $stty = trim((string) shell_exec('stty -g'));
         system("stty -echo");
-        $input = $this->readline($prompt);
+        $input = $this->text($prompt);
         system("stty $stty");
 
         // HACK: Pressing enter with no input shows duplicated prompt
@@ -173,5 +185,97 @@ class Input
         $this->output->ansi->eraseLine();
 
         return $line;
+    }
+
+    /**
+     * @param Closure(InputInfo): (mixed|false)|null $callback
+     * @return string
+     */
+    public function readline(?Closure $callback = null): string
+    {
+        $info = new InputInfo();
+        $stream = STDIN;
+
+        readline_callback_handler_install('', static fn() => true);
+        try {
+            while (!$info->done) {
+                $key = $this->readKey($stream);
+
+                $info->update($key);
+
+                dump($info);
+
+                if ($callback !== null) {
+                    $callback($info);
+                }
+            }
+        }
+        finally {
+            readline_callback_handler_remove();
+        }
+
+        return $info->buffer;
+    }
+
+    /**
+     * @param resource $stream
+     * @return string
+     */
+    protected function readKey($stream): string
+    {
+        $read = [$stream];
+        $write = $except = null;
+        stream_select($read, $write, $except, null);
+
+        $char = stream_get_contents($stream, 1);
+
+        return match ($char) {
+            "\e" => $this->readEscapeSequence($stream, $char),
+            false => InputInfo::EOT,
+            default => $char,
+        };
+    }
+
+    /**
+     * @param resource $stream
+     * @param string $input
+     * @return string
+     */
+    protected function readEscapeSequence($stream, string $input): string
+    {
+        $readByte = static fn(): string|false => stream_get_contents($stream, 1);
+
+        $char = $readByte();
+        $input .= $char;
+
+        // CSI (Control Sequence Introducer)
+        if ($char === '[') {
+            if (($char = $readByte()) === false) {
+                return $input;
+            }
+            while($char >= "\x30" && $char <= "\x3F") {
+                $input .= $char;
+                $char = $readByte();
+            }
+            while($char >= "\x20" && $char <= "\x2F") {
+                $input .= $char;
+                $char = $readByte();
+            }
+            if ($char >= "\x40" && $char <= "\x7E") {
+                $input .= $char;
+            }
+        }
+        // OSC (Operating System Command)
+        elseif ($char === ']') {
+            while(substr($input, -2) !== '\e\\') {
+                $input .= $readByte();
+            }
+        }
+        // SS2 or SS3 (Single Shifts)
+        elseif ($char === 'N' || $char === 'O') {
+            $input .= $readByte();
+        }
+
+        return $input;
     }
 }

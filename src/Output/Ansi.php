@@ -15,12 +15,14 @@ use Stringable;
 use Webmozart\Assert\Assert;
 use function compact;
 use function fread;
+use function fwrite;
 use function implode;
 use function shell_exec;
 use function sscanf;
 use function system;
 use function trim;
 use const STDIN;
+use const STDOUT;
 
 class Ansi
 {
@@ -408,8 +410,16 @@ class Ansi
      */
     public function flush(): static
     {
-        $output = implode('', $this->sequences);
-        echo $output;
+        return $this->flushTo(STDOUT);
+    }
+
+    /**
+     * @param resource $stream
+     * @return $this
+     */
+    public function flushTo($stream): static
+    {
+        fwrite($stream, implode('', $this->sequences));
         $this->sequences = [];
         $this->buffering = false;
         return $this;

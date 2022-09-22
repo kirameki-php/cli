@@ -263,7 +263,7 @@ enum Color: string
 
     /**
      * @param int $code
-     * @return static
+     * @return self
      */
     public static function code(int $code): self
     {

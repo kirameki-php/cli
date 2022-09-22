@@ -6,31 +6,37 @@ enum C0: string
 {
     /**
      * Makes an audible noise
+     * Alias: \x07
      */
-    case Bell = "\x07";
+    case Bell = "\a";
 
     /**
      * Moves back the cursor
+     * Alias: \x08
      */
-    case Backspace = "\x08";
+    case Backspace = "\b";
 
     /**
      * Moves the cursor right 8 times
+     * Alias: \x09
      */
-    case Tab = "\x09";
+    case Tab = "\t";
 
     /**
      * Move to next line and scrolls the display up if at bottom of the screen
+     * Alias: \x0A
      */
-    case LineFeed = "\x0A";
+    case LineFeed = "\n";
 
     /**
      * Moves the cursor to column zero
+     * Alias: \x0D
      */
-    case CarriageReturn = "\x0D";
+    case CarriageReturn = "\r";
 
     /**
      * Starts all the escape sequences
+     * Alias: \x1B
      */
-    case Escape = "\x1B";
+    case Escape = "\e";
 }
