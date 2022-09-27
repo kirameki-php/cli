@@ -229,11 +229,34 @@ class Input
 
         $char = stream_get_contents($stream, 1);
 
-        return match ($char) {
-            "\e" => $this->readEscapeSequence($stream, $char),
-            false => InputInfo::EOT,
-            default => $char,
-        };
+        if ($char === false) {
+            return "\x04";
+        }
+
+        if ($char === "\e") {
+            return $this->readEscapeSequence($stream, $char);
+        }
+
+        if (grapheme_strlen($char) === null) {
+            return $this->readMultiByte($stream, $char);
+        }
+
+        return $char;
+    }
+
+    /**
+     * @param resource $stream
+     * @param string $input
+     * @return string
+     */
+    protected function readMultibyte($stream, string $input): string
+    {
+        do {
+            $input .= stream_get_contents($stream, 1);
+        }
+        while(grapheme_strlen($input) === null);
+
+        return $input;
     }
 
     /**
