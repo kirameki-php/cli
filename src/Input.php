@@ -234,11 +234,11 @@ class Input
         }
 
         if ($char === "\e") {
-            return $this->readEscapeSequence($stream, $char);
+            return $this->readEscapeSequences($stream, $char);
         }
 
         if (grapheme_strlen($char) === null) {
-            return $this->readMultiByte($stream, $char);
+            return $this->readMultibytePortions($stream, $char);
         }
 
         return $char;
@@ -249,7 +249,7 @@ class Input
      * @param string $input
      * @return string
      */
-    protected function readMultibyte($stream, string $input): string
+    protected function readMultibytePortions($stream, string $input): string
     {
         do {
             $input .= stream_get_contents($stream, 1);
@@ -264,7 +264,7 @@ class Input
      * @param string $input
      * @return string
      */
-    protected function readEscapeSequence($stream, string $input): string
+    protected function readEscapeSequences($stream, string $input): string
     {
         $readByte = static fn(): string|false => stream_get_contents($stream, 1);
 
