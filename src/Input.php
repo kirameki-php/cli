@@ -252,7 +252,11 @@ class Input
     protected function readMultibytePortions($stream, string $input): string
     {
         do {
-            $input .= stream_get_contents($stream, 1);
+            $char = stream_get_contents($stream, 1);
+            if ($char === false) {
+                break;
+            }
+            $input .= $char;
         }
         while(grapheme_strlen($input) === null);
 

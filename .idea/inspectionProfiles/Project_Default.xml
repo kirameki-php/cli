@@ -5,6 +5,9 @@
     <inspection_tool class="PhpStanGlobal" enabled="true" level="ERROR" enabled_by_default="true">
       <option name="config" value="$PROJECT_DIR$/phpstan.neon" />
     </inspection_tool>
+    <inspection_tool class="PhpStatementHasEmptyBodyInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="myCommentsCountAsContent" value="true" />
+    </inspection_tool>
     <inspection_tool class="PhpUnnecessaryCurlyVarSyntaxInspection" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
   </profile>
 </component>
