@@ -6,15 +6,13 @@ enum C0: string
 {
     /**
      * Makes an audible noise
-     * Alias: \x07
      */
-    case Bell = "\a";
+    case Bell = "\x07";
 
     /**
-     * Moves back the cursor
-     * Alias: \x08
+     * Moves back the cursor. \b does not work for some reason.
      */
-    case Backspace = "\b";
+    case Backspace = "\x08";
 
     /**
      * Moves the cursor right 8 times

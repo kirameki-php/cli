@@ -4,11 +4,11 @@ namespace Kirameki\Cli;
 
 use Closure;
 use Kirameki\Cli\Input\InputInfo;
+use Kirameki\Cli\Input\Readline;
 use RuntimeException;
 use function array_key_exists;
 use function array_keys;
 use function array_map;
-use function dump;
 use function grapheme_strlen;
 use function is_string;
 use function max;
@@ -194,16 +194,14 @@ class Input
     public function readline(?Closure $callback = null): string
     {
         $info = new InputInfo();
-        $stream = STDIN;
+        $readline = new Readline($this->output->ansi, $info);
 
         readline_callback_handler_install('', static fn() => true);
         try {
             while (!$info->done) {
-                $key = $this->readKey($stream);
+                $readline->process($this->readKey());
 
-                $info->update($key);
-
-                dump($info);
+//                dump($info);
 
                 if ($callback !== null) {
                     $callback($info);
@@ -218,11 +216,11 @@ class Input
     }
 
     /**
-     * @param resource $stream
      * @return string
      */
-    protected function readKey($stream): string
+    protected function readKey(): string
     {
+        $stream = STDIN;
         $read = [$stream];
         $write = $except = null;
         stream_select($read, $write, $except, null);
