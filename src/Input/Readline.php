@@ -33,7 +33,7 @@ final class Readline
     public const PREV_WORD = "\eb"; // option+b
 
     public function __construct(
-        protected Ansi      $ansi,
+        protected Ansi $ansi,
         protected InputInfo $info,
     )
     {
@@ -46,7 +46,6 @@ final class Readline
     public function process(string $key): void
     {
         $info = $this->info;
-        $ansi = $this->ansi;
         $buffer = $info->buffer;
         $point = $info->point;
         $end = $info->end;
@@ -60,20 +59,24 @@ final class Readline
                 $info->end--;
                 $info->buffer = self::substr($buffer, 0, $point - 1) . self::substr($buffer, $point);
             }
-        } elseif (self::matchesKey($key, self::DELETE)) {
+        }
+        elseif (self::matchesKey($key, self::DELETE)) {
             if ($end > 0) {
                 $info->end--;
                 $info->buffer = self::substr($buffer, 0, $point) . self::substr($buffer, $point + 1);
             }
-        } elseif (self::matchesKey($key, self::CUT_TO_BOL)) {
+        }
+        elseif (self::matchesKey($key, self::CUT_TO_BOL)) {
             $info->buffer = self::substr($buffer, $point);
             $info->clipboard = self::substr($buffer, 0, $point);
             $info->point = 0;
             $info->end = $end - $point;
-        } elseif (self::matchesKey($key, self::CUT_TO_EOL)) {
+        }
+        elseif (self::matchesKey($key, self::CUT_TO_EOL)) {
             $info->buffer = self::substr($buffer, 0, $point);
             $info->clipboard = self::substr($buffer, $point);
-        } elseif (self::matchesKey($key, self::CUT_WORD)) {
+        }
+        elseif (self::matchesKey($key, self::CUT_WORD)) {
             $lookahead = $point - 1;
             $cursor = $point;
             while ($lookahead >= 0 && !self::isWord($buffer[$lookahead])) {
@@ -88,31 +91,40 @@ final class Readline
             $info->clipboard = self::substr($buffer, $cursor, $point - $cursor);
             $info->point = $cursor;
             $info->end -= $point - $cursor;
-        } elseif (self::matchesKey($key, self::PASTE)) {
+        }
+        elseif (self::matchesKey($key, self::PASTE)) {
             $pasting = $info->clipboard;
             $info->buffer = self::substr($buffer, 0, $point) . $pasting . self::substr($buffer, $point);
             $move = grapheme_strlen($pasting);
             $info->point += $move;
             $info->end += $move;
-        } elseif (self::matchesKey($key, self::CURSOR_FORWARD)) {
+        }
+        elseif (self::matchesKey($key, self::CURSOR_FORWARD)) {
             if ($point < $end) {
                 $info->point = $point + 1;
             }
-        } elseif (self::matchesKey($key, self::CURSOR_BACK)) {
+        }
+        elseif (self::matchesKey($key, self::CURSOR_BACK)) {
             if ($point > 0) {
                 $info->point = $point - 1;
             }
-        } elseif (self::matchesKey($key, self::BOL)) {
+        }
+        elseif (self::matchesKey($key, self::BOL)) {
             $info->point = 0;
-        } elseif (self::matchesKey($key, self::EOL)) {
+        }
+        elseif (self::matchesKey($key, self::EOL)) {
             $info->point = $end;
-        } elseif (self::matchesKey($key, self::END)) {
+        }
+        elseif (self::matchesKey($key, self::END)) {
             $info->done = true;
-            $ansi->lineFeed();
-        } elseif (self::matchesKey($key, self::CLEAR_SCREEN)) {
-            $ansi->eraseScreen();
-        } elseif (self::matchesKey($key, self::NEXT_WORD)) {
-            $cursor = $info->point;
+        }
+        elseif (self::matchesKey($key, self::CLEAR_SCREEN)) {
+            $this->ansi
+                ->eraseScreen()
+                ->cursorPosition(1, 1);
+        }
+        elseif (self::matchesKey($key, self::NEXT_WORD)) {
+            $cursor = $point;
             while ($cursor < $end && !self::isWord($buffer[$cursor])) {
                 ++$cursor;
             }
@@ -120,8 +132,9 @@ final class Readline
                 ++$cursor;
             }
             $info->point = $cursor;
-        } elseif (self::matchesKey($key, self::PREV_WORD)) {
-            $lookahead = $info->point - 1;
+        }
+        elseif (self::matchesKey($key, self::PREV_WORD)) {
+            $lookahead = $point - 1;
             while ($lookahead >= 0 && !self::isWord($buffer[$lookahead])) {
                 --$info->point;
                 --$lookahead;
@@ -130,31 +143,50 @@ final class Readline
                 --$info->point;
                 --$lookahead;
             }
-        } elseif (str_starts_with($key, "\e")) {
+        }
+        elseif (str_starts_with($key, "\e")) {
             // do nothing
-        } else {
+        }
+        else {
             $info->buffer = self::substr($buffer, 0, $point) . $key . self::substr($buffer, $point);
             $info->point += $size;
             $info->end += $size;
         }
 
-        $this->bufferToScreen();
+        $info->done
+            ? $this->done()
+            : $this->render();
     }
 
     /**
      * @return void
      */
-    protected function bufferToScreen(): void
+    protected function render(): void
     {
-        $ansi = $this->ansi;
-        $info = $this->info;
-        $cursor = self::calculateOffset($info);
+        $this->ansi
+            ->buffer()
+            ->eraseLine()
+            ->cursorBack(9999)
+            ->text($this->getRenderingText())
+            ->cursorBack(9999)
+            ->cursorForward(self::calcCursorPosition($this->info))
+            ->flush();
+    }
 
-        $ansi->eraseLine()
-            ->cursorBack(9999)
-            ->text($info->buffer)
-            ->cursorBack(9999)
-            ->cursorForward($cursor);
+    /**
+     * @return void
+     */
+    protected function done(): void
+    {
+        $this->ansi->lineFeed();
+    }
+
+    /**
+     * @return string
+     */
+    protected function getRenderingText(): string
+    {
+        return $this->info->prompt . $this->info->buffer;
     }
 
     /**
@@ -191,26 +223,21 @@ final class Readline
      * @param InputInfo $info
      * @return int
      */
-    protected static function calculateOffset(InputInfo $info): int
+    protected static function calcCursorPosition(InputInfo $info): int
     {
         $buffer = $info->buffer;
-
-//        if (!preg_match('/[\\x80-\\xff]/', $buffer)) {
-//            return $info->end - $info->point;
-//        }
-
+        $position = 0;
         $offset = 0;
-        $next = 0;
         $bytes = strlen(self::substr($buffer, 0, $info->point));
 
-        while ($next < $bytes) {
-            $char = grapheme_extract($buffer, 1, GRAPHEME_EXTR_COUNT, $next, $next);
+        while ($offset < $bytes) {
+            $char = grapheme_extract($buffer, 1, GRAPHEME_EXTR_COUNT, $offset, $offset);
             if ($char !== false) {
-                $offset += self::getStringWidth($char);
+                $position += self::getStringWidth($char);
             }
         }
 
-        return $offset;
+        return $position;
     }
 
     /**

@@ -188,20 +188,19 @@ class Input
     }
 
     /**
+     * @param string|null $prompt
      * @param Closure(InputInfo): (mixed|false)|null $callback
      * @return string
      */
-    public function readline(?Closure $callback = null): string
+    public function readline(?string $prompt = null, ?Closure $callback = null): string
     {
-        $info = new InputInfo();
+        $info = new InputInfo($prompt);
         $readline = new Readline($this->output->ansi, $info);
 
         readline_callback_handler_install('', static fn() => true);
         try {
             while (!$info->done) {
                 $readline->process($this->readKey());
-
-//                dump($info);
 
                 if ($callback !== null) {
                     $callback($info);

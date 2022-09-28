@@ -209,7 +209,7 @@ class Ansi
      * @param int $column
      * @return $this
      */
-    public function cursorPosition(int $row = 1, int $column = 1): static
+    public function cursorPosition(int $row, int $column): static
     {
         return $this->sequence(C0::Escape, Fe::CSI, Cursor::position($row, $column));
     }
