@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace SouthPointe\Cli;
+namespace Kirameki\Cli;
 
-use SouthPointe\Cli\Definitions\ArgumentBuilder;
-use SouthPointe\Cli\Definitions\OptionBuilder;
-use SouthPointe\Core\Exceptions\LogicException;
+use Kirameki\Cli\Definitions\ArgumentBuilder;
+use Kirameki\Cli\Definitions\OptionBuilder;
+use Kirameki\Core\Exceptions\LogicException;
 use function array_key_exists;
 use function array_map;
 

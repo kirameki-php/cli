@@ -1,12 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace SouthPointe\Cli\Parameters;
+namespace Kirameki\Cli\Parameters;
 
-use SouthPointe\Cli\CommandDefinition;
-use SouthPointe\Cli\Definitions\ArgumentDefinition;
-use SouthPointe\Cli\Definitions\OptionDefinition;
-use SouthPointe\Cli\Definitions\ParameterDefinition;
-use SouthPointe\Cli\Exceptions\ParseException;
+use Kirameki\Cli\CommandDefinition;
+use Kirameki\Cli\Definitions\ArgumentDefinition;
+use Kirameki\Cli\Definitions\OptionDefinition;
+use Kirameki\Cli\Definitions\ParameterDefinition;
+use Kirameki\Cli\Exceptions\ParseException;
 use function array_is_list;
 use function array_key_exists;
 use function array_keys;

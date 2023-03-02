@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace SouthPointe\Cli\Parameters;
+namespace Kirameki\Cli\Parameters;
 
-use SouthPointe\Cli\Definitions\OptionDefinition;
+use Kirameki\Cli\Definitions\OptionDefinition;
 
 /**
  * @extends Parameter<OptionDefinition>

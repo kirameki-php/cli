@@ -1,12 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace SouthPointe\Cli;
+namespace Kirameki\Cli;
 
 use Closure;
+use Kirameki\Cli\Input\InputInfo;
+use Kirameki\Cli\Input\Readline;
 use RuntimeException;
 use SouthPointe\Ansi\Stream as AnsiStream;
-use SouthPointe\Cli\Input\InputInfo;
-use SouthPointe\Cli\Input\Readline;
 use SouthPointe\Stream\Stdin;
 use SouthPointe\Stream\Streamable;
 use function array_key_exists;

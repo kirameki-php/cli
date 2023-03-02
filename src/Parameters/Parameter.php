@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace SouthPointe\Cli\Parameters;
+namespace Kirameki\Cli\Parameters;
 
-use SouthPointe\Cli\Definitions\ParameterDefinition;
-use SouthPointe\Core\Exceptions\RuntimeException;
+use Kirameki\Cli\Definitions\ParameterDefinition;
+use Kirameki\Core\Exceptions\RuntimeException;
 use function array_key_exists;
 
 /**

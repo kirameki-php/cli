@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace SouthPointe\Cli;
+namespace Kirameki\Cli;
 
-use SouthPointe\Cli\Definitions\ArgumentDefinition;
-use SouthPointe\Cli\Definitions\OptionDefinition;
+use Kirameki\Cli\Definitions\ArgumentDefinition;
+use Kirameki\Cli\Definitions\OptionDefinition;
 use function array_key_exists;
 use function array_keys;
 

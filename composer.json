@@ -9,7 +9,8 @@
     "ext-ctype": "*",
     "ext-readline": "*",
     "south-pointe/ansi": "dev-main",
-    "south-pointe/core": "dev-main",
+    "kirameki/collections": "dev-main",
+    "kirameki/core": "dev-main",
     "south-pointe/stream": "dev-main",
     "webmozart/assert": "^1.11"
   },
@@ -18,16 +19,16 @@
     "phpstan/phpstan": "^1.7",
     "phpstan/phpstan-webmozart-assert": "^1.1",
     "phpunit/phpunit": "~9.0",
-    "south-pointe/dumper": "dev-main"
+    "kirameki/dumper": "dev-main"
   },
   "autoload": {
     "psr-4": {
-      "SouthPointe\\Cli\\": "src/"
+      "Kirameki\\Cli\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Tests\\SouthPointe\\Cli\\": "tests/src/"
+      "Tests\\Kirameki\\Cli\\": "tests/src/"
     }
   },
   "config": {

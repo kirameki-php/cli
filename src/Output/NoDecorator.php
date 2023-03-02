@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace SouthPointe\Cli\Output;
+namespace Kirameki\Cli\Output;
 
 use const PHP_EOL;
 

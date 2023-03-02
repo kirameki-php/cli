@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace SouthPointe\Cli\Input;
+namespace Kirameki\Cli\Input;
 
 use SouthPointe\Ansi\Stream;
 use function assert;

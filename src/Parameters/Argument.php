@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace SouthPointe\Cli\Parameters;
+namespace Kirameki\Cli\Parameters;
 
-use SouthPointe\Cli\Definitions\ArgumentDefinition;
+use Kirameki\Cli\Definitions\ArgumentDefinition;
 
 /**
  * @extends Parameter<ArgumentDefinition>

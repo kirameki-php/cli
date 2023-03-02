@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace SouthPointe\Cli;
+namespace Kirameki\Cli;
 
-use SouthPointe\Cli\Parameters\Argument;
-use SouthPointe\Cli\Parameters\Option;
-use SouthPointe\Cli\Parameters\ParameterParser;
-use SouthPointe\Core\Exceptions\LogicException;
+use Kirameki\Cli\Parameters\Argument;
+use Kirameki\Cli\Parameters\Option;
+use Kirameki\Cli\Parameters\ParameterParser;
+use Kirameki\Core\Exceptions\LogicException;
 
 abstract class Command
 {

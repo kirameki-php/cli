@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace SouthPointe\Cli\Exceptions;
+namespace Kirameki\Cli\Exceptions;
 
 
-use SouthPointe\Core\Exceptions\LogicException;
+use Kirameki\Core\Exceptions\LogicException;
 
 class ParseException extends LogicException
 {

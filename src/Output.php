@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace SouthPointe\Cli;
+namespace Kirameki\Cli;
 
-use SouthPointe\Cli\Output\AnsiDecorator;
-use SouthPointe\Cli\Output\Decorator;
+use Kirameki\Cli\Output\AnsiDecorator;
+use Kirameki\Cli\Output\Decorator;
 use SouthPointe\Stream\Stderr;
 use SouthPointe\Stream\Stdout;
 use SouthPointe\Stream\StreamWritable;
