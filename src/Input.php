@@ -166,7 +166,7 @@ class Input
      */
     public function masked(string $prompt = '', string $replacement = '*'): string
     {
-        return $this->readline($prompt, function (InputInfo $info) use ($prompt, $replacement) {
+        $output = $this->readline($prompt, function (InputInfo $info) use ($prompt, $replacement) {
             $this->output
                 // Clear all output up to the end of prompt text.
                 ->cursorBack(9999)->eraseToEndOfLine()
@@ -176,6 +176,12 @@ class Input
                 ->cursorBack($info->end - $info->point)
                 ->flush();
         });
+
+        $this->output
+            ->eraseLine()
+            ->flush();
+
+        return $output;
     }
 
     /**
