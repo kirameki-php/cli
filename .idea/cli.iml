@@ -9,7 +9,6 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/webmozart/assert" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/south-pointe/ansi" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/south-pointe/stream" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/south-pointe/dumper" />
       <excludeFolder url="file://$MODULE_DIR$/.coverage" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/kirameki/dumper" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/kirameki/collections" />

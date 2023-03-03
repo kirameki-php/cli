@@ -4,7 +4,7 @@ namespace Kirameki\Cli\Output;
 
 use const PHP_EOL;
 
-readonly class NoDecorator implements Decorator
+class NoDecorator implements Decorator
 {
     /**
      * @inheritDoc
