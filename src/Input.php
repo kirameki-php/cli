@@ -177,6 +177,7 @@ class Input
                 ->flush();
         });
 
+        // Required to clear out last input.
         $this->output
             ->eraseLine()
             ->flush();
