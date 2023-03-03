@@ -8,6 +8,7 @@ class ExitCode
     public const GeneralError = 1;
     public const NotExecutable = 126;
     public const CommandNotFound = 127;
+    public const InvalidArgument = 128;
     public const KilledBySigInt = 130;
     public const KilledBySigTerm = 143;
     public const StatusOutOfRange = 255;

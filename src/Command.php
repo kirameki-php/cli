@@ -2,11 +2,11 @@
 
 namespace Kirameki\Cli;
 
+use Kirameki\Cli\Exceptions\CodeOutOfRangeException;
 use Kirameki\Cli\Parameters\Argument;
 use Kirameki\Cli\Parameters\Option;
 use Kirameki\Cli\Parameters\ParameterParser;
 use Kirameki\Collections\Map;
-use Kirameki\Core\Exceptions\LogicException;
 
 abstract class Command
 {
@@ -70,7 +70,7 @@ abstract class Command
         $code = $this->run() ?? ExitCode::Success;
 
         if ($code < 0 || $code > 255) {
-            throw new LogicException("Exit code must be between 0 and 255, {$code} given.", [
+            throw new CodeOutOfRangeException("Exit code must be between 0 and 255, {$code} given.", [
                 'code' => $code,
             ]);
         }

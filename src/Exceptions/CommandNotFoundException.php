@@ -5,6 +5,6 @@ namespace Kirameki\Cli\Exceptions;
 
 use Kirameki\Core\Exceptions\LogicException;
 
-class NotFoundException extends LogicException
+class CommandNotFoundException extends LogicException
 {
 }
