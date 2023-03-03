@@ -2,9 +2,15 @@
 
 namespace Kirameki\Cli\Exceptions;
 
+use Kirameki\Cli\ExitCode;
 
-use Kirameki\Core\Exceptions\LogicException;
-
-class CommandNotFoundException extends LogicException
+class CommandNotFoundException extends CliException
 {
+    /**
+     * @return int
+     */
+    public function getExitCode(): int
+    {
+        return ExitCode::CommandNotFound;
+    }
 }
