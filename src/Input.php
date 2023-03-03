@@ -109,7 +109,7 @@ class Input
             return $choice;
         }
 
-        throw new RuntimeException("Invalid input: '$choice'");
+        throw new RuntimeException("Invalid input: '{$choice}'");
     }
 
     /**
@@ -150,11 +150,11 @@ class Input
         $stty = trim((string) shell_exec('stty -g'));
         system("stty -echo");
         $input = $this->text($prompt);
-        system("stty $stty");
+        system("stty {$stty}");
 
         // HACK: Pressing enter with no input shows duplicated prompt
         // for some reason, so we have to add a line feed.
-        $this->output->lineFeed();
+        $this->output->lineFeed()->flush();
 
         return $input;
     }
