@@ -2,6 +2,9 @@
 
 namespace Kirameki\Cli;
 
+use Kirameki\Cli\Exceptions\NotFoundException;
+use function array_key_exists;
+
 class CliManager
 {
     /**
@@ -27,6 +30,13 @@ class CliManager
     {
         $input = new Input();
         $output = new Output();
+
+        if (!array_key_exists($name, $this->commands)) {
+            throw new NotFoundException("Command: {$name} does not exist.", [
+                'name' => $name,
+                'parameters' => $parameters,
+            ]);
+        }
 
         $command = $this->commands[$name];
 
