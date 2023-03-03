@@ -72,6 +72,7 @@ abstract class Command
         if ($code < 0 || $code > 255) {
             throw new CodeOutOfRangeException("Exit code must be between 0 and 255, {$code} given.", [
                 'code' => $code,
+                'parameters' => $parameters,
             ]);
         }
 
