@@ -2,13 +2,8 @@
 
 namespace Kirameki\Cli;
 
-class SignalResponder
+class SignalAction
 {
-    /**
-     * @var bool
-     */
-    protected bool $propagate = false;
-
     /**
      * @var bool
      */
@@ -20,24 +15,7 @@ class SignalResponder
     )
     {
     }
-
-    /**
-     * @param bool $toggle
-     * @return void
-     */
-    public function stopPropagation(bool $toggle = true): void
-    {
-        $this->propagate = $toggle;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isPropagationStopped(): bool
-    {
-        return $this->propagate;
-    }
-
+    
     /**
      * @param bool $toggle
      * @return void

@@ -8,8 +8,8 @@ use Kirameki\Cli\CommandBuilder;
 use Kirameki\Cli\ExitCode;
 use Kirameki\Cli\Input;
 use Kirameki\Cli\Output;
+use Kirameki\Cli\SignalAction;
 use Kirameki\Cli\SignalHandler;
-use Kirameki\Cli\SignalResponder;
 use function posix_kill;
 use const SIGUSR1;
 
@@ -50,7 +50,7 @@ class CommandTest extends TestCase
     {
         $triggered = false;
 
-        $command = $this->commandWithSigResponder('t', SIGUSR1, function(SignalResponder $signal) use (&$triggered) {
+        $command = $this->commandWithSigResponder('t', SIGUSR1, function(SignalAction $signal) use (&$triggered) {
             $triggered = true;
             $signal->shouldTerminate(false);
         });

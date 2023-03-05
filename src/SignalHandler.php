@@ -27,13 +27,13 @@ class SignalHandler
     ];
 
     /**
-     * @var array<int, list<Closure(SignalResponder): mixed>>
+     * @var array<int, list<Closure(SignalAction): mixed>>
      */
     protected array $mappedCallbacks = [];
 
     /**
      * @param int $signal
-     * @param Closure(SignalResponder): mixed $callback
+     * @param Closure(SignalAction): mixed $callback
      * @return void
      */
     public function capture(int $signal, Closure $callback): void
@@ -73,9 +73,6 @@ class SignalHandler
 
         foreach ($this->mappedCallbacks[$signal] as $callback) {
             $callback($event);
-            if ($event->isPropagationStopped()) {
-                break;
-            }
         }
 
         if ($event->markedForTermination()) {
@@ -97,10 +94,10 @@ class SignalHandler
     /**
      * @param int $signal
      * @param mixed $siginfo
-     * @return SignalResponder
+     * @return SignalAction
      */
-    protected function createSignalEvent(int $signal, mixed $siginfo): SignalResponder
+    protected function createSignalEvent(int $signal, mixed $siginfo): SignalAction
     {
-        return new SignalResponder($signal, $siginfo);
+        return new SignalAction($signal, $siginfo);
     }
 }
