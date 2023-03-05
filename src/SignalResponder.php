@@ -2,7 +2,7 @@
 
 namespace Kirameki\Cli;
 
-class SignalEvent
+class SignalResponder
 {
     /**
      * @var bool

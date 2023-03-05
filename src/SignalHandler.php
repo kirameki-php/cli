@@ -27,13 +27,13 @@ class SignalHandler
     ];
 
     /**
-     * @var array<int, list<Closure(SignalEvent): mixed>>
+     * @var array<int, list<Closure(SignalResponder): mixed>>
      */
     protected array $mappedCallbacks = [];
 
     /**
      * @param int $signal
-     * @param Closure(SignalEvent): mixed $callback
+     * @param Closure(SignalResponder): mixed $callback
      * @return void
      */
     public function capture(int $signal, Closure $callback): void
@@ -97,10 +97,10 @@ class SignalHandler
     /**
      * @param int $signal
      * @param mixed $siginfo
-     * @return SignalEvent
+     * @return SignalResponder
      */
-    protected function createSignalEvent(int $signal, mixed $siginfo): SignalEvent
+    protected function createSignalEvent(int $signal, mixed $siginfo): SignalResponder
     {
-        return new SignalEvent($signal, $siginfo);
+        return new SignalResponder($signal, $siginfo);
     }
 }

@@ -7,6 +7,8 @@ use Kirameki\Cli\CommandBuilder;
 use Kirameki\Cli\ExitCode;
 use Kirameki\Cli\Input;
 use Kirameki\Cli\Output;
+use Kirameki\Cli\SignalHandler;
+use Kirameki\Cli\SignalResponder;
 use function dump;
 use function posix_kill;
 use const SIGTERM;
@@ -33,8 +35,8 @@ class CommandTest extends TestCase
 
             public function run(): ?int
             {
-                $this->captureSignal(SIGTERM, function(int $signal, mixed $info) {
-                    dump($info);
+                $this->captureSignal(SIGTERM, function(SignalResponder $event) {
+                    dump($event);
                 });
 
                 return ExitCode::Success;
@@ -45,7 +47,7 @@ class CommandTest extends TestCase
     public function test_captureSignal(): void
     {
         $command = $this->makeCommand('test');
-        $command->execute(new Input(), new Output(), []);
+        $command->execute(new SignalHandler(), new Input(), new Output(), []);
 
         posix_kill(posix_getpid(), SIGTERM);
     }
