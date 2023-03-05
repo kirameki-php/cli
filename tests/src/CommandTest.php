@@ -2,6 +2,7 @@
 
 namespace Tests\Kirameki\Cli;
 
+use Closure;
 use Kirameki\Cli\Command;
 use Kirameki\Cli\CommandBuilder;
 use Kirameki\Cli\ExitCode;
@@ -9,9 +10,8 @@ use Kirameki\Cli\Input;
 use Kirameki\Cli\Output;
 use Kirameki\Cli\SignalHandler;
 use Kirameki\Cli\SignalResponder;
-use function dump;
 use function posix_kill;
-use const SIGTERM;
+use const SIGUSR1;
 
 class CommandTest extends TestCase
 {
@@ -19,11 +19,15 @@ class CommandTest extends TestCase
      * @param string $name
      * @return Command
      */
-    protected function makeCommand(string $name = __CLASS__): Command
+    protected function commandWithSigResponder(string $name, int $signal, Closure $callback): Command
     {
-        return new class($name) extends Command
+        return new class($name, $signal, $callback) extends Command
         {
-            public function __construct(protected string $name)
+            public function __construct(
+                protected string $name,
+                protected int $signal,
+                protected Closure $callback,
+            )
             {
                 parent::__construct();
             }
@@ -35,9 +39,7 @@ class CommandTest extends TestCase
 
             public function run(): ?int
             {
-                $this->captureSignal(SIGTERM, function(SignalResponder $event) {
-                    dump($event);
-                });
+                $this->captureSignal($this->signal, $this->callback);
 
                 return ExitCode::Success;
             }
@@ -46,9 +48,15 @@ class CommandTest extends TestCase
 
     public function test_captureSignal(): void
     {
-        $command = $this->makeCommand('test');
-        $command->execute(new SignalHandler(), new Input(), new Output(), []);
+        $triggered = false;
 
-        posix_kill(posix_getpid(), SIGTERM);
+        $command = $this->commandWithSigResponder('t', SIGUSR1, function(SignalResponder $signal) use (&$triggered) {
+            $triggered = true;
+            $signal->shouldTerminate(false);
+        });
+        $command->execute(new SignalHandler(), new Input(), new Output(), []);
+        posix_kill(posix_getpid(), SIGUSR1);
+
+        self::assertTrue($triggered);
     }
 }

@@ -68,7 +68,7 @@ class SignalHandler
         $event = $this->createSignalEvent($signal, $siginfo);
 
         if (in_array($signal, self::TermSignals)) {
-            $event->shouldTerminate(true);
+            $event->shouldTerminate();
         }
 
         foreach ($this->mappedCallbacks[$signal] as $callback) {

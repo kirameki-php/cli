@@ -42,7 +42,7 @@ class SignalResponder
      * @param bool $toggle
      * @return void
      */
-    public function shouldTerminate(bool $toggle = false): void
+    public function shouldTerminate(bool $toggle = true): void
     {
         $this->terminate = $toggle;
     }
