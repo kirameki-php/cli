@@ -39,7 +39,7 @@ abstract class Command
     /**
      * @var SignalHandler
      */
-    private SignalHandler $signalHandler;
+    private SignalHandler $signal;
 
     public function __construct()
     {
@@ -78,7 +78,7 @@ abstract class Command
         $this->options = new Map($parsed['options']);
         $this->input = $input;
         $this->output = $output;
-        $this->signalHandler = $signalHandler;
+        $this->signal = $signalHandler;
 
         $code = $this->run() ?? ExitCode::Success;
 
@@ -116,6 +116,6 @@ abstract class Command
 
     protected function captureSignal(int $signal, Closure $callback): void
     {
-        $this->signalHandler->capture($signal, $callback);
+        $this->signal->capture($signal, $callback);
     }
 }
