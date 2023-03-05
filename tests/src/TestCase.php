@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Tests\SouthPointe\Cli;
+namespace Tests\Kirameki\Cli;
 
 use PHPUnit\Framework\TestCase as BaseTestCase;
 

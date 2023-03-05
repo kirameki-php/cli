@@ -38,10 +38,8 @@
       <path value="$PROJECT_DIR$/vendor/phar-io/manifest" />
       <path value="$PROJECT_DIR$/vendor/phpunit/php-code-coverage" />
       <path value="$PROJECT_DIR$/vendor/doctrine/instantiator" />
-      <path value="$PROJECT_DIR$/vendor/phpstan/phpstan-webmozart-assert" />
       <path value="$PROJECT_DIR$/vendor/myclabs/deep-copy" />
       <path value="$PROJECT_DIR$/vendor/phpstan/phpstan" />
-      <path value="$PROJECT_DIR$/vendor/phpstan/extension-installer" />
       <path value="$PROJECT_DIR$/vendor/SouthPointe/utils" />
       <path value="$PROJECT_DIR$/vendor/composer" />
       <path value="$PROJECT_DIR$/vendor/webmozart/assert" />
@@ -51,6 +49,10 @@
       <path value="$PROJECT_DIR$/vendor/kirameki/dumper" />
       <path value="$PROJECT_DIR$/vendor/kirameki/collections" />
       <path value="$PROJECT_DIR$/vendor/kirameki/core" />
+      <path value="$PROJECT_DIR$/vendor/symfony/var-dumper" />
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-mbstring" />
+      <path value="$PROJECT_DIR$/vendor/south-pointe/core" />
+      <path value="$PROJECT_DIR$/vendor/south-pointe/dumper" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.2">

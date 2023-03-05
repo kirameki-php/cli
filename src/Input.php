@@ -51,6 +51,10 @@ class Input
         return $this->readline($prompt);
     }
 
+    /**
+     * @param string $prompt
+     * @return int|null
+     */
     public function integer(string $prompt = ''): ?int
     {
         $ansi = $this->output;

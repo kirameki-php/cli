@@ -7,12 +7,12 @@
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/tests/src" isTestSource="true" packagePrefix="Tests\Kirameki\Cli\" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/webmozart/assert" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/south-pointe/ansi" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/south-pointe/stream" />
-      <excludeFolder url="file://$MODULE_DIR$/.coverage" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/kirameki/dumper" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/kirameki/collections" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/kirameki/core" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/kirameki/collections" />
+      <excludeFolder url="file://$MODULE_DIR$/.coverage" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/south-pointe/stream" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/south-pointe/ansi" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/kirameki/dumper" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

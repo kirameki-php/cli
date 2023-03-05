@@ -1,13 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Tests\SouthPointe\Cli;
+namespace Tests\Kirameki\Cli;
 
-use SouthPointe\Cli\CommandBuilder;
-use SouthPointe\Cli\Exceptions\ParseException;
-use SouthPointe\Cli\Parameters\Argument;
-use SouthPointe\Cli\Parameters\Option;
-use SouthPointe\Cli\Parameters\ParameterParser;
-use SouthPointe\Core\Exceptions\LogicException;
+use Kirameki\Cli\CommandBuilder;
+use Kirameki\Cli\Exceptions\ParseException;
+use Kirameki\Cli\Parameters\Argument;
+use Kirameki\Cli\Parameters\Option;
+use Kirameki\Cli\Parameters\ParameterParser;
+use Kirameki\Core\Exceptions\LogicException;
 
 class CommandBuilderTest extends TestCase
 {

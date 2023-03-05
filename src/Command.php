@@ -2,6 +2,7 @@
 
 namespace Kirameki\Cli;
 
+use Closure;
 use Kirameki\Cli\Exceptions\CodeOutOfRangeException;
 use Kirameki\Cli\Parameters\Argument;
 use Kirameki\Cli\Parameters\Option;
@@ -35,6 +36,11 @@ abstract class Command
      */
     protected Output $output;
 
+    /**
+     * @var SignalHandler
+     */
+    private SignalHandler $signalHandler;
+
     public function __construct()
     {
         $builder = new CommandBuilder();
@@ -55,10 +61,16 @@ abstract class Command
      *
      * @param Input $input
      * @param Output $output
+     * @param SignalHandler $signalHandler
      * @param list<string> $parameters
      * @return int
      */
-    public function execute(Input $input, Output $output, array $parameters): int
+    public function execute(
+        SignalHandler $signalHandler,
+        Input $input,
+        Output $output,
+        array $parameters,
+    ): int
     {
         $parsed = $this->parseDefinition($parameters);
 
@@ -66,12 +78,14 @@ abstract class Command
         $this->options = new Map($parsed['options']);
         $this->input = $input;
         $this->output = $output;
+        $this->signalHandler = $signalHandler;
 
         $code = $this->run() ?? ExitCode::Success;
 
         if ($code < 0 || $code > 255) {
             throw new CodeOutOfRangeException("Exit code must be between 0 and 255, {$code} given.", [
                 'code' => $code,
+                'definition' => $this->definition,
                 'parameters' => $parameters,
             ]);
         }
@@ -86,7 +100,7 @@ abstract class Command
      * Exit code for the given command.
      * Must be between 0 and 255.
      */
-    abstract public function run(): ?int;
+    abstract protected function run(): ?int;
 
     /**
      * @param list<string> $parameters
@@ -98,5 +112,10 @@ abstract class Command
     protected function parseDefinition(array $parameters): array
     {
         return ParameterParser::parse($this->definition, $parameters);
+    }
+
+    protected function captureSignal(int $signal, Closure $callback): void
+    {
+        $this->signalHandler->capture($signal, $callback);
     }
 }

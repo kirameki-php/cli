@@ -8,17 +8,16 @@
     "ext-intl": "*",
     "ext-ctype": "*",
     "ext-mbstring": "*",
+    "ext-pcntl": "*",
     "ext-readline": "*",
     "south-pointe/ansi": "dev-main",
     "kirameki/collections": "dev-main",
     "kirameki/core": "dev-main",
-    "south-pointe/stream": "dev-main",
-    "webmozart/assert": "^1.11"
+    "south-pointe/stream": "dev-main"
   },
   "require-dev": {
-    "phpstan/extension-installer": "^1.1",
+    "ext-posix": "*",
     "phpstan/phpstan": "^1.7",
-    "phpstan/phpstan-webmozart-assert": "^1.1",
     "phpunit/phpunit": "~9.0",
     "kirameki/dumper": "dev-main"
   },
