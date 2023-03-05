@@ -5,12 +5,12 @@ namespace Kirameki\Cli;
 use Kirameki\Cli\Exceptions\CommandNotFoundException;
 use function array_key_exists;
 
-class CliManager
+class CommandManager
 {
     /**
      * @var array<string, class-string<Command>>
      */
-    protected array $commandAliasMap = [];
+    protected array $aliasMap = [];
 
     /**
      * @var list<class-string<Command>>
@@ -47,22 +47,7 @@ class CliManager
      */
     public function execute(string $name, array $parameters = []): int
     {
-        $this->instantiateCommandsOnce();
-
-        if (array_key_exists($name, $this->commandAliasMap)) {
-            $name = $this->commandAliasMap[$name];
-        }
-
-        if (!array_key_exists($name, $this->resolved)) {
-            throw new CommandNotFoundException("Command: {$name} does not exist.", [
-                'name' => $name,
-                'parameters' => $parameters,
-            ]);
-        }
-
-        $command = $this->resolved[$name];
-
-        return $command->execute(
+        return $this->resolve($name)->execute(
             $this->signalHandler,
             $this->input,
             $this->output,
@@ -70,12 +55,38 @@ class CliManager
         );
     }
 
-    protected function instantiateCommandsOnce(): void
+    /**
+     * @param string|class-string<Command> $name
+     * @return Command
+     */
+    protected function resolve(string $name): Command
+    {
+        // Instantiate the commands once to get the alias names of all the commands.
+        $this->instantiateUnresolved();
+
+        // Get the alias if $name is given as name.
+        if (array_key_exists($name, $this->aliasMap)) {
+            $name = $this->aliasMap[$name];
+        }
+
+        if (!array_key_exists($name, $this->resolved)) {
+            throw new CommandNotFoundException("Command: {$name} does not exist.", [
+                'name' => $name,
+            ]);
+        }
+
+        return $this->resolved[$name];
+    }
+
+    /**
+     * @return void
+     */
+    protected function instantiateUnresolved(): void
     {
         foreach ($this->unresolved as $class) {
             $command = new $class();
             $this->resolved[$class] = $command;
-            $this->commandAliasMap[$command->definition->getName()] = $class;
+            $this->aliasMap[$command->definition->getName()] = $class;
         }
 
         $this->unresolved = [];
