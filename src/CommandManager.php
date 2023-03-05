@@ -2,7 +2,10 @@
 
 namespace Kirameki\Cli;
 
+use Kirameki\Cli\Events\CommandExecuted;
+use Kirameki\Cli\Events\CommandExecuting;
 use Kirameki\Cli\Exceptions\CommandNotFoundException;
+use Kirameki\Event\EventHandler;
 use function array_key_exists;
 
 class CommandManager
@@ -23,9 +26,10 @@ class CommandManager
     protected array $resolved = [];
 
     public function __construct(
-        protected SignalHandler $signalHandler,
-        protected Input $input,
-        protected Output $output,
+        protected EventHandler $eventHandler,
+        protected SignalHandler $signalHandler = new SignalHandler(),
+        protected Input $input = new Input(),
+        protected Output $output = new Output(),
     )
     {
     }
@@ -47,12 +51,24 @@ class CommandManager
      */
     public function execute(string $name, array $parameters = []): int
     {
-        return $this->resolve($name)->execute(
-            $this->signalHandler,
+        $command = $this->resolve($name);
+        $eventHandler = $this->eventHandler;
+        $signalHandler = $this->signalHandler;
+
+        $eventHandler->dispatchClass(CommandExecuting::class, $command);
+
+        $exitCode = $command->execute(
+            $signalHandler,
             $this->input,
             $this->output,
             $parameters,
         );
+
+        $signalHandler->clearCallbacks();
+
+        $eventHandler->dispatchClass(CommandExecuted::class, $exitCode, $command);
+
+        return $exitCode;
     }
 
     /**
@@ -72,6 +88,7 @@ class CommandManager
         if (!array_key_exists($name, $this->resolved)) {
             throw new CommandNotFoundException("Command: {$name} does not exist.", [
                 'name' => $name,
+                'registered' => $this->resolved,
             ]);
         }
 

@@ -45,7 +45,7 @@ class SignalHandler
             ]);
         }
 
-        // Set async on, once.
+        // Set async on once.
         if (count($this->mappedCallbacks) === 0) {
             pcntl_async_signals(true);
         }
@@ -82,6 +82,16 @@ class SignalHandler
             /** @see https://tldp.org/LDP/abs/html/exitcodes.html **/
             exit(128 + $signal);
         }
+    }
+
+    /**
+     * @private
+     * @interal
+     * @return void
+     */
+    public function clearCallbacks(): void
+    {
+        $this->mappedCallbacks = [];
     }
 
     /**

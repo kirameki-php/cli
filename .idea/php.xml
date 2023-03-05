@@ -53,6 +53,7 @@
       <path value="$PROJECT_DIR$/vendor/symfony/polyfill-mbstring" />
       <path value="$PROJECT_DIR$/vendor/south-pointe/core" />
       <path value="$PROJECT_DIR$/vendor/south-pointe/dumper" />
+      <path value="$PROJECT_DIR$/vendor/kirameki/event" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.2">
