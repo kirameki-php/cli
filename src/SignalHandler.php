@@ -5,6 +5,7 @@ namespace Kirameki\Cli;
 use Closure;
 use Kirameki\Core\Exceptions\LogicException;
 use function array_key_exists;
+use function array_keys;
 use function count;
 use function in_array;
 use function pcntl_async_signals;
@@ -30,6 +31,11 @@ class SignalHandler
      * @var array<int, list<Closure(SignalAction): mixed>>
      */
     protected array $mappedCallbacks = [];
+
+    public function __destruct()
+    {
+        $this->restoreDefaultCallbacks();
+    }
 
     /**
      * @param int $signal
@@ -86,9 +92,15 @@ class SignalHandler
      * @interal
      * @return void
      */
-    public function clearCallbacks(): void
+    public function restoreDefaultCallbacks(): void
     {
-        $this->mappedCallbacks = [];
+        if (count($this->mappedCallbacks) > 0) {
+            $signals = array_keys($this->mappedCallbacks);
+            foreach ($signals as $signal) {
+                pcntl_signal($signal, SIG_DFL);
+            }
+            $this->mappedCallbacks = [];
+        }
     }
 
     /**

@@ -64,7 +64,7 @@ class CommandManager
             $parameters,
         );
 
-        $signalHandler->clearCallbacks();
+        $signalHandler->restoreDefaultCallbacks();
 
         $eventHandler->dispatchClass(CommandExecuted::class, $exitCode, $command);
 
