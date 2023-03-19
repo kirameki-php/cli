@@ -4,8 +4,9 @@ namespace Kirameki\Cli;
 
 use Kirameki\Cli\Output\AnsiDecorator;
 use Kirameki\Cli\Output\Decorator;
-use SouthPointe\Stream\Stderr;
-use SouthPointe\Stream\Stdout;
+use Kirameki\Cli\Output\ProgressBar;
+use SouthPointe\Stream\StderrStream;
+use SouthPointe\Stream\StdoutStream;
 use SouthPointe\Stream\StreamWritable;
 use function implode;
 
@@ -17,8 +18,8 @@ class Output
      * @param Decorator $decorator
      */
     public function __construct(
-        public readonly StreamWritable $stdout = new Stdout(),
-        public readonly StreamWritable $stderr = new Stderr(),
+        public readonly StreamWritable $stdout = new StdoutStream(),
+        public readonly StreamWritable $stderr = new StderrStream(),
         public readonly Decorator $decorator = new AnsiDecorator(),
     )
     {
@@ -149,5 +150,20 @@ class Output
             $this->decorator->alert($text),
             $this->decorator->newLine(),
         );
+    }
+
+    /**
+     * @param int $start
+     * @param int $end
+     * @param int $width
+     * @return ProgressBar
+     */
+    public function progressBar(
+        int $start = 0,
+        int $end = 100,
+        int $width = ProgressBar::DefaultWidth,
+    ): ProgressBar
+    {
+        return new ProgressBar($this, $start, $end, $width);
     }
 }

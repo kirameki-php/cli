@@ -17,6 +17,8 @@ class CommandTest extends TestCase
 {
     /**
      * @param string $name
+     * @param int $signal
+     * @param Closure $callback
      * @return Command
      */
     protected function commandWithSigResponder(string $name, int $signal, Closure $callback): Command

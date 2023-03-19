@@ -7,7 +7,7 @@ use Kirameki\Cli\Input\InputInfo;
 use Kirameki\Cli\Input\Readline;
 use RuntimeException;
 use SouthPointe\Ansi\Stream as AnsiStream;
-use SouthPointe\Stream\Stdin;
+use SouthPointe\Stream\StdinStream;
 use SouthPointe\Stream\Streamable;
 use function array_key_exists;
 use function array_keys;
@@ -36,7 +36,7 @@ class Input
      * @param AnsiStream $output
      */
     public function __construct(
-        readonly protected Streamable $stream = new Stdin(),
+        readonly protected Streamable $stream = new StdinStream(),
         readonly protected AnsiStream $output = new AnsiStream(),
     )
     {
