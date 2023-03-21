@@ -5,9 +5,9 @@ namespace Kirameki\Cli;
 use Kirameki\Cli\Output\AnsiDecorator;
 use Kirameki\Cli\Output\Decorator;
 use Kirameki\Cli\Output\ProgressBar;
-use SouthPointe\Stream\StderrStream;
-use SouthPointe\Stream\StdoutStream;
-use SouthPointe\Stream\StreamWritable;
+use Kirameki\Stream\StderrStream;
+use Kirameki\Stream\StdoutStream;
+use Kirameki\Stream\StreamWritable;
 use function implode;
 
 class Output

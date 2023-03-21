@@ -14,13 +14,14 @@
     "kirameki/collections": "dev-main",
     "kirameki/core": "dev-main",
     "kirameki/event": "dev-main",
-    "south-pointe/stream": "dev-main"
+    "kirameki/stream": "dev-main"
   },
   "require-dev": {
     "ext-posix": "*",
+    "kirameki/dumper": "dev-main",
     "phpstan/phpstan": "^1.7",
     "phpunit/phpunit": "~9.0",
-    "kirameki/dumper": "dev-main"
+    "roave/security-advisories": "dev-latest"
   },
   "autoload": {
     "psr-4": {
