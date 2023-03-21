@@ -50,6 +50,22 @@ class CommandBuilderTest extends TestCase
         self::assertCount(2, $parsed['options']);
     }
 
+    public function test_set_naming(): void
+    {
+        $name = 'foo';
+        $def = $this->makeBuilder($name)->build();
+        self::assertSame($name, $def->getName());
+    }
+
+    public function test_set_description(): void
+    {
+        $desc = 'foo';
+        $builder = $this->makeBuilder();
+        $builder->description($desc);
+        $def = $builder->build();
+        self::assertSame($desc, $def->getDescription());
+    }
+
     public function test_argument(): void
     {
         $builder = $this->makeBuilder();

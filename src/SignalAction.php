@@ -9,6 +9,10 @@ class SignalAction
      */
     protected bool $terminate = true;
 
+    /**
+     * @param int $signal
+     * @param mixed $info
+     */
     public function __construct(
         public readonly int $signal,
         public readonly mixed $info,
@@ -25,6 +29,9 @@ class SignalAction
         $this->terminate = $toggle;
     }
 
+    /**
+     * @return bool
+     */
     public function markedForTermination(): bool
     {
         return $this->terminate;
