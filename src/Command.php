@@ -114,7 +114,7 @@ abstract class Command
         return ParameterParser::parse($this->definition, $parameters);
     }
 
-    protected function captureSignal(int $signal, Closure $callback): void
+    protected function onSignal(int $signal, Closure $callback): void
     {
         $this->signal->capture($signal, $callback);
     }

@@ -41,7 +41,7 @@ class CommandTest extends TestCase
 
             public function run(): ?int
             {
-                $this->captureSignal($this->signal, $this->callback);
+                $this->onSignal($this->signal, $this->callback);
 
                 return ExitCode::Success;
             }
