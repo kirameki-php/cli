@@ -6,7 +6,6 @@ use Closure;
 use Kirameki\Cli\Exceptions\CodeOutOfRangeException;
 use Kirameki\Cli\Parameters\Argument;
 use Kirameki\Cli\Parameters\Option;
-use Kirameki\Cli\Parameters\ParameterParser;
 use Kirameki\Collections\Map;
 
 abstract class Command
@@ -59,23 +58,23 @@ abstract class Command
     /**
      * Parse the raw parameters and run the command.
      *
+     * @param Map<string, Argument> $arguments
+     * @param Map<string, Option> $options
      * @param Input $input
      * @param Output $output
      * @param SignalHandler $signalHandler
-     * @param list<string> $parameters
      * @return int
      */
     public function execute(
+        Map $arguments,
+        Map $options,
         SignalHandler $signalHandler,
         Input $input,
         Output $output,
-        array $parameters,
     ): int
     {
-        $parsed = $this->parseDefinition($parameters);
-
-        $this->arguments = new Map($parsed['arguments']);
-        $this->options = new Map($parsed['options']);
+        $this->arguments = $arguments;
+        $this->options = $options;
         $this->input = $input;
         $this->output = $output;
         $this->signal = $signalHandler;
@@ -86,7 +85,8 @@ abstract class Command
             throw new CodeOutOfRangeException("Exit code must be between 0 and 255, {$code} given.", [
                 'code' => $code,
                 'definition' => $this->definition,
-                'parameters' => $parameters,
+                'arguments' => $this->arguments,
+                'options' => $this->options,
             ]);
         }
 
@@ -101,18 +101,6 @@ abstract class Command
      * Must be between 0 and 255.
      */
     abstract protected function run(): ?int;
-
-    /**
-     * @param list<string> $parameters
-     * @return array{
-     *     arguments: array<string, Argument>,
-     *     options: array<string, Option>,
-     * }
-     */
-    protected function parseDefinition(array $parameters): array
-    {
-        return ParameterParser::parse($this->definition, $parameters);
-    }
 
     protected function onSignal(int $signal, Closure $callback): void
     {

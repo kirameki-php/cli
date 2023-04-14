@@ -1,10 +1,10 @@
 # Idea
-.idea/workspace.xml
+/.idea/workspace.xml
 
 # Framework
-.coverage
-composer.lock
-vendor
+/.coverage
+/composer.lock
+/vendor
 
 # OS related files
 .DS_Store

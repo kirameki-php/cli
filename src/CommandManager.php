@@ -5,6 +5,10 @@ namespace Kirameki\Cli;
 use Kirameki\Cli\Events\CommandExecuted;
 use Kirameki\Cli\Events\CommandExecuting;
 use Kirameki\Cli\Exceptions\CommandNotFoundException;
+use Kirameki\Cli\Parameters\Argument;
+use Kirameki\Cli\Parameters\Option;
+use Kirameki\Cli\Parameters\ParameterParser;
+use Kirameki\Collections\Map;
 use Kirameki\Event\EventHandler;
 use function array_key_exists;
 
@@ -52,21 +56,27 @@ class CommandManager
     public function execute(string $name, array $parameters = []): int
     {
         $command = $this->resolve($name);
+
+        $parsed = $this->parseDefinition($command->definition, $parameters);
+        $arguments = new Map($parsed['arguments']);
+        $options = new Map($parsed['options']);
+
         $eventHandler = $this->eventHandler;
         $signalHandler = $this->signalHandler;
 
-        $eventHandler->dispatchClass(CommandExecuting::class, $command);
+        $eventHandler->dispatchClass(CommandExecuting::class, $command, $arguments, $options);
 
         $exitCode = $command->execute(
+            $arguments,
+            $options,
             $signalHandler,
             $this->input,
             $this->output,
-            $parameters,
         );
 
         $signalHandler->restoreDefaultCallbacks();
 
-        $eventHandler->dispatchClass(CommandExecuted::class, $exitCode, $command);
+        $eventHandler->dispatchClass(CommandExecuted::class, $command, $arguments, $options, $exitCode);
 
         return $exitCode;
     }
@@ -107,5 +117,21 @@ class CommandManager
         }
 
         $this->unresolved = [];
+    }
+
+    /**
+     * @param CommandDefinition $definition
+     * @param list<string> $parameters
+     * @return array{
+     *     arguments: array<string, Argument>,
+     *     options: array<string, Option>,
+     * }
+     */
+    protected function parseDefinition(
+        CommandDefinition $definition,
+        array $parameters,
+    ): array
+    {
+        return ParameterParser::parse($definition, $parameters);
     }
 }

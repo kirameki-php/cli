@@ -3,16 +3,24 @@
 namespace Kirameki\Cli\Events;
 
 use Kirameki\Cli\Command;
+use Kirameki\Cli\Parameters\Argument;
+use Kirameki\Cli\Parameters\Option;
+use Kirameki\Collections\Map;
 use Kirameki\Event\Event;
 
 class CommandExecuted extends Event
 {
     /**
      * @param Command $command
+     * @param Map<string, Argument> $arguments
+     * @param Map<string, Option> $options
+     * @param int $exitCode
      */
     public function __construct(
-        public readonly int $exitCode,
         public readonly Command $command,
+        public readonly Map $arguments,
+        public readonly Map $options,
+        public readonly int $exitCode,
     )
     {
     }

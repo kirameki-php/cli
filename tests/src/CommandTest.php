@@ -51,7 +51,6 @@ class CommandTest extends TestCase
     public function test_captureSignal(): void
     {
         $triggered = false;
-
         $command = $this->commandWithSigResponder('t', SIGUSR1, function(SignalAction $signal) use (&$triggered) {
             $triggered = true;
             $signal->shouldTerminate(false);
