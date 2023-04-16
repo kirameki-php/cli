@@ -64,7 +64,7 @@ class CommandManager
         $eventHandler = $this->eventHandler;
         $signalHandler = $this->signalHandler;
 
-        $eventHandler->dispatchClass(CommandExecuting::class, $command, $arguments, $options);
+        $eventHandler->dispatch(new CommandExecuting($command, $arguments, $options));
 
         $exitCode = $command->execute(
             $arguments,
@@ -76,7 +76,7 @@ class CommandManager
 
         $signalHandler->restoreDefaultCallbacks();
 
-        $eventHandler->dispatchClass(CommandExecuted::class, $command, $arguments, $options, $exitCode);
+        $eventHandler->dispatch(new CommandExecuted($command, $arguments, $options, $exitCode));
 
         return $exitCode;
     }
