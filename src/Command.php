@@ -7,6 +7,7 @@ use Kirameki\Cli\Exceptions\CodeOutOfRangeException;
 use Kirameki\Cli\Parameters\Argument;
 use Kirameki\Cli\Parameters\Option;
 use Kirameki\Collections\Map;
+use Kirameki\Core\Signal;
 
 abstract class Command
 {
@@ -35,11 +36,6 @@ abstract class Command
      */
     protected Output $output;
 
-    /**
-     * @var SignalHandler
-     */
-    private SignalHandler $signal;
-
     public function __construct()
     {
         $builder = new CommandBuilder();
@@ -62,13 +58,11 @@ abstract class Command
      * @param Map<string, Option> $options
      * @param Input $input
      * @param Output $output
-     * @param SignalHandler $signalHandler
      * @return int
      */
     public function execute(
         Map $arguments,
         Map $options,
-        SignalHandler $signalHandler,
         Input $input,
         Output $output,
     ): int
@@ -77,7 +71,6 @@ abstract class Command
         $this->options = $options;
         $this->input = $input;
         $this->output = $output;
-        $this->signal = $signalHandler;
 
         $code = $this->run() ?? ExitCode::Success;
 
@@ -104,6 +97,6 @@ abstract class Command
 
     protected function onSignal(int $signal, Closure $callback): void
     {
-        $this->signal->capture($signal, $callback);
+        Signal::handle($signal, $callback);
     }
 }

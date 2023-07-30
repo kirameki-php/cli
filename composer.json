@@ -19,8 +19,8 @@
   "require-dev": {
     "ext-posix": "*",
     "kirameki/dumper": "dev-main",
-    "phpstan/phpstan": "^1.7",
-    "phpunit/phpunit": "~9.0",
+    "phpstan/phpstan": "^1.10",
+    "phpunit/phpunit": "~10.0",
     "roave/security-advisories": "dev-latest"
   },
   "autoload": {

@@ -31,7 +31,6 @@ class CommandManager
 
     public function __construct(
         protected EventHandler $eventHandler,
-        protected SignalHandler $signalHandler = new SignalHandler(),
         protected Input $input = new Input(),
         protected Output $output = new Output(),
     )
@@ -62,19 +61,15 @@ class CommandManager
         $options = new Map($parsed['options']);
 
         $eventHandler = $this->eventHandler;
-        $signalHandler = $this->signalHandler;
 
         $eventHandler->dispatch(new CommandExecuting($command, $arguments, $options));
 
         $exitCode = $command->execute(
             $arguments,
             $options,
-            $signalHandler,
             $this->input,
             $this->output,
         );
-
-        $signalHandler->restoreDefaultCallbacks();
 
         $eventHandler->dispatch(new CommandExecuted($command, $arguments, $options, $exitCode));
 
