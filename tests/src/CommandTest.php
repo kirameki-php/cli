@@ -10,7 +10,15 @@ use Kirameki\Cli\Input;
 use Kirameki\Cli\Output;
 use Kirameki\Cli\SignalAction;
 use Kirameki\Cli\SignalHandler;
+use Kirameki\Collections\Map;
+use Kirameki\Core\Exceptions\LogicException;
+use function posix_getpid;
 use function posix_kill;
+use const SIGHUP;
+use const SIGINT;
+use const SIGKILL;
+use const SIGQUIT;
+use const SIGTERM;
 use const SIGUSR1;
 
 class CommandTest extends TestCase
@@ -48,16 +56,43 @@ class CommandTest extends TestCase
         };
     }
 
-    public function test_captureSignal(): void
+    public function test_onSignal(): void
     {
-        $triggered = false;
-        $command = $this->commandWithSigResponder('t', SIGUSR1, function(SignalAction $signal) use (&$triggered) {
-            $triggered = true;
-            $signal->shouldTerminate(false);
+        $triggered = 0;
+        $command = $this->commandWithSigResponder('t', SIGUSR1, function() use (&$triggered) {
+            $triggered += 1;
         });
-        $command->execute(new SignalHandler(), new Input(), new Output(), []);
+        $command->execute(new Map(), new Map(), new SignalHandler(), new Input(), new Output());
         posix_kill(posix_getpid(), SIGUSR1);
 
-        self::assertTrue($triggered);
+        self::assertSame(1, $triggered);
+    }
+
+    public function test_onSignal_terminating_signals(): void
+    {
+        $triggered = 0;
+        foreach ([SIGHUP, SIGINT, SIGQUIT, SIGTERM] as $i => $signal) {
+            $willTerminate = false;
+            $command = $this->commandWithSigResponder('t', $signal, function(SignalAction $action) use (&$triggered, &$willTerminate) {
+                $triggered += 1;
+                $willTerminate = $action->markedForTermination();
+                $action->shouldTerminate(false);
+            });
+
+            $command->execute(new Map(), new Map(), new SignalHandler(), new Input(), new Output());
+            posix_kill(posix_getpid(), $signal);
+
+            self::assertSame($i + 1, $triggered);
+            self::assertTrue($willTerminate);
+        }
+    }
+
+    public function test_onSignal_sigkill(): void
+    {
+        $this->expectExceptionMessage('SIGKILL cannot be captured.');
+        $this->expectException(LogicException::class);
+
+        $command = $this->commandWithSigResponder('t', SIGKILL, fn() => null);
+        $command->execute(new Map(), new Map(), new SignalHandler(), new Input(), new Output());
     }
 }

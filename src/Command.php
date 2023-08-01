@@ -95,6 +95,11 @@ abstract class Command
      */
     abstract protected function run(): ?int;
 
+    /**
+     * @param int $signal
+     * @param Closure(SignalAction): mixed $callback
+     * @return void
+     */
     protected function onSignal(int $signal, Closure $callback): void
     {
         Signal::handle($signal, $callback);
