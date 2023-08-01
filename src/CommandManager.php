@@ -56,7 +56,11 @@ class CommandManager
     {
         $command = $this->resolve($name);
 
-        $parsed = $this->parseDefinition($command->definition, $parameters);
+        $builder = new CommandBuilder();
+        $command::define($builder);
+        $definition = $builder->build();
+
+        $parsed = $this->parseDefinition($definition, $parameters);
         $arguments = new Map($parsed['arguments']);
         $options = new Map($parsed['options']);
 
@@ -65,6 +69,7 @@ class CommandManager
         $eventHandler->dispatch(new CommandExecuting($command, $arguments, $options));
 
         $exitCode = $command->execute(
+            $definition,
             $arguments,
             $options,
             $this->input,

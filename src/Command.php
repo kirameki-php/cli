@@ -8,13 +8,14 @@ use Kirameki\Cli\Parameters\Argument;
 use Kirameki\Cli\Parameters\Option;
 use Kirameki\Collections\Map;
 use Kirameki\Core\Signal;
+use Kirameki\Core\SignalEvent;
 
 abstract class Command
 {
     /**
      * @var CommandDefinition
      */
-    public readonly CommandDefinition $definition;
+    protected CommandDefinition $definition;
 
     /**
      * @var Map<string, Argument>
@@ -49,11 +50,12 @@ abstract class Command
      * @param CommandBuilder $builder
      * @return void
      */
-    abstract protected function define(CommandBuilder $builder): void;
+    abstract public static function define(CommandBuilder $builder): void;
 
     /**
      * Parse the raw parameters and run the command.
      *
+     * @param CommandDefinition $definition
      * @param Map<string, Argument> $arguments
      * @param Map<string, Option> $options
      * @param Input $input
@@ -61,12 +63,14 @@ abstract class Command
      * @return int
      */
     public function execute(
+        CommandDefinition $definition,
         Map $arguments,
         Map $options,
         Input $input,
         Output $output,
     ): int
     {
+        $this->definition = $definition;
         $this->arguments = $arguments;
         $this->options = $options;
         $this->input = $input;
@@ -77,9 +81,9 @@ abstract class Command
         if ($code < 0 || $code > 255) {
             throw new CodeOutOfRangeException("Exit code must be between 0 and 255, {$code} given.", [
                 'code' => $code,
-                'definition' => $this->definition,
-                'arguments' => $this->arguments,
-                'options' => $this->options,
+                'definition' => $definition,
+                'arguments' => $arguments,
+                'options' => $options,
             ]);
         }
 
@@ -97,7 +101,7 @@ abstract class Command
 
     /**
      * @param int $signal
-     * @param Closure(SignalAction): mixed $callback
+     * @param Closure(SignalEvent): mixed $callback
      * @return void
      */
     protected function onSignal(int $signal, Closure $callback): void
