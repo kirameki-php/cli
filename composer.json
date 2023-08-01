@@ -12,6 +12,7 @@
     "ext-readline": "*",
     "south-pointe/ansi": "dev-main",
     "kirameki/collections": "dev-main",
+    "kirameki/container": "dev-main",
     "kirameki/core": "dev-main",
     "kirameki/event": "dev-main",
     "kirameki/stream": "dev-main"

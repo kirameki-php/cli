@@ -5,8 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="aa20a749-ae9a-4b20-8ce4-1e9e63f6aa3a" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/cli.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/cli.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Command.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Command.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/composer.json" beforeDir="false" afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CommandManager.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/CommandManager.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -14,7 +16,7 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ComposerSettings">
+  <component name="ComposerSettings" synchronizationState="SYNCHRONIZE">
     <pharConfigPath>$PROJECT_DIR$/composer.json</pharConfigPath>
     <execution />
   </component>
@@ -69,6 +71,7 @@
       <path value="$PROJECT_DIR$/vendor/south-pointe/dumper" />
       <path value="$PROJECT_DIR$/vendor/kirameki/event" />
       <path value="$PROJECT_DIR$/vendor/kirameki/stream" />
+      <path value="$PROJECT_DIR$/vendor/kirameki/container" />
     </include_path>
   </component>
   <component name="ProjectId" id="2THHaswtZr0NmLRDpmXDVa9KlJH" />
@@ -106,6 +109,8 @@
       <updated>1690693153115</updated>
       <workItem from="1690693154484" duration="5834000" />
       <workItem from="1690899905063" duration="1044000" />
+      <workItem from="1690930743760" duration="33000" />
+      <workItem from="1690930787879" duration="25000" />
     </task>
     <servers />
   </component>

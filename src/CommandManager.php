@@ -9,6 +9,8 @@ use Kirameki\Cli\Parameters\Argument;
 use Kirameki\Cli\Parameters\Option;
 use Kirameki\Cli\Parameters\ParameterParser;
 use Kirameki\Collections\Map;
+use Kirameki\Collections\Utils\Arr;
+use Kirameki\Container\Container;
 use Kirameki\Event\EventHandler;
 use function array_key_exists;
 
@@ -24,12 +26,8 @@ class CommandManager
      */
     protected array $unresolved = [];
 
-    /**
-     * @var array<class-string<Command>, Command>
-     */
-    protected array $resolved = [];
-
     public function __construct(
+        protected Container $container,
         protected EventHandler $eventHandler,
         protected Input $input = new Input(),
         protected Output $output = new Output(),
@@ -49,18 +47,14 @@ class CommandManager
 
     /**
      * @param string|class-string<Command> $name
-     * @param list<string> $parameters
+     * @param iterable<int, string> $parameters
      * @return int
      */
-    public function execute(string $name, array $parameters = []): int
+    public function execute(string $name, iterable $parameters = []): int
     {
         $command = $this->resolve($name);
-
-        $builder = new CommandBuilder();
-        $command::define($builder);
-        $definition = $builder->build();
-
-        $parsed = $this->parseDefinition($definition, $parameters);
+        $definition = $this->getDefinition($command::class);
+        $parsed = $this->parseDefinition($definition, Arr::from($parameters));
         $arguments = new Map($parsed['arguments']);
         $options = new Map($parsed['options']);
 
@@ -87,41 +81,52 @@ class CommandManager
      */
     protected function resolve(string $name): Command
     {
+        if (class_exists($name) && is_subclass_of($name, Command::class)) {
+            return $this->container->resolve($name);
+        }
+
         // Instantiate the commands once to get the alias names of all the commands.
-        $this->instantiateUnresolved();
+        $this->registerAliasMap();
 
         // Get the alias if $name is given as name.
         if (array_key_exists($name, $this->aliasMap)) {
             $name = $this->aliasMap[$name];
+            return $this->container->resolve($name);
         }
 
-        if (!array_key_exists($name, $this->resolved)) {
-            throw new CommandNotFoundException("Command: {$name} does not exist.", [
-                'name' => $name,
-                'registered' => $this->resolved,
-            ]);
-        }
-
-        return $this->resolved[$name];
+        throw new CommandNotFoundException("Command: {$name} does not exist.", [
+            'name' => $name,
+            'registered' => $this->unresolved,
+        ]);
     }
 
     /**
      * @return void
      */
-    protected function instantiateUnresolved(): void
+    protected function registerAliasMap(): void
     {
+        // TODO use file caching for aliasMap
         foreach ($this->unresolved as $class) {
-            $command = new $class();
-            $this->resolved[$class] = $command;
-            $this->aliasMap[$command->definition->getName()] = $class;
+            $name = $this->getDefinition($class)->getName();
+            $this->aliasMap[$name] = $class;
         }
-
         $this->unresolved = [];
     }
 
     /**
+     * @param class-string<Command> $command
+     * @return CommandDefinition
+     */
+    protected function getDefinition(string $command): CommandDefinition
+    {
+        $builder = new CommandBuilder();
+        $command::define($builder);
+        return $builder->build();
+    }
+
+    /**
      * @param CommandDefinition $definition
-     * @param list<string> $parameters
+     * @param iterable<int, string> $parameters
      * @return array{
      *     arguments: array<string, Argument>,
      *     options: array<string, Option>,
