@@ -88,7 +88,7 @@ class CommandManager
         // Instantiate the commands once to get the alias names of all the commands.
         $this->registerAliasMap();
 
-        // Get the alias if $name is given as name.
+        // Get the alias if `$name` is given as name.
         if (array_key_exists($name, $this->aliasMap)) {
             $name = $this->aliasMap[$name];
             return $this->container->resolve($name);
@@ -126,7 +126,7 @@ class CommandManager
 
     /**
      * @param CommandDefinition $definition
-     * @param iterable<int, string> $parameters
+     * @param list<string> $parameters
      * @return array{
      *     arguments: array<string, Argument>,
      *     options: array<string, Option>,
