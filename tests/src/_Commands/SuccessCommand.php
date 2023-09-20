@@ -8,6 +8,13 @@ use Kirameki\Cli\ExitCode;
 
 class SuccessCommand extends Command
 {
+    public function __construct(
+        protected int $code = ExitCode::Success,
+    )
+    {
+        parent::__construct();
+    }
+
     public function define(CommandBuilder $builder): void
     {
         $builder->name('success');
@@ -16,6 +23,6 @@ class SuccessCommand extends Command
 
     protected function run(): ?int
     {
-        return ExitCode::Success;
+        return $this->code;
     }
 }

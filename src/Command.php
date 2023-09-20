@@ -73,7 +73,18 @@ abstract class Command
         $this->input = $input;
         $this->output = $output;
 
-        return $this->run() ?? ExitCode::Success;
+        $code = $this->run() ?? ExitCode::Success;
+
+        if ($code < 0 || $code > 255) {
+            throw new CodeOutOfRangeException("Exit code must be between 0 and 255, {$code} given.", [
+                'code' => $code,
+                'definition' => $this->definition,
+                'arguments' => $arguments,
+                'options' => $options,
+            ]);
+        }
+
+        return $code;
     }
 
     /**

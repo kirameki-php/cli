@@ -12,7 +12,7 @@ use Kirameki\Cli\Output;
 use Kirameki\Collections\Map;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\SignalEvent;
-use ValueError;
+use Tests\Kirameki\Cli\_Commands\SuccessCommand;
 use function posix_getpid;
 use function posix_kill;
 use const SIGHUP;
@@ -57,10 +57,10 @@ final class CommandTest extends TestCase
 
     public function test_invalid_return(): void
     {
-        $this->expectExceptionMessage('pcntl_signal(): Argument #1 ($signal) must be greater than or equal to 1');
-        $this->expectException(ValueError::class);
+        $this->expectExceptionMessage('Exit code must be between 0 and 255, -1 given.');
+        $this->expectException(CodeOutOfRangeException::class);
 
-        $command = $this->commandWithSigResponder(-1, fn() => null);
+        $command = new SuccessCommand(-1);
         $command->execute(new Map(), new Map(), new Input(), new Output());
     }
 
