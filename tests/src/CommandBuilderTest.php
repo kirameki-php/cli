@@ -344,6 +344,15 @@ final class CommandBuilderTest extends TestCase
         $this->parse($builder, []);
     }
 
+    public function test_option__long__no_value__but_value_given(): void
+    {
+        $this->expectException(ParseException::class);
+        $this->expectExceptionMessage('Option: --all no value expected but "val" given.');
+        $builder = $this->makeBuilder();
+        $builder->option('all');
+        $this->parse($builder, ['--all=val']);
+    }
+
     public function test_option__long__spaced_value(): void
     {
         $builder = $this->makeBuilder();
