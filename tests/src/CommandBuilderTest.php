@@ -127,6 +127,16 @@ final class CommandBuilderTest extends TestCase
         self::assertFalse($parsed['arguments']['a']->wasEntered);
     }
 
+    public function test_argument_as_optional__invalid_value(): void
+    {
+        $this->expectExceptionMessage('Default values must consist of strings, array given.');
+        $this->expectException(LogicException::class);
+
+        $builder = $this->makeBuilder();
+        $builder->argument('a')->optional([1]);
+        $this->parse($builder, []);
+    }
+
     public function test_argument_as_optional_with_default_fallback(): void
     {
         $builder = $this->makeBuilder();
@@ -138,19 +148,6 @@ final class CommandBuilderTest extends TestCase
         $argument = $parsed['arguments']['a'];
         self::assertFalse($argument->wasEntered);
         self::assertSame(['1'], $argument->values);
-    }
-
-    public function test_argument_as_optional_with_default(): void
-    {
-        $builder = $this->makeBuilder();
-        $builder->argument('a')->optional('1');
-        $parsed = $this->parse($builder, ['x']);
-
-        self::assertCount(1, $parsed['arguments']);
-
-        $argument = $parsed['arguments']['a'];
-        self::assertTrue($argument->wasEntered);
-        self::assertSame(['x'], $argument->values);
     }
 
     public function test_argument_with_multiple_definitions_with_optional_first_with_fallback(): void
@@ -214,6 +211,36 @@ final class CommandBuilderTest extends TestCase
 
         self::assertCount(1, $parsed['arguments']);
         self::assertCount(2, $parsed['options']);
+    }
+
+    public function test_argument_multi_default(): void
+    {
+        $builder = $this->makeBuilder();
+        $builder->argument('a')->allowMultiple()->optional(['1', '2']);
+        $parsed = $this->parse($builder, []);
+
+        self::assertCount(1, $parsed['arguments']);
+        self::assertCount(2, $parsed['options']);
+    }
+
+    public function test_argument_multi_default_invalid_map(): void
+    {
+        $this->expectExceptionMessage('Argument: [a] Default values must be list<string>, map given');
+        $this->expectException(LogicException::class);
+
+        $builder = $this->makeBuilder();
+        $builder->argument('a')->allowMultiple()->optional(['a' => '1', 'b' => '2']);
+        $this->parse($builder, []);
+    }
+
+    public function test_argument_multi_non_string_value(): void
+    {
+        $this->expectExceptionMessage('Argument: [a] Default values must consist of strings, integer given.');
+        $this->expectException(LogicException::class);
+
+        $builder = $this->makeBuilder();
+        $builder->argument('a')->allowMultiple()->optional([1]);
+        $this->parse($builder, []);
     }
 
     public function test_argument_multi_after_single(): void
@@ -305,6 +332,16 @@ final class CommandBuilderTest extends TestCase
         $builder = $this->makeBuilder();
         $builder->option('all')->requiresValue();
         $this->parse($builder, ['--all']);
+    }
+
+    public function test_option__long__no_value__invalid_default(): void
+    {
+        $this->expectExceptionMessage('Option: --a Default values must consist of strings, integer given.');
+        $this->expectException(LogicException::class);
+
+        $builder = $this->makeBuilder();
+        $builder->option('a')->allowMultiple()->requiresValue([1]);
+        $this->parse($builder, []);
     }
 
     public function test_option__long__spaced_value(): void

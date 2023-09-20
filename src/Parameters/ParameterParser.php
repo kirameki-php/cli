@@ -11,6 +11,7 @@ use function array_is_list;
 use function array_key_exists;
 use function array_keys;
 use function count;
+use function dump;
 use function explode;
 use function gettype;
 use function is_array;
@@ -404,8 +405,8 @@ class ParameterParser
     protected function throwParseException(ParameterDefinition $defined, string $message, array $context = []): never
     {
         $type = ($defined instanceof ArgumentDefinition)
-            ? "Option: --{$defined->name}"
-            : "Argument: [{$defined->name}]";
+            ? "Argument: [{$defined->name}]"
+            : "Option: --{$defined->name}";
 
         throw new ParseException("{$type} {$message}", $context + [
             'defined' => $defined,
