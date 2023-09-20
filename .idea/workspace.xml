@@ -5,10 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="aa20a749-ae9a-4b20-8ce4-1e9e63f6aa3a" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitattributes" beforeDir="false" afterPath="$PROJECT_DIR$/.gitattributes" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/cli.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/cli.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Command.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Command.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CommandDefinition.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/CommandDefinition.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CommandManager.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/CommandManager.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/compose.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/composer.json" beforeDir="false" afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/src/CommandTest.php" beforeDir="false" afterPath="$PROJECT_DIR$/tests/src/CommandTest.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

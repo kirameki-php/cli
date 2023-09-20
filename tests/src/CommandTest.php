@@ -24,7 +24,7 @@ class CommandTest extends TestCase
 {
     /**
      * @param int $signal
-     * @param Closure $callback
+     * @param Closure(SignalEvent): mixed $callback
      * @return Command
      */
     protected function commandWithSigResponder(int $signal, Closure $callback): Command
