@@ -7,6 +7,7 @@ use Kirameki\Cli\Definitions\OptionBuilder;
 use Kirameki\Core\Exceptions\LogicException;
 use function array_key_exists;
 use function array_map;
+use function dump;
 
 class CommandBuilder
 {

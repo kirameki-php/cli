@@ -3,6 +3,7 @@
 namespace Tests\Kirameki\Cli;
 
 use Kirameki\Cli\CommandBuilder;
+use Kirameki\Cli\CommandDefinition;
 use Kirameki\Cli\Exceptions\ParseException;
 use Kirameki\Cli\Parameters\Argument;
 use Kirameki\Cli\Parameters\Option;
@@ -55,6 +56,15 @@ class CommandBuilderTest extends TestCase
         $name = 'foo';
         $def = $this->makeBuilder($name)->build();
         self::assertSame($name, $def->getName());
+    }
+
+    public function test_no_name_set(): void
+    {
+        $this->expectExceptionMessage('Name of command must be defined!');
+        $this->expectException(LogicException::class);
+
+        $builder = new CommandBuilder();
+        self::assertInstanceOf(CommandDefinition::class, $builder->build());
     }
 
     public function test_set_description(): void
