@@ -6,7 +6,7 @@ use Kirameki\Cli\Command;
 use Kirameki\Cli\Parameters\Argument;
 use Kirameki\Cli\Parameters\Option;
 use Kirameki\Collections\Map;
-use Kirameki\Event\Event;
+use Kirameki\Core\Event;
 
 class CommandExecuted extends Event
 {

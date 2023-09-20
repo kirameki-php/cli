@@ -5,8 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="aa20a749-ae9a-4b20-8ce4-1e9e63f6aa3a" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/cli.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/cli.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/phpspec.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/phpspec.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CommandManager.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/CommandManager.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Events/CommandExecuted.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Events/CommandExecuted.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Events/CommandExecuting.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Events/CommandExecuting.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,8 +73,13 @@
       <path value="$PROJECT_DIR$/vendor/kirameki/event" />
       <path value="$PROJECT_DIR$/vendor/kirameki/stream" />
       <path value="$PROJECT_DIR$/vendor/kirameki/container" />
+      <path value="$PROJECT_DIR$/vendor/psr/container" />
     </include_path>
   </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "customColor": "",
+  "associatedIndex": 6
+}]]></component>
   <component name="ProjectId" id="2THHaswtZr0NmLRDpmXDVa9KlJH" />
   <component name="ProjectViewState">
     <option name="autoscrollFromSource" value="true" />
@@ -108,7 +117,8 @@
       <workItem from="1690899905063" duration="1044000" />
       <workItem from="1690930743760" duration="33000" />
       <workItem from="1690930787879" duration="1563000" />
-      <workItem from="1691013736845" duration="598000" />
+      <workItem from="1691013736845" duration="608000" />
+      <workItem from="1693632697948" duration="1257000" />
     </task>
     <servers />
   </component>

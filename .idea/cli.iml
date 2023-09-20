@@ -15,6 +15,7 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/kirameki/event" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/kirameki/stream" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/kirameki/container" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/psr/container" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
