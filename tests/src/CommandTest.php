@@ -5,12 +5,14 @@ namespace Tests\Kirameki\Cli;
 use Closure;
 use Kirameki\Cli\Command;
 use Kirameki\Cli\CommandBuilder;
+use Kirameki\Cli\Exceptions\CodeOutOfRangeException;
 use Kirameki\Cli\ExitCode;
 use Kirameki\Cli\Input;
 use Kirameki\Cli\Output;
 use Kirameki\Collections\Map;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\SignalEvent;
+use ValueError;
 use function posix_getpid;
 use function posix_kill;
 use const SIGHUP;
@@ -20,7 +22,7 @@ use const SIGQUIT;
 use const SIGTERM;
 use const SIGUSR1;
 
-class CommandTest extends TestCase
+final class CommandTest extends TestCase
 {
     /**
      * @param int $signal
@@ -51,6 +53,15 @@ class CommandTest extends TestCase
                 return ExitCode::Success;
             }
         };
+    }
+
+    public function test_invalid_return(): void
+    {
+        $this->expectExceptionMessage('pcntl_signal(): Argument #1 ($signal) must be greater than or equal to 1');
+        $this->expectException(ValueError::class);
+
+        $command = $this->commandWithSigResponder(-1, fn() => null);
+        $command->execute(new Map(), new Map(), new Input(), new Output());
     }
 
     public function test_onSignal(): void

@@ -94,7 +94,7 @@ class CommandManager
             return $this->container->make($name);
         }
 
-        throw new CommandNotFoundException("Command: {$name} does not exist.", [
+        throw new CommandNotFoundException("Command: {$name} is not registered.", [
             'name' => $name,
             'registered' => $this->unresolved,
         ]);

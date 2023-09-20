@@ -10,7 +10,7 @@ use Kirameki\Cli\Parameters\Option;
 use Kirameki\Cli\Parameters\ParameterParser;
 use Kirameki\Core\Exceptions\LogicException;
 
-class CommandBuilderTest extends TestCase
+final class CommandBuilderTest extends TestCase
 {
     /**
      * @param string $name
