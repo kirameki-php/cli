@@ -11,7 +11,7 @@ use Kirameki\Cli\Parameters\ParameterParser;
 use Kirameki\Collections\Map;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Container\Container;
-use Kirameki\Event\EventHandler;
+use Kirameki\Event\EventDispatcher;
 use function array_key_exists;
 
 class CommandManager
@@ -28,7 +28,7 @@ class CommandManager
 
     public function __construct(
         protected Container $container,
-        protected EventHandler $eventHandler,
+        protected EventDispatcher $events,
         protected Input $input = new Input(),
         protected Output $output = new Output(),
     )
@@ -54,23 +54,23 @@ class CommandManager
     {
         $command = $this->resolve($name);
         $definition = $this->getDefinition($command::class);
+
         $parsed = $this->parseDefinition($definition, Arr::from($parameters));
         $arguments = new Map($parsed['arguments']);
         $options = new Map($parsed['options']);
 
-        $eventHandler = $this->eventHandler;
+        $events = $this->events;
 
-        $eventHandler->dispatch(new CommandExecuting($command, $arguments, $options));
+        $events->dispatch(new CommandExecuting($command, $arguments, $options));
 
         $exitCode = $command->execute(
-            $definition,
             $arguments,
             $options,
             $this->input,
             $this->output,
         );
 
-        $eventHandler->dispatch(new CommandExecuted($command, $arguments, $options, $exitCode));
+        $events->dispatch(new CommandExecuted($command, $arguments, $options, $exitCode));
 
         return $exitCode;
     }
@@ -82,7 +82,7 @@ class CommandManager
     protected function resolve(string $name): Command
     {
         if (class_exists($name) && is_subclass_of($name, Command::class)) {
-            return $this->container->resolve($name);
+            return $this->container->make($name);
         }
 
         // Instantiate the commands once to get the alias names of all the commands.
@@ -91,7 +91,7 @@ class CommandManager
         // Get the alias if `$name` is given as name.
         if (array_key_exists($name, $this->aliasMap)) {
             $name = $this->aliasMap[$name];
-            return $this->container->resolve($name);
+            return $this->container->make($name);
         }
 
         throw new CommandNotFoundException("Command: {$name} does not exist.", [
@@ -119,9 +119,7 @@ class CommandManager
      */
     protected function getDefinition(string $command): CommandDefinition
     {
-        $builder = new CommandBuilder();
-        $command::define($builder);
-        return $builder->build();
+        return $this->container->make($command)->definition;
     }
 
     /**

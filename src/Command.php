@@ -15,7 +15,7 @@ abstract class Command
     /**
      * @var CommandDefinition
      */
-    protected CommandDefinition $definition;
+    public readonly CommandDefinition $definition;
 
     /**
      * @var Map<string, Argument>
@@ -50,12 +50,11 @@ abstract class Command
      * @param CommandBuilder $builder
      * @return void
      */
-    abstract public static function define(CommandBuilder $builder): void;
+    abstract public function define(CommandBuilder $builder): void;
 
     /**
      * Parse the raw parameters and run the command.
      *
-     * @param CommandDefinition $definition
      * @param Map<string, Argument> $arguments
      * @param Map<string, Option> $options
      * @param Input $input
@@ -63,14 +62,12 @@ abstract class Command
      * @return int
      */
     public function execute(
-        CommandDefinition $definition,
         Map $arguments,
         Map $options,
         Input $input,
         Output $output,
     ): int
     {
-        $this->definition = $definition;
         $this->arguments = $arguments;
         $this->options = $options;
         $this->input = $input;
@@ -81,7 +78,7 @@ abstract class Command
         if ($code < 0 || $code > 255) {
             throw new CodeOutOfRangeException("Exit code must be between 0 and 255, {$code} given.", [
                 'code' => $code,
-                'definition' => $definition,
+                'definition' => $this->definition,
                 'arguments' => $arguments,
                 'options' => $options,
             ]);

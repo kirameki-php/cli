@@ -12,7 +12,7 @@ class CommandDefinition
     /**
      * @var list<string>
      */
-    protected array $argumentIndexAliases;
+    protected readonly array $argumentIndexAliases;
 
     /**
      * @param string $name
@@ -22,11 +22,11 @@ class CommandDefinition
      * @param array<string, string> $shortNameAliases
      */
     public function __construct(
-        protected string $name,
-        protected string $description,
-        protected array $arguments,
-        protected array $options,
-        protected array $shortNameAliases,
+        protected readonly string $name,
+        protected readonly string $description,
+        protected readonly array $arguments,
+        protected readonly array $options,
+        protected readonly array $shortNameAliases,
     )
     {
         $this->argumentIndexAliases = array_keys($arguments);
