@@ -4,12 +4,12 @@ namespace Tests\Kirameki\Cli\_Commands;
 
 use Kirameki\Cli\Command;
 use Kirameki\Cli\CommandBuilder;
-use Kirameki\Cli\ExitCode;
+use Kirameki\Process\ExitCode;
 
 class SuccessCommand extends Command
 {
     public function __construct(
-        protected int $code = ExitCode::Success,
+        protected int $code = ExitCode::SUCCESS,
     )
     {
         parent::__construct();

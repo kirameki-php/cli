@@ -5,9 +5,9 @@ namespace Tests\Kirameki\Cli;
 use Kirameki\Cli\CommandManager;
 use Kirameki\Cli\Events\CommandExecuting;
 use Kirameki\Cli\Exceptions\CommandNotFoundException;
-use Kirameki\Cli\ExitCode;
 use Kirameki\Container\Container;
 use Kirameki\Event\EventDispatcher;
+use Kirameki\Process\ExitCode;
 use Tests\Kirameki\Cli\_Commands\SuccessCommand;
 
 final class CommandManagerTest extends TestCase
@@ -54,7 +54,7 @@ final class CommandManagerTest extends TestCase
             $manager = new CommandManager(new Container(), $events);
             $manager->execute('success');
         } catch (CommandNotFoundException $e) {
-            $this->assertSame(ExitCode::CommandNotFound, $e->getExitCode());
+            $this->assertSame(ExitCode::COMMAND_NOT_FOUND, $e->getExitCode());
             throw $e;
         }
     }

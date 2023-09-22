@@ -2,7 +2,7 @@
 
 namespace Kirameki\Cli\Exceptions;
 
-use Kirameki\Cli\ExitCode;
+use Kirameki\Process\ExitCode;
 
 class CodeOutOfRangeException extends CliException
 {
@@ -11,6 +11,6 @@ class CodeOutOfRangeException extends CliException
      */
     public function getExitCode(): int
     {
-        return ExitCode::StatusOutOfRange;
+        return ExitCode::STATUS_OUT_OF_RANGE;
     }
 }

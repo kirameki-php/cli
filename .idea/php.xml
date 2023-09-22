@@ -56,6 +56,7 @@
       <path value="$PROJECT_DIR$/vendor/kirameki/stream" />
       <path value="$PROJECT_DIR$/vendor/kirameki/container" />
       <path value="$PROJECT_DIR$/vendor/psr/container" />
+      <path value="$PROJECT_DIR$/vendor/kirameki/process" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.2">

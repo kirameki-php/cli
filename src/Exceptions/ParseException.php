@@ -2,7 +2,7 @@
 
 namespace Kirameki\Cli\Exceptions;
 
-use Kirameki\Cli\ExitCode;
+use Kirameki\Process\ExitCode;
 
 class ParseException extends CliException
 {
@@ -11,6 +11,6 @@ class ParseException extends CliException
      */
     public function getExitCode(): int
     {
-        return ExitCode::InvalidArgument;
+        return ExitCode::INVALID_ARGUMENT;
     }
 }

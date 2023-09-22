@@ -15,6 +15,7 @@
     "kirameki/container": "dev-main",
     "kirameki/core": "dev-main",
     "kirameki/event": "dev-main",
+    "kirameki/process": "dev-main",
     "kirameki/stream": "dev-main"
   },
   "require-dev": {

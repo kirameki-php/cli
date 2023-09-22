@@ -9,6 +9,7 @@ use Kirameki\Cli\Parameters\Option;
 use Kirameki\Collections\Map;
 use Kirameki\Core\Signal;
 use Kirameki\Core\SignalEvent;
+use Kirameki\Process\ExitCode;
 
 abstract class Command
 {
@@ -73,7 +74,7 @@ abstract class Command
         $this->input = $input;
         $this->output = $output;
 
-        $code = $this->run() ?? ExitCode::Success;
+        $code = $this->run() ?? ExitCode::SUCCESS;
 
         if ($code < 0 || $code > 255) {
             throw new CodeOutOfRangeException("Exit code must be between 0 and 255, {$code} given.", [

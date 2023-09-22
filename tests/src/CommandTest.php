@@ -6,12 +6,12 @@ use Closure;
 use Kirameki\Cli\Command;
 use Kirameki\Cli\CommandBuilder;
 use Kirameki\Cli\Exceptions\CodeOutOfRangeException;
-use Kirameki\Cli\ExitCode;
 use Kirameki\Cli\Input;
 use Kirameki\Cli\Output;
 use Kirameki\Collections\Map;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\SignalEvent;
+use Kirameki\Process\ExitCode;
 use Tests\Kirameki\Cli\_Commands\SuccessCommand;
 use function posix_getpid;
 use function posix_kill;
@@ -50,7 +50,7 @@ final class CommandTest extends TestCase
             {
                 $this->onSignal($this->signal, $this->callback);
 
-                return ExitCode::Success;
+                return ExitCode::SUCCESS;
             }
         };
     }
@@ -64,7 +64,7 @@ final class CommandTest extends TestCase
             $command = new SuccessCommand(-1);
             $command->execute(new Map(), new Map(), new Input(), new Output());
         } catch (CodeOutOfRangeException $e) {
-            self::assertSame(ExitCode::StatusOutOfRange, $e->getExitCode());
+            self::assertSame(ExitCode::STATUS_OUT_OF_RANGE, $e->getExitCode());
             throw $e;
         }
     }

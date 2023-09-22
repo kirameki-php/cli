@@ -6,12 +6,12 @@ use Kirameki\Cli\CommandBuilder;
 use Kirameki\Cli\CommandDefinition;
 use Kirameki\Cli\Exceptions\DefinitionException;
 use Kirameki\Cli\Exceptions\ParseException;
-use Kirameki\Cli\ExitCode;
 use Kirameki\Cli\Parameters\Argument;
 use Kirameki\Cli\Parameters\Option;
 use Kirameki\Cli\Parameters\ParameterParser;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\RuntimeException;
+use Kirameki\Process\ExitCode;
 
 final class CommandBuilderTest extends TestCase
 {
@@ -380,7 +380,7 @@ final class CommandBuilderTest extends TestCase
         try {
             $this->parse($builder, ['--all=val']);
         } catch (ParseException $e) {
-            self::assertSame(ExitCode::InvalidArgument, $e->getExitCode());
+            self::assertSame(ExitCode::INVALID_ARGUMENT, $e->getExitCode());
             throw $e;
         }
     }
