@@ -4,6 +4,7 @@ namespace Kirameki\Cli;
 
 use Kirameki\Cli\Definitions\ArgumentBuilder;
 use Kirameki\Cli\Definitions\OptionBuilder;
+use Kirameki\Cli\Exceptions\DefinitionException;
 use Kirameki\Core\Exceptions\LogicException;
 use function array_key_exists;
 use function array_map;
@@ -53,7 +54,7 @@ class CommandBuilder
     public function argument(string $name): ArgumentBuilder
     {
         if (array_key_exists($name, $this->argumentBuilders)) {
-            throw new LogicException("Argument [{$name}] already exists.", [
+            throw new DefinitionException("Argument [{$name}] already exists.", [
                 'name' => $name,
                 'argument' => $this->argumentBuilders[$name],
             ]);
@@ -71,7 +72,7 @@ class CommandBuilder
         $builder = new OptionBuilder($name, $short);
 
         if (array_key_exists($name, $this->optionBuilders)) {
-            throw new LogicException("Option: --{$name} already exists.", [
+            throw new DefinitionException("Option: --{$name} already exists.", [
                 'name' => $name,
                 'option' => $this->optionBuilders[$name],
             ]);
@@ -80,7 +81,7 @@ class CommandBuilder
 
         if ($short !== null) {
             if (array_key_exists($short, $this->shortNameAliases)) {
-                throw new LogicException("Option: -{$short} already exists.", [
+                throw new DefinitionException("Option: -{$short} already exists.", [
                     'name' => $name,
                     'option' => $this->optionBuilders[$name],
                 ]);
@@ -94,14 +95,14 @@ class CommandBuilder
     public function build(): CommandDefinition
     {
         if ($this->name === null) {
-            throw new LogicException('Name of command must be defined!');
+            throw new DefinitionException('Name of command must be defined!');
         }
 
         return new CommandDefinition(
             $this->name,
             $this->description,
-            array_map(fn($builder) => $builder->build(), $this->argumentBuilders),
-            array_map(fn($builder) => $builder->build(), $this->optionBuilders),
+            array_map(fn($argBuilder) => $argBuilder->build(), $this->argumentBuilders),
+            array_map(fn($optBuilder) => $optBuilder->build(), $this->optionBuilders),
             $this->shortNameAliases,
         );
     }

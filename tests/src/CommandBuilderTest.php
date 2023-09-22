@@ -4,6 +4,7 @@ namespace Tests\Kirameki\Cli;
 
 use Kirameki\Cli\CommandBuilder;
 use Kirameki\Cli\CommandDefinition;
+use Kirameki\Cli\Exceptions\DefinitionException;
 use Kirameki\Cli\Exceptions\ParseException;
 use Kirameki\Cli\ExitCode;
 use Kirameki\Cli\Parameters\Argument;
@@ -63,7 +64,7 @@ final class CommandBuilderTest extends TestCase
     public function test_no_name_set(): void
     {
         $this->expectExceptionMessage('Name of command must be defined!');
-        $this->expectException(LogicException::class);
+        $this->expectException(DefinitionException::class);
 
         $builder = new CommandBuilder();
         self::assertInstanceOf(CommandDefinition::class, $builder->build());
@@ -111,7 +112,7 @@ final class CommandBuilderTest extends TestCase
 
     public function test_argument__name_collision(): void
     {
-        $this->expectException(LogicException::class);
+        $this->expectException(DefinitionException::class);
         $this->expectExceptionMessage('Argument [a] already exists.');
         $builder = $this->makeBuilder();
         $builder->name('t');
@@ -309,7 +310,7 @@ final class CommandBuilderTest extends TestCase
 
     public function test_option__long__name_collision(): void
     {
-        $this->expectException(LogicException::class);
+        $this->expectException(DefinitionException::class);
         $this->expectExceptionMessage('Option: --all already exists.');
         $builder = $this->makeBuilder();
         $builder->name('t');
@@ -489,7 +490,7 @@ final class CommandBuilderTest extends TestCase
 
     public function test_option__short__name_collision(): void
     {
-        $this->expectException(LogicException::class);
+        $this->expectException(DefinitionException::class);
         $this->expectExceptionMessage('Option: -a already exists.');
         $builder = $this->makeBuilder();
         $builder->name('t');
