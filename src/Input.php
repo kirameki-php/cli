@@ -3,6 +3,7 @@
 namespace Kirameki\Cli;
 
 use Closure;
+use Kirameki\Cli\Exceptions\InvalidInputException;
 use Kirameki\Cli\Input\InputInfo;
 use Kirameki\Cli\Input\Readline;
 use Kirameki\Stream\StdinStream;
@@ -88,7 +89,9 @@ class Input
         // PHP converts all values greater than PHP_INT_MAX to PHP_INT_MAX
         // so check that string value does not overflow.
         if ($converted === false) {
-            throw new RuntimeException('Integer overflow! allowed:±' . PHP_INT_MAX . ' given: ' . $value);
+            throw new InvalidInputException('Integer overflow! allowed:±' . PHP_INT_MAX . ' given: ' . $value, [
+                'value' => $value,
+            ]);
         }
 
         return $converted;
@@ -113,7 +116,9 @@ class Input
             return $choice;
         }
 
-        throw new RuntimeException("Invalid input: '{$choice}'");
+        throw new InvalidInputException("Invalid input: '{$choice}'", [
+            'options' => $options,
+        ]);
     }
 
     /**
@@ -141,7 +146,10 @@ class Input
         return match ($input) {
             $yes => true,
             $no => false,
-            default => $default ?? throw new RuntimeException("Invalid input: '$input'"),
+            default => $default ?? throw new InvalidInputException("Invalid input: '$input'", [
+                'message' => $message,
+                'default' => $default,
+            ]),
         };
     }
 
