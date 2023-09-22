@@ -5,10 +5,12 @@ namespace Tests\Kirameki\Cli;
 use Kirameki\Cli\CommandBuilder;
 use Kirameki\Cli\CommandDefinition;
 use Kirameki\Cli\Exceptions\ParseException;
+use Kirameki\Cli\ExitCode;
 use Kirameki\Cli\Parameters\Argument;
 use Kirameki\Cli\Parameters\Option;
 use Kirameki\Cli\Parameters\ParameterParser;
 use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Core\Exceptions\RuntimeException;
 
 final class CommandBuilderTest extends TestCase
 {
@@ -281,6 +283,30 @@ final class CommandBuilderTest extends TestCase
         self::assertSame(['4'], $argument_b->values);
     }
 
+    public function test_argument__get_with_value(): void
+    {
+        $builder = $this->makeBuilder();
+        $builder->argument('a')->allowMultiple();
+        $parsed = $this->parse($builder, ['1', '2', '3']);
+
+        $argument_a = $parsed['arguments']['a'];
+        self::assertSame('1', $argument_a->value());
+        self::assertSame('2', $argument_a->value(1));
+    }
+
+    public function test_argument__get_with_value_out_of_range(): void
+    {
+        $this->expectExceptionMessage('No values exists at [1]');
+        $this->expectException(RuntimeException::class);
+
+        $builder = $this->makeBuilder();
+        $builder->argument('a');
+        $parsed = $this->parse($builder, ['1']);
+
+        $argument_a = $parsed['arguments']['a'];
+        $argument_a->value(1);
+    }
+
     public function test_option__long__name_collision(): void
     {
         $this->expectException(LogicException::class);
@@ -350,7 +376,12 @@ final class CommandBuilderTest extends TestCase
         $this->expectExceptionMessage('Option: --all no value expected but "val" given.');
         $builder = $this->makeBuilder();
         $builder->option('all');
-        $this->parse($builder, ['--all=val']);
+        try {
+            $this->parse($builder, ['--all=val']);
+        } catch (ParseException $e) {
+            self::assertSame(ExitCode::InvalidArgument, $e->getExitCode());
+            throw $e;
+        }
     }
 
     public function test_option__long__spaced_value(): void
@@ -563,6 +594,19 @@ final class CommandBuilderTest extends TestCase
         self::assertTrue($optionBee->wasEntered);
         self::assertSame(['1'], $optionAll->values);
         self::assertSame(['2'], $optionBee->values);
+    }
+
+    public function test_option__short__consecutive_chars_as_value(): void
+    {
+        $builder = $this->makeBuilder();
+        $builder->option('all', 'a')->requiresValue();
+        $parsed = $this->parse($builder, ['-ab']);
+
+        self::assertCount(3, $parsed['options']);
+
+        $optionAll = $parsed['options']['all'];
+        self::assertTrue($optionAll->wasEntered);
+        self::assertSame(['b'], $optionAll->values);
     }
 
     public function test_option__short__define_more_than_one(): void

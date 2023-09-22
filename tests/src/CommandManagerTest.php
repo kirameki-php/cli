@@ -5,6 +5,7 @@ namespace Tests\Kirameki\Cli;
 use Kirameki\Cli\CommandManager;
 use Kirameki\Cli\Events\CommandExecuting;
 use Kirameki\Cli\Exceptions\CommandNotFoundException;
+use Kirameki\Cli\ExitCode;
 use Kirameki\Container\Container;
 use Kirameki\Event\EventDispatcher;
 use Tests\Kirameki\Cli\_Commands\SuccessCommand;
@@ -48,9 +49,14 @@ final class CommandManagerTest extends TestCase
         $this->expectExceptionMessage('Command: success is not registered.');
         $this->expectException(CommandNotFoundException::class);
 
-        $events = new EventDispatcher();
-        $manager = new CommandManager(new Container(), $events);
-        $manager->execute('success');
+        try {
+            $events = new EventDispatcher();
+            $manager = new CommandManager(new Container(), $events);
+            $manager->execute('success');
+        } catch (CommandNotFoundException $e) {
+            $this->assertSame(ExitCode::CommandNotFound, $e->getExitCode());
+            throw $e;
+        }
     }
 
     public function test_execute_unregistered_class(): void

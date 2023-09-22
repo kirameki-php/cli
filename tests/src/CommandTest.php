@@ -60,8 +60,13 @@ final class CommandTest extends TestCase
         $this->expectExceptionMessage('Exit code must be between 0 and 255, -1 given.');
         $this->expectException(CodeOutOfRangeException::class);
 
-        $command = new SuccessCommand(-1);
-        $command->execute(new Map(), new Map(), new Input(), new Output());
+        try {
+            $command = new SuccessCommand(-1);
+            $command->execute(new Map(), new Map(), new Input(), new Output());
+        } catch (CodeOutOfRangeException $e) {
+            self::assertSame(ExitCode::StatusOutOfRange, $e->getExitCode());
+            throw $e;
+        }
     }
 
     public function test_onSignal(): void
