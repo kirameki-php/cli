@@ -213,7 +213,8 @@ class Input
         readline_callback_handler_install($prompt, static fn() => true);
         try {
             while (!$info->done) {
-                $readline->process($this->waitForInput($stream));
+                $input = $this->waitForInput($stream);
+                $readline->process($input);
 
                 if ($onKeyInput !== null) {
                     if ($onKeyInput($info) === false) {
@@ -249,7 +250,7 @@ class Input
             return $this->readEscapeSequences($stream, $char);
         }
 
-        if (grapheme_strlen($char) === null) {
+        if (!preg_match("//u", $char)) {
             return $this->readMultibytePortions($stream, $char);
         }
 
@@ -270,7 +271,7 @@ class Input
             }
             $input .= $char;
         }
-        while(grapheme_strlen($input) === null);
+        while(!preg_match("//u", $input));
 
         return $input;
     }
