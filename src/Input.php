@@ -49,7 +49,7 @@ class Input
      */
     public function text(string $prompt = ''): string
     {
-        return $this->readline($prompt);
+        return $this->readLine($prompt);
     }
 
     /**
@@ -60,7 +60,7 @@ class Input
     {
         $ansi = $this->output;
         $value = null;
-        $this->readline($prompt, static function(InputInfo $info) use ($ansi, &$value) {
+        $this->readLine($prompt, static function(InputInfo $info) use ($ansi, &$value) {
             if ($info->done) {
                 return false;
             }
@@ -178,19 +178,21 @@ class Input
      */
     public function masked(string $prompt = '', string $replacement = '*'): string
     {
-        $output = $this->readline($prompt, function (InputInfo $info) use ($prompt, $replacement) {
-            $this->output
+        $ansi = $this->output;
+
+        $output = $this->readLine($prompt, function (InputInfo $info) use ($ansi, $replacement) {
+            $ansi
                 // Clear all output up to the end of prompt text.
                 ->cursorBack(9999)->eraseToEndOfLine()
                 // Write replacement text (will set the cursor to the end).
-                ->text($prompt . str_repeat($replacement, $info->end))
+                ->text($info->prompt . str_repeat($replacement, $info->end))
                 // Set the cursor back to the offset position.
                 ->cursorBack($info->end - $info->point)
                 ->flush();
         });
 
         // Required to clear out last input.
-        $this->output
+        $ansi
             ->eraseLine()
             ->flush();
 
@@ -204,22 +206,20 @@ class Input
      * second argument contains a string of all the chars upto the current char.
      * @return string
      */
-    public function readline(string $prompt = '', ?Closure $onKeyInput = null): string
+    public function readLine(string $prompt = '', ?Closure $onKeyInput = null): string
     {
         $stream = $this->stream->getResource();
         $info = new InputInfo($prompt);
-        $readline = new Readline($this->output, $info);
+        $readLine = new     Readline($this->output, $info);
 
         readline_callback_handler_install($prompt, static fn() => true);
         try {
             while (!$info->done) {
                 $input = $this->waitForInput($stream);
-                $readline->process($input);
+                $readLine->process($input);
 
-                if ($onKeyInput !== null) {
-                    if ($onKeyInput($info) === false) {
-                        break;
-                    }
+                if ($onKeyInput !== null && $onKeyInput($info) === false) {
+                    break;
                 }
             }
         }
