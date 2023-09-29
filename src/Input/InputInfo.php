@@ -2,6 +2,8 @@
 
 namespace Kirameki\Cli\Input;
 
+use function grapheme_strlen;
+
 final class InputInfo
 {
     public string $prompt;
@@ -18,5 +20,13 @@ final class InputInfo
     public function __construct(?string $prompt)
     {
         $this->prompt = $prompt ?? '';
+    }
+
+    /**
+     * @return int
+     */
+    public function cursorPosition(): int
+    {
+        return grapheme_strlen($this->prompt) + $this->point;
     }
 }

@@ -60,7 +60,7 @@ class Input
     {
         $ansi = $this->output;
         $value = null;
-        $this->readline($prompt, function(InputInfo $info) use ($ansi, &$value) {
+        $this->readline($prompt, static function(InputInfo $info) use ($ansi, &$value) {
             if ($info->done) {
                 return false;
             }
@@ -72,7 +72,7 @@ class Input
             }
 
             $ansi
-                ->cursorBack(9999)
+                ->cursorBack($info->cursorPosition())
                 ->eraseToEndOfLine()
                 ->text($info->prompt . $value)
                 ->flush();
