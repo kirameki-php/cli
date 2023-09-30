@@ -21,11 +21,11 @@ final class InputTest extends TestCase
         );
 
         $inStream->write('123' . PHP_EOL);
+        $inStream->write('456' . PHP_EOL);
         $inStream->rewind();
 
         $this->assertSame(123, $input->integer('in:'));
-
-        dump($outStream->rewind()->readToEnd());
+        $this->assertSame(456, $input->integer('in:'));
     }
 
     public function test_hidden(): void
