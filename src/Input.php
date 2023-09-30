@@ -11,27 +11,19 @@ use Kirameki\Stream\StdinStream;
 use Kirameki\Stream\Streamable;
 use SouthPointe\Ansi\Codes\Color;
 use SouthPointe\Ansi\Stream as AnsiStream;
-use function array_key_exists;
-use function array_keys;
-use function array_map;
-use function end;
 use function filter_var;
-use function max;
-use function str_pad;
-use function strlen;
 use const FILTER_VALIDATE_INT;
 use const PHP_INT_MAX;
-use const STR_PAD_LEFT;
 
 class Input
 {
     /**
-     * @param Streamable $stdin
-     * @param AnsiStream $output
+     * @param Streamable $input
+     * @param AnsiStream $ansi
      */
     public function __construct(
-        readonly protected Streamable $stdin = new StdinStream(),
-        readonly protected AnsiStream $output = new AnsiStream(),
+        readonly protected Streamable $input = new StdinStream(),
+        readonly protected AnsiStream $ansi = new AnsiStream(),
     )
     {
     }
@@ -42,7 +34,7 @@ class Input
      */
     public function text(string $prompt = ''): string
     {
-        return (new LineReader($this->stdin, $this->output, $prompt))->readline();
+        return (new LineReader($this->input, $this->ansi, $prompt))->readline();
     }
 
     /**
@@ -52,7 +44,8 @@ class Input
     public function integer(string $prompt = ''): ?int
     {
         while (true) {
-            $value = (new IntegerReader($this->stdin, $this->output, $prompt))->readline();
+            $value = (new IntegerReader($this->input, $this->ansi, $prompt))->readline();
+
             $converted = filter_var($value, FILTER_VALIDATE_INT);
 
             if ($converted !== false) {
@@ -61,9 +54,11 @@ class Input
 
             // PHP converts all values greater than PHP_INT_MAX to PHP_INT_MAX
             // so check that string value does not overflow.
-            $message = 'Integer overflow! allowed:±' . PHP_INT_MAX . ' given: ' . $value;
+            $message = $value === ''
+                ? 'Integer value is required.'
+                : 'Integer overflow! allowed:±' . PHP_INT_MAX . ' given: ' . $value;
 
-            $this->output
+            $this->ansi
                 ->fgColor(Color::Red)
                 ->text($message)
                 ->lineFeed()
@@ -78,7 +73,7 @@ class Input
      */
     public function hidden(string $prompt = ''): string
     {
-        return (new HiddenReader($this->stdin, $this->output, $prompt))->readline();
+        return (new HiddenReader($this->input, $this->ansi, $prompt))->readline();
     }
 
     /**
@@ -87,6 +82,6 @@ class Input
      */
     public function masked(string $prompt = ''): string
     {
-        return (new MaskedReader($this->stdin, $this->output, $prompt))->readline();
+        return (new MaskedReader($this->input, $this->ansi, $prompt))->readline();
     }
 }

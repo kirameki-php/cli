@@ -28,6 +28,9 @@ final class CommandManagerTest extends TestCase
         $this->assertSame(1, $executed);
     }
 
+    /**
+     * @group test
+     */
     public function test_execute_class(): void
     {
         $events = new EventDispatcher();
@@ -44,6 +47,9 @@ final class CommandManagerTest extends TestCase
         $this->assertSame(1, $executed);
     }
 
+    /**
+     * @group test
+     */
     public function test_execute_unregistered_name(): void
     {
         $this->expectExceptionMessage('Command: success is not registered.');

@@ -6,6 +6,7 @@ use Closure;
 use Kirameki\Stream\Streamable;
 use SouthPointe\Ansi\Stream;
 use function assert;
+use function dump;
 use function grapheme_extract;
 use function grapheme_strlen;
 use function grapheme_substr;
@@ -21,6 +22,7 @@ use function stream_get_contents;
 use function stream_select;
 use function strlen;
 use function substr;
+use function system;
 
 class LineReader
 {
@@ -63,20 +65,27 @@ class LineReader
      */
     public function readline(): string
     {
-        readline_callback_handler_install($this->prompt, static fn() => true);
+        $settings = trim((string) shell_exec('stty -g'));
+
+        // -icanon for non-canonical mode (callback after each character read)
+        // -echo to hide output so we can handle it ourself
+        shell_exec('stty -icanon -echo');
         try {
+            if ($this->prompt !== '') {
+                $this->ansi->text($this->prompt)->flush();
+            }
+
             while (!$this->done) {
                 $this->processInput($this->waitForInput());
             }
+
+            // Required to clear out last input.
+            $this->ansi->eraseLine()->flush();
         }
         finally {
-            readline_callback_handler_remove();
+            // restore stty settings
+            shell_exec("stty {$settings}");
         }
-
-        // Required to clear out last input.
-        $this->ansi
-            ->eraseLine()
-            ->flush();
 
         return $this->buffer;
     }
@@ -132,9 +141,9 @@ class LineReader
      * @param string $input
      * @return string
      */
-    protected function readEscapeSequences($stream, string $input): string
+    protected function readEscapeSequences(mixed $stream, string $input): string
     {
-        $readByte = static fn(): string|false => stream_get_contents($stream, 1);
+        $readByte = static fn() => stream_get_contents($stream, 1);
 
         $char = $readByte();
         $input .= $char;
@@ -304,12 +313,10 @@ class LineReader
      */
     protected function render(): void
     {
-        $text = $this->getRenderingText();
-
         $this->ansi
             ->eraseLine()
             ->carriageReturn()
-            ->text($text)
+            ->text($this->getRenderingText())
             ->carriageReturn()
             ->cursorForward($this->calcCursorPosition())
             ->flush();
