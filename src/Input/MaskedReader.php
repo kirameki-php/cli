@@ -9,6 +9,6 @@ class MaskedReader extends LineReader
      */
     protected function getRenderingText(): string
     {
-        return $this->prompt . str_repeat('*', $this->end);
+        return $this->prompt . str_repeat('∗', $this->end);
     }
 }

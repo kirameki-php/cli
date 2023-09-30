@@ -68,17 +68,14 @@ class LineReader
         // -icanon for non-canonical mode (callback after each character read)
         // -echo to hide output so we can handle it ourself
         shell_exec('stty -icanon -echo');
+
         try {
             if ($this->prompt !== '') {
                 $this->ansi->text($this->prompt)->flush();
             }
-
             while (!$this->done) {
                 $this->processInput($this->waitForInput());
             }
-
-            // Required to clear out last input.
-            $this->ansi->eraseLine()->flush();
         }
         finally {
             // restore stty settings
