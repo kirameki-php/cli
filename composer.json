@@ -9,7 +9,6 @@
     "ext-ctype": "*",
     "ext-mbstring": "*",
     "ext-pcntl": "*",
-    "ext-readline": "*",
     "south-pointe/ansi": "dev-main",
     "kirameki/collections": "dev-main",
     "kirameki/container": "dev-main",
