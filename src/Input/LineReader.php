@@ -49,6 +49,7 @@ class LineReader
     /**
      * @param Streamable $stdin
      * @param Stream $ansi
+     * @param string $prompt
      */
     public function __construct(
         protected readonly Streamable $stdin,
@@ -70,9 +71,7 @@ class LineReader
         shell_exec('stty -icanon -echo');
 
         try {
-            if ($this->prompt !== '') {
-                $this->ansi->text($this->prompt)->flush();
-            }
+            $this->processInput('');
             while (!$this->done) {
                 $this->processInput($this->waitForInput());
             }

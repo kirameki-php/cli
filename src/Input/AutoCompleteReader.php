@@ -3,6 +3,8 @@
 namespace Kirameki\Cli\Input;
 
 use Kirameki\Stream\Streamable;
+use SouthPointe\Ansi\Ansi;
+use SouthPointe\Ansi\Codes\Color;
 use SouthPointe\Ansi\Stream;
 use function array_is_list;
 use function array_keys;
@@ -12,6 +14,8 @@ use function trim;
 
 class AutoCompleteReader extends LineReader
 {
+    protected AutoComplete $completion;
+
     /**
      * @param Streamable $stdin
      * @param Stream $ansi
@@ -22,10 +26,26 @@ class AutoCompleteReader extends LineReader
         Streamable $stdin,
         Stream $ansi,
         string $prompt = '',
-        protected array $rules = [],
+        array $rules = [],
     )
     {
         parent::__construct($stdin, $ansi, $prompt);
+        $this->completion = new AutoComplete($rules);
+    }
+
+    /**
+     * @param string $input
+     * @return void
+     */
+    protected function processInput(string $input): void
+    {
+        if ($input === "\t") {
+            $complement = $this->completion->complement($this->buffer);
+            if ($complement !== null) {
+                $input = $complement;
+            }
+        }
+        parent::processInput($input);
     }
 
     /**
@@ -33,44 +53,24 @@ class AutoCompleteReader extends LineReader
      */
     protected function getRenderingText(): string
     {
-        $completion = $this->getCompletion();
-
-        return $this->prompt . $this->buffer;
+        return parent::getRenderingText() . $this->getCompletion();
     }
 
     /**
      * @return string
      */
-    protected function getCompletion(): ?string
+    protected function getCompletion(): string
     {
-        $current = $this->rules;
-        $lastWord = null;
-        $words = explode(' ', $this->buffer);
-        $maxWordCount = count($words);
-        for ($i = 0; $i < $maxWordCount; $i++) {
-            $lastWord = trim($words[$i]);
-            $current = $current[$lastWord] ?? null;
-            if ($current === null) {
-                return null;
-            }
+        $completion = $this->completion->complement($this->buffer);
+
+        if ($completion === null) {
+            return '';
         }
 
-        $candidates = array_is_list($current)
-            ? $current
-            : array_keys($current);
-
-        if ($i === $maxWordCount) {
-            return $candidates[0] ?? null;
-        }
-
-        foreach ($candidates as $candidate) {
-            $pos = strpos($candidate, $lastWord);
-            if ($pos === false) {
-                return $candidate;
-            } else {
-                return substr($candidate, $pos);
-            }
-        }
-        return null;
+        return Ansi::buffer()
+            ->fgColor(Color::Gray)
+            ->text($completion)
+            ->resetStyle()
+            ->toString();
     }
 }

@@ -3,6 +3,7 @@
 namespace Kirameki\Cli;
 
 use Kirameki\Cli\Exceptions\InvalidInputException;
+use Kirameki\Cli\Input\AutoCompleteReader;
 use Kirameki\Cli\Input\HiddenReader;
 use Kirameki\Cli\Input\IntegerReader;
 use Kirameki\Cli\Input\LineReader;
@@ -35,6 +36,16 @@ class Input
     public function text(string $prompt = ''): string
     {
         return (new LineReader($this->input, $this->ansi, $prompt))->readline();
+    }
+
+    /**
+     * @param string $prompt
+     * @param array<array-key, mixed> $rules
+     * @return string
+     */
+    public function autoComplete(string $prompt = '', array $rules = []): string
+    {
+        return (new AutoCompleteReader($this->input, $this->ansi, $prompt, $rules))->readline();
     }
 
     /**

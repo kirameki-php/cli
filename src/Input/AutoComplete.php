@@ -8,6 +8,8 @@ use function array_keys;
 use function count;
 use function dump;
 use function explode;
+use function is_array;
+use function strlen;
 use function strpos;
 use function substr;
 use function trim;
@@ -15,12 +17,21 @@ use function trim;
 class AutoComplete
 {
     /**
-     * @param string $input
      * @param array<array-key, mixed> $rules
+     */
+    public function __construct(
+        protected array $rules = [],
+    )
+    {
+    }
+
+    /**
+     * @param string $input
      * @return string|null
      */
-    public function complement(string $input, array $rules): ?string
+    public function complement(string $input): ?string
     {
+        $rules = $this->rules;
         $words = explode(' ', $input);
         $maxWordCount = count($words);
 
@@ -33,14 +44,19 @@ class AutoComplete
             }
         }
 
+        if (!is_array($rules)) {
+            return null;
+        }
+
         $candidates = array_is_list($rules)
             ? $rules
             : array_keys($rules);
 
         foreach ($candidates as $candidate) {
-            $pos = strpos($candidate, $words[$maxWordCount - 1]);
+            $word = $words[$maxWordCount - 1];
+            $pos = strpos($candidate, $word);
             if ($pos !== false) {
-                return substr($candidate, $pos + 1);
+                return substr($candidate, $pos + strlen($word));
             }
         }
 

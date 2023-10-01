@@ -11,18 +11,24 @@ final class AutoCompleteTest extends TestCase
     public function test_match_first(): void
     {
         $ac = new AutoComplete();
-        $this->assertSame('it', $ac->complement('g', ['a', 'git']));
+        $this->assertSame('it', $ac->complement('g', ['skip', 'git']));
     }
 
     public function test_match_exact(): void
     {
         $ac = new AutoComplete();
-        $this->assertSame('it', $ac->complement('git', ['a', 'git']));
+        $this->assertSame('it', $ac->complement('git', ['skip', 'git']));
     }
 
-    public function test_match_double(): void
+    public function test_match_repeat(): void
     {
         $ac = new AutoComplete();
-        $this->assertNull($ac->complement('git g', ['a', 'git']));
+        $this->assertNull($ac->complement('git g', ['skip', 'git']));
+    }
+
+    public function test_match_twice(): void
+    {
+        $ac = new AutoComplete();
+        $this->assertSame('ommit', $ac->complement('git c', ['skip' => null, 'git' => ['commit', 'push']]));
     }
 }
