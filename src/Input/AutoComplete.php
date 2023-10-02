@@ -6,7 +6,6 @@ use function array_is_list;
 use function array_key_exists;
 use function array_keys;
 use function count;
-use function dump;
 use function explode;
 use function is_array;
 use function strlen;
@@ -53,10 +52,19 @@ class AutoComplete
             ? $rules
             : array_keys($rules);
 
-        $word = $words[$maxWordCount - 1];
-        if ($word === '') {
-            return $candidates[$index % count($candidates)] ?? null;
+        $count = count($candidates);
+        if ($count === 0) {
+            return null;
         }
+
+        $word = $words[$maxWordCount - 1];
+
+        if ($word === '') {
+            return $index >= 0
+                ? $candidates[$index % $count]
+                : $candidates[$count + ($index % $count) - 1];
+        }
+
         foreach ($candidates as $candidate) {
             $pos = strpos($candidate, $word);
             if ($pos !== false) {
