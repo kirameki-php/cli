@@ -2,7 +2,6 @@
 
 namespace Kirameki\Cli;
 
-use Kirameki\Cli\Exceptions\InvalidInputException;
 use Kirameki\Cli\Input\AutoCompleteReader;
 use Kirameki\Cli\Input\HiddenReader;
 use Kirameki\Cli\Input\IntegerReader;
@@ -56,9 +55,7 @@ class Input
     {
         while (true) {
             $value = (new IntegerReader($this->input, $this->ansi, $prompt))->readline();
-
             $converted = filter_var($value, FILTER_VALIDATE_INT);
-
             if ($converted !== false) {
                 return $converted;
             }
