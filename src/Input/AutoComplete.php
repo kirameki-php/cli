@@ -33,9 +33,9 @@ class AutoComplete
     {
         $rules = $this->rules;
         $words = explode(' ', $input);
-        $maxWordCount = count($words);
+        $wordCount = count($words);
 
-        for ($i = 0; $i < $maxWordCount - 1; $i++) {
+        for ($i = 0; $i < $wordCount - 1; $i++) {
             $word = trim($words[$i]);
             if (array_key_exists($word, $rules)) {
                 $rules = $rules[$word];
@@ -52,17 +52,18 @@ class AutoComplete
             ? $rules
             : array_keys($rules);
 
-        $count = count($candidates);
-        if ($count === 0) {
+        $candidatesCount = count($candidates);
+        if ($candidatesCount === 0) {
             return null;
         }
 
-        $word = $words[$maxWordCount - 1];
+        $word = $words[$wordCount - 1];
 
         if ($word === '') {
+            $candidatesIndex = $index % $candidatesCount;
             return $index >= 0
-                ? $candidates[$index % $count]
-                : $candidates[$count + ($index % $count) - 1];
+                ? $candidates[$candidatesIndex]
+                : $candidates[$candidatesCount + $candidatesIndex - 1];
         }
 
         foreach ($candidates as $candidate) {
