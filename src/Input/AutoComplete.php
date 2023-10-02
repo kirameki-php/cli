@@ -68,7 +68,7 @@ class AutoComplete
 
         foreach ($candidates as $candidate) {
             $pos = strpos($candidate, $word);
-            if ($pos !== false) {
+            if ($pos === 0) {
                 return substr($candidate, $pos + strlen($word));
             }
         }
