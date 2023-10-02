@@ -5,6 +5,7 @@ namespace Kirameki\Cli\Input;
 use Kirameki\Stream\Streamable;
 use SouthPointe\Ansi\Stream;
 use function assert;
+use function dump;
 use function grapheme_extract;
 use function grapheme_strlen;
 use function grapheme_substr;

@@ -27,9 +27,10 @@ class AutoComplete
 
     /**
      * @param string $input
+     * @param int $index
      * @return string|null
      */
-    public function complement(string $input): ?string
+    public function complement(string $input, int $index): ?string
     {
         $rules = $this->rules;
         $words = explode(' ', $input);
@@ -52,8 +53,11 @@ class AutoComplete
             ? $rules
             : array_keys($rules);
 
+        $word = $words[$maxWordCount - 1];
+        if ($word === '') {
+            return $candidates[$index % count($candidates)] ?? null;
+        }
         foreach ($candidates as $candidate) {
-            $word = $words[$maxWordCount - 1];
             $pos = strpos($candidate, $word);
             if ($pos !== false) {
                 return substr($candidate, $pos + strlen($word));

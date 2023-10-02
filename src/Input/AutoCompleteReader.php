@@ -14,7 +14,19 @@ use function trim;
 
 class AutoCompleteReader extends LineReader
 {
+    public const UP_ARROW = "\e[A"; // up arrow
+    public const DOWN_ARROW = "\e[B"; // down arrow
+    public const TAB = "\t"; // tab
+
+    /**
+     * @var AutoComplete
+     */
     protected AutoComplete $completion;
+
+    /**
+     * @var int
+     */
+    protected int $suggestIndex = 0;
 
     /**
      * @param Streamable $stdin
@@ -39,11 +51,20 @@ class AutoCompleteReader extends LineReader
      */
     protected function processInput(string $input): void
     {
-        if ($input === "\t") {
-            $complement = $this->completion->complement($this->buffer);
+        // apply the suggestion
+        if ($input === self::TAB) {
+            $complement = $this->completion->complement($this->buffer, $this->suggestIndex);
             if ($complement !== null) {
                 $input = $complement;
             }
+        }
+        // see prev suggestion
+        elseif ($input === self::UP_ARROW) {
+            $this->suggestIndex--;
+        }
+        // see next suggestion
+        elseif ($input === self::DOWN_ARROW) {
+            $this->suggestIndex++;
         }
         parent::processInput($input);
     }
@@ -61,9 +82,10 @@ class AutoCompleteReader extends LineReader
      */
     protected function getCompletion(): string
     {
-        $completion = $this->completion->complement($this->buffer);
+        $completion = $this->completion->complement($this->buffer, $this->suggestIndex);
 
         if ($completion === null) {
+            $this->suggestIndex = 0;
             return '';
         }
 
