@@ -19,9 +19,9 @@ class AutoCompleteReader extends LineReader
     public const TAB = "\t"; // tab
 
     /**
-     * @var AutoComplete
+     * @var WordCompletion
      */
-    protected AutoComplete $completion;
+    protected WordCompletion $completion;
 
     /**
      * @var int
@@ -42,7 +42,7 @@ class AutoCompleteReader extends LineReader
     )
     {
         parent::__construct($stdin, $ansi, $prompt);
-        $this->completion = new AutoComplete($rules);
+        $this->completion = new WordCompletion($rules);
     }
 
     /**
@@ -53,9 +53,9 @@ class AutoCompleteReader extends LineReader
     {
         // apply the suggestion
         if ($input === self::TAB) {
-            $complement = $this->completion->complement($this->buffer, $this->suggestIndex);
-            if ($complement !== null) {
-                $input = $complement;
+            $predicted = $this->completion->predict($this->buffer, $this->suggestIndex);
+            if ($predicted !== null) {
+                $input = $predicted;
             }
         }
         // see prev suggestion
@@ -82,16 +82,16 @@ class AutoCompleteReader extends LineReader
      */
     protected function getCompletion(): string
     {
-        $completion = $this->completion->complement($this->buffer, $this->suggestIndex);
+        $predicted = $this->completion->predict($this->buffer, $this->suggestIndex);
 
-        if ($completion === null) {
+        if ($predicted === null) {
             $this->suggestIndex = 0;
             return '';
         }
 
         return Ansi::buffer()
             ->fgColor(Color::Gray)
-            ->text($completion)
+            ->text($predicted)
             ->resetStyle()
             ->toString();
     }

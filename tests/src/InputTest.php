@@ -39,8 +39,6 @@ final class InputTest extends TestCase
         );
 
         $inStream->write('123' . PHP_EOL);
-        $inStream->write('123' . PHP_EOL);
-        $inStream->write('123' . PHP_EOL);
         $inStream->rewind();
 
         $this->assertSame('123', $input->hidden('hidden:'));

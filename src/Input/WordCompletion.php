@@ -13,7 +13,7 @@ use function strpos;
 use function substr;
 use function trim;
 
-class AutoComplete
+class WordCompletion
 {
     /**
      * @param array<array-key, mixed> $rules
@@ -29,7 +29,7 @@ class AutoComplete
      * @param int $index
      * @return string|null
      */
-    public function complement(string $input, int $index): ?string
+    public function predict(string $input, int $index): ?string
     {
         $rules = $this->rules;
         $words = explode(' ', $input);
