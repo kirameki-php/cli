@@ -6,10 +6,33 @@ use Kirameki\Cli\Input\LineReader;
 use Kirameki\Stream\TmpFileStream;
 use SouthPointe\Ansi\Stream;
 use Tests\Kirameki\Cli\TestCase;
+use function dump;
 use const PHP_EOL;
+use const SEEK_CUR;
 
 final class LineReaderTest extends TestCase
 {
+    public function test_readline_twice(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $reader = new LineReader($inStream, new Stream($outStream->getResource()));
+
+        $inStream->write("hello" . PHP_EOL);
+        $inStream->rewind();
+
+        $this->assertSame('hello', $reader->readline());
+        $this->assertSame(5, $reader->point);
+        $this->assertSame(5, $reader->end);
+
+        $inStream->write('abc' . PHP_EOL);
+        $inStream->seek(-4, SEEK_CUR);
+
+        $this->assertSame('abc', $reader->readline());
+        $this->assertSame(3, $reader->point);
+        $this->assertSame(3, $reader->end);
+    }
+
     public function test_multibyte(): void
     {
         $outStream = new TmpFileStream();
@@ -115,5 +138,108 @@ final class LineReaderTest extends TestCase
 
         $this->assertSame('hello ', $reader->readline());
         $this->assertSame('world   ', $reader->clipboard);
+    }
+
+    public function test_escape_paste_nothing(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $reader = new LineReader($inStream, new Stream($outStream->getResource()));
+
+        // hello world + cut word
+        $inStream->write("hello\x19" . PHP_EOL);
+        $inStream->rewind();
+
+        $this->assertSame('hello', $reader->readline());
+        $this->assertSame('', $reader->clipboard);
+    }
+
+    public function test_escape_paste_word(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $reader = new LineReader($inStream, new Stream($outStream->getResource()));
+
+        // hello world + cut word
+        $inStream->write("hello\x17\x19\x19" . PHP_EOL);
+        $inStream->rewind();
+
+        $this->assertSame('hellohello', $reader->readline());
+        $this->assertSame('hello', $reader->clipboard);
+    }
+
+    public function test_escape_cursor_forward(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $reader = new LineReader($inStream, new Stream($outStream->getResource()));
+
+        // hello world + cut word
+        $inStream->write("hello\x01\x06" . PHP_EOL);
+        $inStream->rewind();
+
+        $this->assertSame('hello', $reader->readline());
+        $this->assertSame(1, $reader->point);
+        $this->assertSame(5, $reader->end);
+    }
+
+    public function test_escape_cursor_eol(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $reader = new LineReader($inStream, new Stream($outStream->getResource()));
+
+        // hello world + cut word
+        $inStream->write("hello\x02\x05" . PHP_EOL);
+        $inStream->rewind();
+
+        $this->assertSame('hello', $reader->readline());
+        $this->assertSame(5, $reader->point);
+        $this->assertSame(5, $reader->end);
+    }
+
+    public function test_clear_screen(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $reader = new LineReader($inStream, new Stream($outStream->getResource()));
+
+        // hello world + cut word
+        $inStream->write("hello world\f" . PHP_EOL);
+        $inStream->rewind();
+
+        $this->assertSame('hello world', $reader->readline());
+        $this->assertSame(11, $reader->point);
+        $this->assertSame(11, $reader->end);
+    }
+
+    public function test_next_word(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $reader = new LineReader($inStream, new Stream($outStream->getResource()));
+
+        // hello world + cut word
+        $inStream->write("hello   world\x01\ef\ef" . PHP_EOL);
+        $inStream->rewind();
+
+        $this->assertSame('hello   world', $reader->readline());
+        $this->assertSame(13, $reader->point);
+        $this->assertSame(13, $reader->end);
+    }
+
+    public function test_prev_word(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $reader = new LineReader($inStream, new Stream($outStream->getResource()));
+
+        // hello world + cut word
+        $inStream->write("hello   world  \eb" . PHP_EOL);
+        $inStream->rewind();
+
+        $this->assertSame('hello   world  ', $reader->readline());
+        $this->assertSame(8, $reader->point);
+        $this->assertSame(15, $reader->end);
     }
 }

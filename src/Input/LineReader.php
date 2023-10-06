@@ -71,18 +71,19 @@ class LineReader
         // -echo to hide output so we can handle it ourself
         shell_exec('stty -icanon -echo');
 
+        $this->resetInfo();
+
         try {
             $this->processInput('');
             while (!$this->done) {
                 $this->processInput($this->waitForInput());
             }
+            return $this->buffer;
         }
         finally {
             // restore stty settings
             shell_exec("stty {$settings}");
         }
-
-        return $this->buffer;
     }
 
     /**
@@ -110,6 +111,16 @@ class LineReader
         }
 
         return $char;
+    }
+
+    protected function resetInfo(): void
+    {
+        $this->buffer = '';
+        $this->latest = '';
+        $this->clipboard = '';
+        $this->point = 0;
+        $this->end = 0;
+        $this->done = false;
     }
 
     /**
