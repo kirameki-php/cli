@@ -5,21 +5,32 @@ namespace Tests\Kirameki\Cli\Input;
 use Kirameki\Cli\Input\WordCompletion;
 use Tests\Kirameki\Cli\TestCase;
 
-final class AutoCompleteTest extends TestCase
+final class WorldCompletionTest extends TestCase
 {
-    public function test_match_none(): void
+    public function test_no_rules(): void
     {
         $ac = new WordCompletion([]);
         $this->assertNull($ac->predict('g', 0));
     }
 
-    public function test_match_first(): void
+    public function test_no_match(): void
+    {
+        $ac = new WordCompletion(['one']);
+        $this->assertNull($ac->predict('two', 0));
+    }
+    public function test_initial(): void
+    {
+        $ac = new WordCompletion(['skip', 'git']);
+        $this->assertSame('skip', $ac->predict('', 0));
+    }
+
+    public function test_match_first_letter(): void
     {
         $ac = new WordCompletion(['skip', 'git']);
         $this->assertSame('it', $ac->predict('g', 0));
     }
 
-    public function test_match_partial(): void
+    public function test_match_partial_letter(): void
     {
         $ac = new WordCompletion(['skip' => null]);
         $this->assertSame('ip', $ac->predict('sk', 0));
