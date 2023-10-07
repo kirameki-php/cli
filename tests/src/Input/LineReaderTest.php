@@ -169,6 +169,48 @@ final class LineReaderTest extends TestCase
         $this->assertSame('hello', $reader->clipboard);
     }
 
+    public function test_escape_transpose_last(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $reader = new LineReader($inStream, new Stream($outStream->getResource()));
+
+        // abc + transpose
+        $inStream->write("abc\x14" . PHP_EOL);
+        $inStream->rewind();
+
+        $this->assertSame('acb', $reader->readline());
+        $this->assertSame(3, $reader->point);
+    }
+
+    public function test_escape_transpose_first(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $reader = new LineReader($inStream, new Stream($outStream->getResource()));
+
+        // abc + transpose
+        $inStream->write("abc\x01\x14" . PHP_EOL);
+        $inStream->rewind();
+
+        $this->assertSame('abc', $reader->readline());
+        $this->assertSame(0, $reader->point);
+    }
+
+    public function test_escape_transpose_back(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $reader = new LineReader($inStream, new Stream($outStream->getResource()));
+
+        // abc + cursor back + transpose
+        $inStream->write("abc\x02\x14" . PHP_EOL);
+        $inStream->rewind();
+
+        $this->assertSame('acb', $reader->readline());
+        $this->assertSame(3, $reader->point);
+    }
+
     public function test_escape_cursor_forward(): void
     {
         $outStream = new TmpFileStream();

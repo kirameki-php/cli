@@ -6,7 +6,6 @@ use Kirameki\Cli\Exceptions\InvalidInputException;
 use Kirameki\Stream\Streamable;
 use SouthPointe\Ansi\Stream;
 use function assert;
-use function dump;
 use function grapheme_extract;
 use function grapheme_strlen;
 use function grapheme_substr;
@@ -23,6 +22,7 @@ use function str_starts_with;
 use function stream_get_contents;
 use function stream_select;
 use function strlen;
+use function strrev;
 use function substr;
 use function trim;
 use const GRAPHEME_EXTR_COUNT;
@@ -37,6 +37,7 @@ class LineReader
     public const CUT_TO_EOL = "\x0b"; // ctrl+k
     public const CUT_WORD = "\x17"; // ctrl+w
     public const PASTE = "\x19"; // ctrl+y
+    public const TRANSPOSE = "\x14"; // ctrl+t
     public const CURSOR_FORWARD = "\x06"; // ctrl+f (right arrow is handled by CSI)
     public const CURSOR_BACK = "\x02"; // ctrl+b (left arrow is handled by CSI)
     public const END = ["\x00", "\x0a", "\x0d", "\r"]; // EOF, ctrl+j,  ctrl+m, carriage return
@@ -113,6 +114,9 @@ class LineReader
         return $char;
     }
 
+    /**
+     * @return void
+     */
     protected function resetInfo(): void
     {
         $this->buffer = '';
@@ -258,6 +262,18 @@ class LineReader
             $move = grapheme_strlen($pasting);
             $this->point += $move;
             $this->end += $move;
+        }
+        elseif (self::matchesKey($input, self::TRANSPOSE)) {
+            $start = $point === $end ? $point - 1 : $point;
+            $seq = self::substr($buffer, $start - 1, 2);
+            if ($start > 0) {
+                $this->buffer = self::substr($buffer, 0, $start - 1) . strrev($seq) . self::substr($buffer, $start + 1);
+                if ($point < $end) {
+                    $this->point+= 1;
+                }
+            } else {
+                $this->ansi->bell();
+            }
         }
         elseif (self::matchesKey($input, self::CURSOR_FORWARD)) {
             if ($point < $end) {
