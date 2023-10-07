@@ -234,12 +234,39 @@ final class LineReaderTest extends TestCase
         $inStream = new TmpFileStream();
         $reader = new LineReader($inStream, new Stream($outStream->getResource()));
 
-        // hello world + cut word
         $inStream->write("hello   world  \eb" . PHP_EOL);
         $inStream->rewind();
 
         $this->assertSame('hello   world  ', $reader->readline());
         $this->assertSame(8, $reader->point);
         $this->assertSame(15, $reader->end);
+    }
+
+    public function test_escape_seq_csi_none(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $reader = new LineReader($inStream, new Stream($outStream->getResource()));
+
+        $inStream->write("\e[" . PHP_EOL);
+        $inStream->rewind();
+
+        $this->assertSame('', $reader->readline());
+        $this->assertSame(0, $reader->point);
+        $this->assertSame(0, $reader->end);
+    }
+
+    public function test_escape_seq_osc(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $reader = new LineReader($inStream, new Stream($outStream->getResource()));
+
+        $inStream->write("\e]hello\e\\" . PHP_EOL);
+        $inStream->rewind();
+
+        $this->assertSame('', $reader->readline());
+        $this->assertSame(0, $reader->point);
+        $this->assertSame(0, $reader->end);
     }
 }

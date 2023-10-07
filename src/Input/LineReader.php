@@ -2,6 +2,7 @@
 
 namespace Kirameki\Cli\Input;
 
+use Kirameki\Cli\Exceptions\InvalidInputException;
 use Kirameki\Stream\Streamable;
 use SouthPointe\Ansi\Stream;
 use function assert;
@@ -15,6 +16,8 @@ use function mb_strlen;
 use function mb_strwidth;
 use function preg_match;
 use function shell_exec;
+use function str_contains;
+use function str_ends_with;
 use function str_starts_with;
 use function stream_get_contents;
 use function stream_select;
@@ -159,22 +162,42 @@ class LineReader
             if (($char = $readByte()) === false) {
                 return $input;
             }
+            $valid = false;
             while($char >= "\x30" && $char <= "\x3F") {
+                $valid = true;
                 $input .= $char;
                 $char = $readByte();
             }
             while($char >= "\x20" && $char <= "\x2F") {
+                $valid = true;
                 $input .= $char;
                 $char = $readByte();
             }
             if ($char >= "\x40" && $char <= "\x7E") {
+                $valid = true;
                 $input .= $char;
+            }
+            if ($char === false || !$valid) {
+                throw new InvalidInputException('Invalid CSI sequence.', [
+                    'reader' => $this,
+                    'input' => $input,
+                ]);
             }
         }
         // OSC (Operating System Command)
         elseif ($char === ']') {
-            while(substr($input, -2) !== '\e\\') {
-                $input .= $readByte();
+            $read = '';
+            while(!str_contains($read, "\e\\")) {
+                $next = $readByte();
+                if ($next === false) {
+                    throw new InvalidInputException('Invalid OSC sequence (must be terminated with ST).', [
+                        'reader' => $this,
+                        'input' => $input,
+                        'read' => $read,
+                    ]);
+                }
+                $read.= $next;
+                $input.= $next;
             }
         }
         // SS2 or SS3 (Single Shifts)
