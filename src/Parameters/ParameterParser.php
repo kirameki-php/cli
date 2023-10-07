@@ -11,7 +11,6 @@ use function array_is_list;
 use function array_key_exists;
 use function array_keys;
 use function count;
-use function dump;
 use function explode;
 use function gettype;
 use function is_array;

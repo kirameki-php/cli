@@ -12,12 +12,13 @@ use function grapheme_strlen;
 use function grapheme_substr;
 use function in_array;
 use function is_array;
+use function max;
 use function mb_strlen;
 use function mb_strwidth;
+use function min;
 use function preg_match;
 use function shell_exec;
 use function str_contains;
-use function str_ends_with;
 use function str_starts_with;
 use function stream_get_contents;
 use function stream_select;
@@ -36,8 +37,8 @@ class LineReader
     public const CUT_TO_EOL = "\x0b"; // ctrl+k
     public const CUT_WORD = "\x17"; // ctrl+w
     public const PASTE = "\x19"; // ctrl+y
-    public const CURSOR_FORWARD = ["\x06", "\e[C"]; // ctrl+f, right arrow
-    public const CURSOR_BACK = ["\x02", "\e[D"]; // ctrl+b, left arrow
+    public const CURSOR_FORWARD = "\x06"; // ctrl+f (right arrow is handled by CSI)
+    public const CURSOR_BACK = "\x02"; // ctrl+b (left arrow is handled by CSI)
     public const END = ["\x00", "\x0a", "\x0d", "\r"]; // EOF, ctrl+j,  ctrl+m, carriage return
     public const CLEAR_SCREEN = "\f"; // ctrl+l
     public const NEXT_WORD = "\ef"; // option+f
@@ -99,11 +100,7 @@ class LineReader
         $write = $except = null;
         stream_select($read, $write, $except, null);
 
-        $char = stream_get_contents($stream, 1);
-
-        if ($char === false) {
-            return self::DELETE;
-        }
+        $char = static::getNextChar($stream);
 
         if ($char === "\e") {
             return $this->readEscapeSequences($stream, $char);
@@ -134,11 +131,7 @@ class LineReader
     protected function readMultibytePortions($stream, string $input): string
     {
         do {
-            $char = stream_get_contents($stream, 1);
-            if ($char === false) {
-                break;
-            }
-            $input .= $char;
+            $input .= static::getNextChar($stream);
         }
         while(!preg_match("//u", $input));
 
@@ -152,17 +145,16 @@ class LineReader
      */
     protected function readEscapeSequences(mixed $stream, string $input): string
     {
-        $readByte = static fn() => stream_get_contents($stream, 1);
+        $readByte = static fn() => static::getNextChar($stream);
 
         $char = $readByte();
         $input .= $char;
 
         // CSI (Control Sequence Introducer)
         if ($char === '[') {
-            if (($char = $readByte()) === false) {
-                return $input;
-            }
             $valid = false;
+            $char = $readByte();
+            // contains chars: 0123456789:;<=>?
             while($char >= "\x30" && $char <= "\x3F") {
                 $valid = true;
                 $input .= $char;
@@ -173,11 +165,12 @@ class LineReader
                 $input .= $char;
                 $char = $readByte();
             }
+            // contains chars: @ABCDEFGHJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~(delete)
             if ($char >= "\x40" && $char <= "\x7E") {
                 $valid = true;
                 $input .= $char;
             }
-            if ($char === false || !$valid) {
+            if (!$valid) {
                 throw new InvalidInputException('Invalid CSI sequence.', [
                     'reader' => $this,
                     'input' => $input,
@@ -189,7 +182,7 @@ class LineReader
             $read = '';
             while(!str_contains($read, "\e\\")) {
                 $next = $readByte();
-                if ($next === false) {
+                if ($next === '') {
                     throw new InvalidInputException('Invalid OSC sequence (must be terminated with ST).', [
                         'reader' => $this,
                         'input' => $input,
@@ -202,7 +195,7 @@ class LineReader
         }
         // SS2 or SS3 (Single Shifts)
         elseif ($char === 'N' || $char === 'O') {
-            $input .= $readByte();
+            $input .= $char;
         }
 
         return $input;
@@ -313,7 +306,29 @@ class LineReader
             }
         }
         elseif (str_starts_with($input, "\e")) {
-            // do nothing
+            $feSequence = substr($input, 1, 1);
+
+            // CSI
+            if ($feSequence === '[') {
+                preg_match("/\e\[([\x30-\x3f]*)([\x20-\\\]*)([\x40-\x7f])/", $input, $matches);
+                $n = $matches[1] ?? null;
+                $code = $matches[3] ?? throw new InvalidInputException('Invalid CSI sequence.', [
+                    'reader' => $this,
+                    'input' => $input,
+                ]);
+
+                // Cursor forward
+                if ($code === 'C') {
+                    $this->point = min($end, $point + (int)($n ?: 1));
+
+                }
+                // Cursor back
+                elseif ($code === 'D') {
+                    $this->point = max(0, $point - (int)($n ?: 1));
+                }
+            }
+
+            // ignore all other sequences since they serve no purpose.
         }
         else {
             $input = $this->formatInput($input);
@@ -416,6 +431,17 @@ class LineReader
         }
 
         return strlen($this->prompt) + $position;
+    }
+
+    /**
+     * @param resource $stream
+     * @return string
+     */
+    protected static function getNextChar($stream): string
+    {
+        $char = stream_get_contents($stream, 1);
+        assert($char !== false);
+        return $char;
     }
 
     /**

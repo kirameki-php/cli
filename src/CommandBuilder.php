@@ -5,10 +5,8 @@ namespace Kirameki\Cli;
 use Kirameki\Cli\Definitions\ArgumentBuilder;
 use Kirameki\Cli\Definitions\OptionBuilder;
 use Kirameki\Cli\Exceptions\DefinitionException;
-use Kirameki\Core\Exceptions\LogicException;
 use function array_key_exists;
 use function array_map;
-use function dump;
 
 class CommandBuilder
 {

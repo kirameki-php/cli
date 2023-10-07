@@ -2,6 +2,7 @@
 
 namespace Tests\Kirameki\Cli\Input;
 
+use Kirameki\Cli\Exceptions\InvalidInputException;
 use Kirameki\Cli\Input\LineReader;
 use Kirameki\Stream\TmpFileStream;
 use SouthPointe\Ansi\Stream;
@@ -242,7 +243,94 @@ final class LineReaderTest extends TestCase
         $this->assertSame(15, $reader->end);
     }
 
-    public function test_escape_seq_csi_none(): void
+    public function test_escape_seq_csi_partial(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $reader = new LineReader($inStream, new Stream($outStream->getResource()));
+
+        $inStream->write("\e[");
+        $inStream->rewind();
+
+        $this->expectException(InvalidInputException::class);
+        $this->expectExceptionMessage('Invalid CSI sequence');
+        $this->assertSame('', $reader->readline());
+    }
+
+    public function test_escape_seq_csi_cursor_back(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $reader = new LineReader($inStream, new Stream($outStream->getResource()));
+
+        $inStream->write("a\e[D" . PHP_EOL);
+        $inStream->rewind();
+
+        $this->assertSame('a', $reader->readline());
+        $this->assertSame(0, $reader->point);
+        $this->assertSame(1, $reader->end);
+    }
+
+    public function test_escape_seq_csi_cursor_back_multi(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $reader = new LineReader($inStream, new Stream($outStream->getResource()));
+
+        $inStream->write("ab\e[3D" . PHP_EOL);
+        $inStream->rewind();
+
+        $this->assertSame('ab', $reader->readline());
+        $this->assertSame(0, $reader->point);
+        $this->assertSame(2, $reader->end);
+    }
+
+    public function test_escape_seq_csi_cursor_forward(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $reader = new LineReader($inStream, new Stream($outStream->getResource()));
+
+        // a + BOL + cursor forward
+        $inStream->write("a\x01\e[C" . PHP_EOL);
+        $inStream->rewind();
+
+        $this->assertSame('a', $reader->readline());
+        $this->assertSame(1, $reader->point);
+        $this->assertSame(1, $reader->end);
+    }
+
+    public function test_escape_seq_csi_cursor_forward_multi(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $reader = new LineReader($inStream, new Stream($outStream->getResource()));
+
+        // a + BOL + cursor forward x3
+        $inStream->write("ab\x01\e[3C" . PHP_EOL);
+        $inStream->rewind();
+
+        $this->assertSame('ab', $reader->readline());
+        $this->assertSame(2, $reader->point);
+        $this->assertSame(2, $reader->end);
+    }
+
+    public function test_escape_seq_csi_with_spacing(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $reader = new LineReader($inStream, new Stream($outStream->getResource()));
+
+        // a + BOL + cursor forward x3
+        $inStream->write("ab\e[1 D" . PHP_EOL);
+        $inStream->rewind();
+
+        $this->assertSame('ab', $reader->readline());
+        $this->assertSame(1, $reader->point);
+        $this->assertSame(2, $reader->end);
+    }
+
+    public function test_escape_seq_csi_invalid(): void
     {
         $outStream = new TmpFileStream();
         $inStream = new TmpFileStream();
@@ -251,12 +339,12 @@ final class LineReaderTest extends TestCase
         $inStream->write("\e[" . PHP_EOL);
         $inStream->rewind();
 
+        $this->expectException(InvalidInputException::class);
+        $this->expectExceptionMessage('Invalid CSI sequence');
         $this->assertSame('', $reader->readline());
-        $this->assertSame(0, $reader->point);
-        $this->assertSame(0, $reader->end);
     }
 
-    public function test_escape_seq_osc(): void
+    public function test_escape_seq_osc_valid(): void
     {
         $outStream = new TmpFileStream();
         $inStream = new TmpFileStream();
@@ -268,5 +356,33 @@ final class LineReaderTest extends TestCase
         $this->assertSame('', $reader->readline());
         $this->assertSame(0, $reader->point);
         $this->assertSame(0, $reader->end);
+    }
+
+    public function test_escape_seq_osc_invalid(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $reader = new LineReader($inStream, new Stream($outStream->getResource()));
+
+        $inStream->write("\e]hello\e" . PHP_EOL);
+        $inStream->rewind();
+
+        $this->expectException(InvalidInputException::class);
+        $this->expectExceptionMessage('Invalid OSC sequence');
+        $this->assertSame('', $reader->readline());
+    }
+
+    public function test_escape_seq_ss2_ss3(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $reader = new LineReader($inStream, new Stream($outStream->getResource()));
+
+        $inStream->write("a\eN\eO" . PHP_EOL);
+        $inStream->rewind();
+
+        $this->assertSame('a', $reader->readline());
+        $this->assertSame(1, $reader->point);
+        $this->assertSame(1, $reader->end);
     }
 }
