@@ -21,6 +21,7 @@ class Input
      */
     public function __construct(
         readonly protected Streamable $input = new StdinStream(),
+        readonly protected AnsiStream $ansi = new AnsiStream(),
     )
     {
     }
