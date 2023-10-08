@@ -61,9 +61,10 @@ class WordCompletion
 
         if ($word === '') {
             $candidatesIndex = $index % $candidatesCount;
-            return $index >= 0
-                ? $candidates[$candidatesIndex]
-                : $candidates[$candidatesCount + $candidatesIndex - 1];
+            if ($candidatesIndex < 0) {
+                $candidatesIndex += $candidatesCount;
+            }
+            return $candidates[$candidatesIndex];
         }
 
         foreach ($candidates as $candidate) {

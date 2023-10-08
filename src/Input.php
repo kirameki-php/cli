@@ -38,11 +38,11 @@ class Input
     }
 
     /**
-     * @param string $prompt
      * @param array<array-key, mixed> $rules
+     * @param string $prompt
      * @return string
      */
-    public function autoComplete(string $prompt = '', array $rules = []): string
+    public function autoComplete(array $rules, string $prompt = ''): string
     {
         return (new AutoCompleteReader($this->input, $this->ansi, $prompt, $rules))->readline();
     }
