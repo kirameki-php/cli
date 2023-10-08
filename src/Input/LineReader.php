@@ -272,7 +272,9 @@ class LineReader
                     $this->point+= 1;
                 }
             } else {
-                $this->ansi->bell();
+                $this->ansi
+                    ->bell()
+                    ->flush();
             }
         }
         elseif (self::matchesKey($input, self::CURSOR_FORWARD)) {

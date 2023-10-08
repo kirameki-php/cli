@@ -4,7 +4,6 @@ namespace Tests\Kirameki\Cli;
 
 use Kirameki\Cli\Input;
 use Kirameki\Cli\Input\AutoCompleteReader;
-use Kirameki\Cli\Input\MaskedReader;
 use Kirameki\Stream\TmpFileStream;
 use SouthPointe\Ansi\Stream;
 use function substr;
@@ -12,15 +11,26 @@ use const PHP_EOL;
 
 final class InputTest extends TestCase
 {
+    public function test_text(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $input = new Input($inStream, new Stream($outStream->getResource()));
+
+        $inStream->write('123' . PHP_EOL);
+        $inStream->write('456' . PHP_EOL);
+        $inStream->rewind();
+
+        $this->assertSame('123', $input->text('t:'));
+        $this->assertSame('456', $input->text('t:'));
+        $this->assertStringContainsString('t:123', $outStream->readFromStartToEnd());
+    }
+
     public function test_autoComplete(): void
     {
         $outStream = new TmpFileStream();
         $inStream = new TmpFileStream();
-
-        $input = new Input(
-            $inStream,
-            new Stream($outStream->getResource()),
-        );
+        $input = new Input($inStream, new Stream($outStream->getResource()));
 
         $inStream->write(AutoCompleteReader::UP_ARROW);
         $inStream->write(AutoCompleteReader::UP_ARROW);
@@ -36,11 +46,7 @@ final class InputTest extends TestCase
     {
         $outStream = new TmpFileStream();
         $inStream = new TmpFileStream();
-
-        $input = new Input(
-            $inStream,
-            new Stream($outStream->getResource()),
-        );
+        $input = new Input($inStream, new Stream($outStream->getResource()));
 
         $inStream->write(AutoCompleteReader::UP_ARROW);
         $inStream->write("\t" . PHP_EOL);
@@ -50,15 +56,11 @@ final class InputTest extends TestCase
         $this->assertStringContainsString('ac:', $outStream->readFromStartToEnd());
     }
 
-    public function test_integer(): void
+    public function test_integer_valid(): void
     {
         $outStream = new TmpFileStream();
         $inStream = new TmpFileStream();
-
-        $input = new Input(
-            $inStream,
-            new Stream($outStream->getResource()),
-        );
+        $input = new Input($inStream, new Stream($outStream->getResource()));
 
         $inStream->write('123' . PHP_EOL);
         $inStream->write('456' . PHP_EOL);
@@ -68,15 +70,25 @@ final class InputTest extends TestCase
         $this->assertSame(456, $input->integer('in:'));
     }
 
+    public function test_integer_invalid(): void
+    {
+        $outStream = new TmpFileStream();
+        $inStream = new TmpFileStream();
+        $input = new Input($inStream, new Stream($outStream->getResource()));
+
+        $inStream->write('123a' . PHP_EOL);
+        $inStream->write('0' . PHP_EOL);
+        $inStream->rewind();
+
+        $this->assertSame(0, $input->integer('in:'));
+        $this->assertStringContainsString('Integer value is required.', $outStream->readFromStartToEnd());
+    }
+
     public function test_hidden(): void
     {
         $outStream = new TmpFileStream();
         $inStream = new TmpFileStream();
-
-        $input = new Input(
-            $inStream,
-            new Stream($outStream->getResource()),
-        );
+        $input = new Input($inStream, new Stream($outStream->getResource()));
 
         $inStream->write('123' . PHP_EOL);
         $inStream->rewind();
@@ -88,14 +100,12 @@ final class InputTest extends TestCase
     {
         $outStream = new TmpFileStream();
         $inStream = new TmpFileStream();
-        $reader = new MaskedReader($inStream, new Stream($outStream->getResource()));
+        $input = new Input($inStream, new Stream($outStream->getResource()));
 
         $inStream->write("aあ" . PHP_EOL);
         $inStream->rewind();
 
-        $this->assertSame('aあ', $reader->readline());
+        $this->assertSame('aあ', $input->masked());
         $this->assertSame('∗∗', substr($outStream->readFromStartToEnd(), 24, -6));
-        $this->assertSame(2, $reader->point);
-        $this->assertSame(2, $reader->end);
     }
 }
