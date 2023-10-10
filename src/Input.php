@@ -6,8 +6,8 @@ use Kirameki\Cli\Input\AutoCompleteReader;
 use Kirameki\Cli\Input\HiddenReader;
 use Kirameki\Cli\Input\LineReader;
 use Kirameki\Cli\Input\MaskedReader;
+use Kirameki\Stream\ResourceStreamable;
 use Kirameki\Stream\StdinStream;
-use Kirameki\Stream\Streamable;
 use SouthPointe\Ansi\Codes\Color;
 use SouthPointe\Ansi\Stream as AnsiStream;
 use function filter_var;
@@ -16,11 +16,11 @@ use const FILTER_VALIDATE_INT;
 class Input
 {
     /**
-     * @param Streamable $input
+     * @param ResourceStreamable $input
      * @param AnsiStream $ansi
      */
     public function __construct(
-        readonly protected Streamable $input = new StdinStream(),
+        readonly protected ResourceStreamable $input = new StdinStream(),
         readonly protected AnsiStream $ansi = new AnsiStream(),
     )
     {

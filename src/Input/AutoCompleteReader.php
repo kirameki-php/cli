@@ -2,15 +2,10 @@
 
 namespace Kirameki\Cli\Input;
 
-use Kirameki\Stream\Streamable;
+use Kirameki\Stream\ResourceStreamable;
 use SouthPointe\Ansi\Ansi;
 use SouthPointe\Ansi\Codes\Color;
 use SouthPointe\Ansi\Stream;
-use function array_is_list;
-use function array_keys;
-use function explode;
-use function strpos;
-use function trim;
 
 class AutoCompleteReader extends LineReader
 {
@@ -29,13 +24,13 @@ class AutoCompleteReader extends LineReader
     protected int $suggestIndex = 0;
 
     /**
-     * @param Streamable $stdin
+     * @param ResourceStreamable $stdin
      * @param Stream $ansi
      * @param string $prompt
      * @param array<array-key, mixed> $rules
      */
     public function __construct(
-        Streamable $stdin,
+        ResourceStreamable $stdin,
         Stream $ansi,
         string $prompt = '',
         array $rules = [],

@@ -3,8 +3,8 @@
 namespace Kirameki\Cli\Input;
 
 use Kirameki\Cli\Exceptions\InvalidInputException;
-use Kirameki\Stream\Streamable;
-use SouthPointe\Ansi\Stream;
+use Kirameki\Stream\ResourceStreamable;
+use SouthPointe\Ansi\Stream as AnsiStream;
 use function assert;
 use function grapheme_extract;
 use function grapheme_strlen;
@@ -53,13 +53,13 @@ class LineReader
     public bool $done = false;
 
     /**
-     * @param Streamable $stdin
-     * @param Stream $ansi
+     * @param ResourceStreamable $stdin
+     * @param AnsiStream $ansi
      * @param string $prompt
      */
     public function __construct(
-        protected readonly Streamable $stdin,
-        protected readonly Stream $ansi,
+        protected readonly ResourceStreamable $stdin,
+        protected readonly AnsiStream $ansi,
         public string $prompt = '',
     )
     {
