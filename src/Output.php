@@ -96,22 +96,10 @@ class Output
      * @param string $text
      * @return $this
      */
-    public function notice(string $text): static
-    {
-        return $this->toStdout(
-            $this->decorator->notice($text),
-            $this->decorator->newLine(),
-        );
-    }
-
-    /**
-     * @param string $text
-     * @return $this
-     */
-    public function warning(string $text): static
+    public function warn(string $text): static
     {
         return $this->toStderr(
-            $this->decorator->warning($text),
+            $this->decorator->warn($text),
             $this->decorator->newLine(),
         );
     }
@@ -124,30 +112,6 @@ class Output
     {
         return $this->toStderr(
             $this->decorator->error($text),
-            $this->decorator->newLine(),
-        );
-    }
-
-    /**
-     * @param string $text
-     * @return $this
-     */
-    public function critical(string $text): static
-    {
-        return $this->toStderr(
-            $this->decorator->critical($text),
-            $this->decorator->newLine(),
-        );
-    }
-
-    /**
-     * @param string $text
-     * @return $this
-     */
-    public function alert(string $text): static
-    {
-        return $this->toStderr(
-            $this->decorator->alert($text),
             $this->decorator->newLine(),
         );
     }

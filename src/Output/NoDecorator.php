@@ -19,7 +19,7 @@ class NoDecorator implements Decorator
      */
     public function text(string $text): string
     {
-        return $this->text($text);
+        return $text;
     }
 
     /**
@@ -41,15 +41,7 @@ class NoDecorator implements Decorator
     /**
      * @inheritDoc
      */
-    public function notice(string $text): string
-    {
-        return $this->text($text);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function warning(string $text): string
+    public function warn(string $text): string
     {
         return $this->text($text);
     }
@@ -58,22 +50,6 @@ class NoDecorator implements Decorator
      * @inheritDoc
      */
     public function error(string $text): string
-    {
-        return $this->text($text);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function critical(string $text): string
-    {
-        return $this->text($text);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function alert(string $text): string
     {
         return $this->text($text);
     }

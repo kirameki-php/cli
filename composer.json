@@ -1,6 +1,6 @@
 {
-  "name": "south-pointe/cli",
-  "description": "CLI for South Pointe Framework",
+  "name": "kirameki/cli",
+  "description": "CLI for Kirameki Framework",
   "type": "library",
   "license": "MIT",
   "require": {

@@ -57,19 +57,7 @@ class AnsiDecorator implements Decorator
     /**
      * @inheritDoc
      */
-    public function notice(string $text): string
-    {
-        return $this->buffer
-            ->fgColor(Color::Green)
-            ->text($text)
-            ->resetStyle()
-            ->extract();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function warning(string $text): string
+    public function warn(string $text): string
     {
         return $this->buffer
             ->fgColor(Color::Yellow)
@@ -85,33 +73,6 @@ class AnsiDecorator implements Decorator
     {
         return $this->buffer
             ->fgColor(Color::Red)
-            ->text($text)
-            ->resetStyle()
-            ->extract();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function critical(string $text): string
-    {
-        return $this->buffer
-            ->bgColor(Color::Red)
-            ->fgColor(Color::White)
-            ->text($text)
-            ->resetStyle()
-            ->extract();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function alert(string $text): string
-    {
-        return $this->buffer
-            ->bgColor(Color::Red)
-            ->fgColor(Color::White)
-            ->blink()
             ->text($text)
             ->resetStyle()
             ->extract();
