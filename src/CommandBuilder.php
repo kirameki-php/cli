@@ -16,6 +16,8 @@ class CommandBuilder
      * @param array<string, ArgumentBuilder> $argumentBuilders
      * @param array<string, OptionBuilder> $optionBuilders
      * @param array<string, string> $shortNameAliases
+     * @param string|null $memoryLimit
+     * @param int|null $timeLimit
      */
     public function __construct(
         protected ?string $name = null,
@@ -23,10 +25,14 @@ class CommandBuilder
         protected array $argumentBuilders = [],
         protected array $optionBuilders = [],
         protected array $shortNameAliases = [],
+        protected ?string $memoryLimit = null,
+        protected ?int $timeLimit = null,
     )
     {
         $this->addHelpOption();
         $this->addVerboseOption();
+        $this->addMemoryLimitOption();
+        $this->addTimeLimitOption();
     }
 
     /**
@@ -90,6 +96,27 @@ class CommandBuilder
         return $builder;
     }
 
+    /**
+     * @param string|null $size
+     * @return void
+     */
+    public function setMemoryLimit(?string $size): void
+    {
+        $this->memoryLimit = $size;
+    }
+
+    /**
+     * @param int|null $seconds
+     * @return void
+     */
+    public function setTimeLimit(?int $seconds): void
+    {
+        $this->timeLimit = $seconds;
+    }
+
+    /**
+     * @return CommandDefinition
+     */
     public function build(): CommandDefinition
     {
         if ($this->name === null) {
@@ -102,29 +129,49 @@ class CommandBuilder
             array_map(fn($argBuilder) => $argBuilder->build(), $this->argumentBuilders),
             array_map(fn($optBuilder) => $optBuilder->build(), $this->optionBuilders),
             $this->shortNameAliases,
+            $this->memoryLimit,
+            $this->timeLimit,
         );
     }
 
     /**
-     * @return $this
+     * @return void
      */
-    protected function addVerboseOption(): static
+    protected function addVerboseOption(): void
     {
         $this->option('verbose', 'v')
             ->description('Set output to verbose mode. Verbosity can be adjusted by calling it multiple times (ex: -vv).')
             ->allowMultiple()
             ->noValue();
-        return $this;
     }
 
     /**
-     * @return $this
+     * @return void
      */
-    protected function addHelpOption(): static
+    protected function addHelpOption(): void
     {
         $this->option('help', 'h')
             ->description('Displays usage and the arguments and options you can use for the command.')
             ->noValue();
-        return $this;
+    }
+
+    /**
+     * @return void
+     */
+    protected function addMemoryLimitOption(): void
+    {
+        $this->option('memory-limit')
+            ->description('Sets the memory limit for the command.')
+            ->requiresValue();
+    }
+
+    /**
+     * @return void
+     */
+    protected function addTimeLimitOption(): void
+    {
+        $this->option('time-limit')
+            ->description('Sets the time limit for the command.')
+            ->requiresValue();
     }
 }

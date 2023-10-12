@@ -47,4 +47,14 @@ abstract class Parameter
 
         return $values[$at];
     }
+
+    /**
+     * TODO proper casting of int
+     * @param int $at
+     * @return int
+     */
+    public function valueAsInt(int $at = 0): int
+    {
+        return (int) $this->value($at);
+    }
 }

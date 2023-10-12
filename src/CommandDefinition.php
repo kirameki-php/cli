@@ -20,6 +20,8 @@ class CommandDefinition
      * @param array<string, ArgumentDefinition> $arguments
      * @param array<string, OptionDefinition> $options
      * @param array<string, string> $shortNameAliases
+     * @param string|null $memoryLimit
+     * @param int|null $timeLimit
      */
     public function __construct(
         protected readonly string $name,
@@ -27,6 +29,8 @@ class CommandDefinition
         protected readonly array $arguments,
         protected readonly array $options,
         protected readonly array $shortNameAliases,
+        protected readonly ?string $memoryLimit = null,
+        protected readonly ?int $timeLimit = null,
     )
     {
         $this->argumentIndexAliases = array_keys($arguments);
@@ -111,5 +115,15 @@ class CommandDefinition
         return $this->shortOptionExists($char)
             ? $this->getOptionOrNull($this->shortNameAliases[$char])
             : null;
+    }
+
+    public function getMemoryLimit(): ?string
+    {
+        return $this->memoryLimit;
+    }
+
+    public function getTimeLimit(): ?int
+    {
+        return $this->timeLimit;
     }
 }

@@ -90,8 +90,7 @@ class CommandManager
 
         // Get the alias if `$name` is given as name.
         if (array_key_exists($name, $this->aliasMap)) {
-            $name = $this->aliasMap[$name];
-            return $this->container->make($name);
+            return $this->container->make($this->aliasMap[$name]);
         }
 
         throw new CommandNotFoundException("Command: {$name} is not registered.", [

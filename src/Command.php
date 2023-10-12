@@ -10,6 +10,7 @@ use Kirameki\Collections\Map;
 use Kirameki\Core\Signal;
 use Kirameki\Core\SignalEvent;
 use Kirameki\Process\ExitCode;
+use function ini_set;
 
 abstract class Command
 {
@@ -74,6 +75,8 @@ abstract class Command
         $this->input = $input;
         $this->output = $output;
 
+        $this->applyRuntimeLimits();
+
         $code = $this->run() ?? ExitCode::SUCCESS;
 
         if ($code < 0 || $code > 255) {
@@ -105,5 +108,34 @@ abstract class Command
     protected function onSignal(int $signal, Closure $callback): void
     {
         Signal::handle($signal, $callback);
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isVerbose(): bool
+    {
+        return $this->options->get('verbose')->wasEntered;
+    }
+
+    /**
+     * @return void
+     */
+    private function applyRuntimeLimits(): void
+    {
+        $timeLimit = $this->options->getOrNull('time-limit')?->valueAsInt()
+                  ?? $this->definition->getTimeLimit();
+
+        if ($timeLimit !== null) {
+            set_time_limit($timeLimit);
+        }
+
+        // validate format
+        $memoryLimit = $this->options->getOrNull('memory-limit')?->value()
+                    ?? $this->definition->getMemoryLimit();
+
+        if ($memoryLimit !== null) {
+            ini_set('memory_limit', $memoryLimit);
+        }
     }
 }
