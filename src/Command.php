@@ -115,7 +115,7 @@ abstract class Command
      */
     protected function isVerbose(): bool
     {
-        return $this->options->get('verbose')->wasEntered;
+        return $this->options->get('verbose')->supplied;
     }
 
     /**

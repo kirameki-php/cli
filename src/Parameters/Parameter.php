@@ -14,7 +14,7 @@ abstract class Parameter
     /**
      * @var bool
      */
-    public readonly bool $wasEntered;
+    public readonly bool $supplied;
 
     /**
      * @param TDefinition $definition
@@ -27,7 +27,7 @@ abstract class Parameter
         protected readonly array $enteredValues,
     )
     {
-        $this->wasEntered = $this->enteredValues !== [];
+        $this->supplied = $this->enteredValues !== [];
     }
 
     /**
