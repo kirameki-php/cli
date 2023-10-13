@@ -145,7 +145,7 @@ final class CommandTest extends TestCase
 
     public function test_setMemoryLimit_invalid_string(): void
     {
-        $command = $this->makeRuntimeCommand('1G');
+        $command = $this->makeRuntimeCommand('1T');
         $command->execute(new Map(), new Map(), new Input(), new Output());
     }
 }

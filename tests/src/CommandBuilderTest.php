@@ -15,6 +15,8 @@ use Kirameki\Process\ExitCode;
 
 final class CommandBuilderTest extends TestCase
 {
+    protected static int $defaultOptionsCount = 4;
+
     /**
      * @param string $name
      * @return CommandBuilder
@@ -51,7 +53,7 @@ final class CommandBuilderTest extends TestCase
         $parsed = $this->parse($builder, []);
 
         self::assertCount(0, $parsed['arguments']);
-        self::assertCount(2, $parsed['options']);
+        self::assertCount(self::$defaultOptionsCount, $parsed['options']);
     }
 
     public function test_set_naming(): void
@@ -86,7 +88,7 @@ final class CommandBuilderTest extends TestCase
         $parsed = $this->parse($builder, ['1']);
 
         self::assertCount(1, $parsed['arguments']);
-        self::assertCount(2, $parsed['options']);
+        self::assertCount(self::$defaultOptionsCount, $parsed['options']);
 
         $argument = $parsed['arguments']['a'];
         self::assertTrue($argument->supplied);
@@ -213,7 +215,7 @@ final class CommandBuilderTest extends TestCase
         $parsed = $this->parse($builder, ['1', '2']);
 
         self::assertCount(1, $parsed['arguments']);
-        self::assertCount(2, $parsed['options']);
+        self::assertCount(self::$defaultOptionsCount, $parsed['options']);
     }
 
     public function test_argument_multi_default(): void
@@ -223,7 +225,7 @@ final class CommandBuilderTest extends TestCase
         $parsed = $this->parse($builder, []);
 
         self::assertCount(1, $parsed['arguments']);
-        self::assertCount(2, $parsed['options']);
+        self::assertCount(self::$defaultOptionsCount, $parsed['options']);
     }
 
     public function test_argument_multi_default_invalid_map(): void
@@ -332,7 +334,7 @@ final class CommandBuilderTest extends TestCase
         $builder->option('all');
         $parsed = $this->parse($builder, ['--all']);
 
-        self::assertCount(3, $parsed['options']);
+        self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $option = $parsed['options']['all'];
         self::assertTrue($option->supplied);
@@ -345,7 +347,7 @@ final class CommandBuilderTest extends TestCase
         $builder->option('all')->requiresValue('d');
         $parsed = $this->parse($builder, ['--all']);
 
-        self::assertCount(3, $parsed['options']);
+        self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $option = $parsed['options']['all'];
         self::assertTrue($option->supplied);
@@ -391,7 +393,7 @@ final class CommandBuilderTest extends TestCase
         $builder->option('all')->requiresValue();
         $parsed = $this->parse($builder, ['--all', 'text']);
 
-        self::assertCount(3, $parsed['options']);
+        self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $option = $parsed['options']['all'];
         self::assertTrue($option->supplied);
@@ -404,7 +406,7 @@ final class CommandBuilderTest extends TestCase
         $builder->option('all')->requiresValue();
         $parsed = $this->parse($builder, ['--all=text']);
 
-        self::assertCount(3, $parsed['options']);
+        self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $option = $parsed['options']['all'];
         self::assertTrue($option->supplied);
@@ -417,7 +419,7 @@ final class CommandBuilderTest extends TestCase
         $builder->option('all')->allowMultiple()->requiresValue();
         $parsed = $this->parse($builder, ['--all=1', '--all=2']);
 
-        self::assertCount(3, $parsed['options']);
+        self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $option = $parsed['options']['all'];
         self::assertTrue($option->supplied);
@@ -439,7 +441,7 @@ final class CommandBuilderTest extends TestCase
         $builder->option('all')->allowMultiple();
         $parsed = $this->parse($builder, []);
 
-        self::assertCount(3, $parsed['options']);
+        self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $option = $parsed['options']['all'];
         self::assertFalse($option->supplied);
@@ -452,7 +454,7 @@ final class CommandBuilderTest extends TestCase
         $builder->option('all')->allowMultiple()->requiresValue(['3']);
         $parsed = $this->parse($builder, []);
 
-        self::assertCount(3, $parsed['options']);
+        self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $option = $parsed['options']['all'];
         self::assertFalse($option->supplied);
@@ -465,7 +467,7 @@ final class CommandBuilderTest extends TestCase
         $builder->option('all')->allowMultiple()->requiresValue(['3']);
         $parsed = $this->parse($builder, ['--all=1']);
 
-        self::assertCount(3, $parsed['options']);
+        self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $option = $parsed['options']['all'];
         self::assertTrue($option->supplied);
@@ -479,7 +481,7 @@ final class CommandBuilderTest extends TestCase
         $builder->option('bee');
         $parsed = $this->parse($builder, ['--all=1', '--bee', '--all=2']);
 
-        self::assertCount(4, $parsed['options']);
+        self::assertCount(self::$defaultOptionsCount + 2, $parsed['options']);
 
         $optionAll = $parsed['options']['all'];
         $optionBee = $parsed['options']['bee'];
@@ -512,7 +514,7 @@ final class CommandBuilderTest extends TestCase
         $builder->option('all', 'a');
         $parsed = $this->parse($builder, ['-a']);
 
-        self::assertCount(3, $parsed['options']);
+        self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $option = $parsed['options']['all'];
         self::assertTrue($option->supplied);
@@ -525,7 +527,7 @@ final class CommandBuilderTest extends TestCase
         $builder->option('all', 'a')->requiresValue();
         $parsed = $this->parse($builder, ['-a', 'text']);
 
-        self::assertCount(3, $parsed['options']);
+        self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $option = $parsed['options']['all'];
         self::assertTrue($option->supplied);
@@ -547,7 +549,7 @@ final class CommandBuilderTest extends TestCase
         $builder->option('all', 'a')->requiresValue('d');
         $parsed = $this->parse($builder, ['-a']);
 
-        self::assertCount(3, $parsed['options']);
+        self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $option = $parsed['options']['all'];
         self::assertTrue($option->supplied);
@@ -570,7 +572,7 @@ final class CommandBuilderTest extends TestCase
         $builder->option('bee', 'b');
         $parsed = $this->parse($builder, ['-ab']);
 
-        self::assertCount(4, $parsed['options']);
+        self::assertCount(self::$defaultOptionsCount + 2, $parsed['options']);
 
         $optionAll = $parsed['options']['all'];
         $optionBee = $parsed['options']['bee'];
@@ -587,7 +589,7 @@ final class CommandBuilderTest extends TestCase
         $builder->option('bee', 'b')->requiresValue('2');
         $parsed = $this->parse($builder, ['-ab']);
 
-        self::assertCount(4, $parsed['options']);
+        self::assertCount(self::$defaultOptionsCount + 2, $parsed['options']);
 
         $optionAll = $parsed['options']['all'];
         $optionBee = $parsed['options']['bee'];
@@ -603,7 +605,7 @@ final class CommandBuilderTest extends TestCase
         $builder->option('all', 'a')->requiresValue();
         $parsed = $this->parse($builder, ['-ab']);
 
-        self::assertCount(3, $parsed['options']);
+        self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $optionAll = $parsed['options']['all'];
         self::assertTrue($optionAll->supplied);
@@ -617,7 +619,7 @@ final class CommandBuilderTest extends TestCase
         $builder->option('bee', 'b')->requiresValue('2');
         $parsed = $this->parse($builder, ['-ab']);
 
-        self::assertCount(4, $parsed['options']);
+        self::assertCount(self::$defaultOptionsCount + 2, $parsed['options']);
 
         $optionAll = $parsed['options']['all'];
         $optionBee = $parsed['options']['bee'];
@@ -633,7 +635,7 @@ final class CommandBuilderTest extends TestCase
         $builder->option('test', 't')->allowMultiple();
         $parsed = $this->parse($builder, ['-ttt']);
 
-        self::assertCount(3, $parsed['options']);
+        self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $verbose = $parsed['options']['test'];
         self::assertTrue($verbose->supplied);

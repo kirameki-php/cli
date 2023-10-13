@@ -11,6 +11,7 @@ use Kirameki\Core\Signal;
 use Kirameki\Core\SignalEvent;
 use Kirameki\Process\ExitCode;
 use function ini_set;
+use function set_time_limit;
 
 abstract class Command
 {
@@ -123,19 +124,41 @@ abstract class Command
      */
     private function applyRuntimeLimits(): void
     {
-        $timeLimit = $this->options->getOrNull('time-limit')?->valueAsInt()
-                  ?? $this->definition->getTimeLimit();
+        $this->applyTimeLimit();
+        $this->applyMemoryLimit();
+    }
+
+    /**
+     * @return void
+     */
+    private function applyTimeLimit(): void
+    {
+        $option = $this->options->getOrNull('time-limit');
+
+        $timeLimit = $option?->supplied
+            ? $option->valueAsInt()
+            : $this->definition->getTimeLimit();
 
         if ($timeLimit !== null) {
             set_time_limit($timeLimit);
         }
+    }
 
+    /**
+     * @return void
+     */
+    private function applyMemoryLimit(): void
+    {
         // validate format
-        $memoryLimit = $this->options->getOrNull('memory-limit')?->value()
-                    ?? $this->definition->getMemoryLimit();
+        $option = $this->options->getOrNull('memory-limit');
+
+        $memoryLimit = $option?->supplied
+            ? $option->value()
+            : $this->definition->getMemoryLimit();
 
         if ($memoryLimit !== null) {
             ini_set('memory_limit', $memoryLimit);
         }
     }
+
 }
