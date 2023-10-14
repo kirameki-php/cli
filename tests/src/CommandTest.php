@@ -6,13 +6,10 @@ use Closure;
 use Kirameki\Cli\Command;
 use Kirameki\Cli\CommandBuilder;
 use Kirameki\Cli\Exceptions\CodeOutOfRangeException;
-use Kirameki\Cli\Input;
-use Kirameki\Cli\Output;
-use Kirameki\Collections\Map;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\SignalEvent;
 use Kirameki\Process\ExitCode;
-use Tests\Kirameki\Cli\_Commands\SuccessCommand;
+use Tests\Kirameki\Cli\_Commands\TestableCommand;
 use function ini_get;
 use function posix_getpid;
 use function posix_kill;
@@ -32,54 +29,19 @@ final class CommandTest extends TestCase
      */
     protected function makeCommandWithSigResponder(int $signal, Closure $callback): Command
     {
-        return new class($signal, $callback) extends Command
-        {
-            public function __construct(
-                protected int $signal,
-                protected Closure $callback,
-            )
-            {
-                parent::__construct();
-            }
-
-            public function define(CommandBuilder $builder): void
-            {
-                $builder->name('t');
-            }
-
-            public function run(): ?int
-            {
-                $this->onSignal($this->signal, $this->callback);
-
-                return ExitCode::SUCCESS;
-            }
-        };
+        $command = TestableCommand::make();
+        $command->signal = $signal;
+        $command->onSignal = $callback;
+        return $command;
     }
 
     protected function makeRuntimeCommand(?string $memoryLimit = null, ?int $timeLimit = null): Command
     {
-        return new class($memoryLimit, $timeLimit) extends Command
-        {
-            public function __construct(
-                protected ?string $memoryLimit,
-                protected ?int $timeLimit,
-            )
-            {
-                parent::__construct();
-            }
-
-            public function define(CommandBuilder $builder): void
-            {
-                $builder->name('t');
-                $builder->setMemoryLimit($this->memoryLimit);
-                $builder->setTimeLimit($this->timeLimit);
-            }
-
-            public function run(): ?int
-            {
-                return ExitCode::SUCCESS;
-            }
-        };
+        $builder = new CommandBuilder();
+        $builder->setMemoryLimit($memoryLimit);
+        $builder->setTimeLimit($timeLimit);
+        $command = TestableCommand::make($builder);
+        return $command;
     }
 
     public function test_invalid_return(): void
@@ -88,8 +50,9 @@ final class CommandTest extends TestCase
         $this->expectException(CodeOutOfRangeException::class);
 
         try {
-            $command = new SuccessCommand(-1);
-            $command->execute(new Map(), new Map(), new Input(), new Output());
+            $command = TestableCommand::make();
+            $command->exitCode = -1;
+            $command->execute();
         } catch (CodeOutOfRangeException $e) {
             self::assertSame(ExitCode::STATUS_OUT_OF_RANGE, $e->getExitCode());
             throw $e;
@@ -102,7 +65,7 @@ final class CommandTest extends TestCase
         $command = $this->makeCommandWithSigResponder(SIGUSR1, function() use (&$triggered) {
             $triggered += 1;
         });
-        $command->execute(new Map(), new Map(), new Input(), new Output());
+        $command->execute();
         posix_kill(posix_getpid(), SIGUSR1);
 
         self::assertSame(1, $triggered);
@@ -119,7 +82,7 @@ final class CommandTest extends TestCase
                 $action->shouldTerminate(false);
             });
 
-            $command->execute(new Map(), new Map(), new Input(), new Output());
+            $command->execute();
             posix_kill(posix_getpid(), $signal);
 
             self::assertSame($i + 1, $triggered);
@@ -133,19 +96,19 @@ final class CommandTest extends TestCase
         $this->expectException(LogicException::class);
 
         $command = $this->makeCommandWithSigResponder(SIGKILL, fn() => null);
-        $command->execute(new Map(), new Map(), new Input(), new Output());
+        $command->execute();
     }
 
     public function test_setMemoryLimit_valid_size(): void
     {
         $command = $this->makeRuntimeCommand('512M');
-        $command->execute(new Map(), new Map(), new Input(), new Output());
+        $command->execute();
         self::assertSame('512M', ini_get('memory_limit'));
     }
 
     public function test_setMemoryLimit_invalid_string(): void
     {
         $command = $this->makeRuntimeCommand('1T');
-        $command->execute(new Map(), new Map(), new Input(), new Output());
+        $command->execute();
     }
 }

@@ -8,7 +8,7 @@ use Kirameki\Cli\Exceptions\CommandNotFoundException;
 use Kirameki\Container\Container;
 use Kirameki\Event\EventDispatcher;
 use Kirameki\Process\ExitCode;
-use Tests\Kirameki\Cli\_Commands\SuccessCommand;
+use Tests\Kirameki\Cli\_Commands\TestableCommand;
 
 final class CommandManagerTest extends TestCase
 {
@@ -22,8 +22,8 @@ final class CommandManagerTest extends TestCase
         $events->listen(CommandExecuting::class, function () use (&$executed) { $executed++; });
 
         $manager = new CommandManager(new Container(), $events);
-        $manager->register(SuccessCommand::class);
-        $this->assertSame(0, $manager->execute('success'));
+        $manager->register(TestableCommand::class);
+        $this->assertSame(0, $manager->run('test'));
         $this->assertSame(1, $executing);
         $this->assertSame(1, $executed);
     }
@@ -41,8 +41,8 @@ final class CommandManagerTest extends TestCase
         $events->listen(CommandExecuting::class, function () use (&$executed) { $executed++; });
 
         $manager = new CommandManager(new Container(), $events);
-        $manager->register(SuccessCommand::class);
-        $this->assertSame(0, $manager->execute(SuccessCommand::class));
+        $manager->register(TestableCommand::class);
+        $this->assertSame(0, $manager->run(TestableCommand::class));
         $this->assertSame(1, $executing);
         $this->assertSame(1, $executed);
     }
@@ -58,7 +58,7 @@ final class CommandManagerTest extends TestCase
         try {
             $events = new EventDispatcher();
             $manager = new CommandManager(new Container(), $events);
-            $manager->execute('success');
+            $manager->run('success');
         } catch (CommandNotFoundException $e) {
             $this->assertSame(ExitCode::COMMAND_NOT_FOUND, $e->getExitCode());
             throw $e;
@@ -69,6 +69,6 @@ final class CommandManagerTest extends TestCase
     {
         $events = new EventDispatcher();
         $manager = new CommandManager(new Container(), $events);
-        $this->assertSame(0, $manager->execute(SuccessCommand::class));
+        $this->assertSame(0, $manager->run(TestableCommand::class));
     }
 }

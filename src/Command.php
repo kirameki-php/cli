@@ -7,6 +7,7 @@ use Kirameki\Cli\Exceptions\CodeOutOfRangeException;
 use Kirameki\Cli\Parameters\Argument;
 use Kirameki\Cli\Parameters\Option;
 use Kirameki\Collections\Map;
+use Kirameki\Container\Container;
 use Kirameki\Core\Signal;
 use Kirameki\Core\SignalEvent;
 use Kirameki\Process\ExitCode;
@@ -16,35 +17,22 @@ use function set_time_limit;
 abstract class Command
 {
     /**
-     * @var CommandDefinition
+     * @param Container $container
+     * @param Input $input
+     * @param Output $output
+     * @param CommandDefinition $definition
+     * @param Map<string, Argument> $arguments
+     * @param Map<string, Option> $options
      */
-    public readonly CommandDefinition $definition;
-
-    /**
-     * @var Map<string, Argument>
-     */
-    protected Map $arguments;
-
-    /**
-     * @var Map<string, Option>
-     */
-    protected Map $options;
-
-    /**
-     * @var Input
-     */
-    protected Input $input;
-
-    /**
-     * @var Output
-     */
-    protected Output $output;
-
-    public function __construct()
+    public function __construct(
+        protected readonly Container $container,
+        public readonly CommandDefinition $definition,
+        protected readonly Input $input,
+        protected readonly Output $output,
+        public readonly Map $arguments,
+        public readonly Map $options,
+    )
     {
-        $builder = new CommandBuilder();
-        $this->define($builder);
-        $this->definition = $builder->build();
     }
 
     /**
@@ -53,39 +41,25 @@ abstract class Command
      * @param CommandBuilder $builder
      * @return void
      */
-    abstract public function define(CommandBuilder $builder): void;
+    abstract public static function define(CommandBuilder $builder): void;
 
     /**
      * Parse the raw parameters and run the command.
      *
-     * @param Map<string, Argument> $arguments
-     * @param Map<string, Option> $options
-     * @param Input $input
-     * @param Output $output
      * @return int
      */
-    public function execute(
-        Map $arguments,
-        Map $options,
-        Input $input,
-        Output $output,
-    ): int
+    public function execute(): int
     {
-        $this->arguments = $arguments;
-        $this->options = $options;
-        $this->input = $input;
-        $this->output = $output;
-
         $this->applyRuntimeLimits();
 
-        $code = $this->run() ?? ExitCode::SUCCESS;
+        $code = $this->container->call($this->run(...)) ?? ExitCode::SUCCESS;
 
         if ($code < 0 || $code > 255) {
             throw new CodeOutOfRangeException("Exit code must be between 0 and 255, {$code} given.", [
                 'code' => $code,
-                'definition' => $this->definition,
-                'arguments' => $arguments,
-                'options' => $options,
+                'command' => $this,
+                'arguments' => $this->arguments,
+                'options' => $this->options,
             ]);
         }
 
