@@ -112,8 +112,8 @@ class ParameterParser
      */
     protected function processParameters(): void
     {
-        $parameterCount = count($this->parameters);
         $parameters = $this->parameters;
+        $parameterCount = count($parameters);
         while ($this->parameterCursor < $parameterCount) {
             $parameter = $parameters[$this->parameterCursor];
             match (true) {

@@ -116,7 +116,7 @@ abstract class Command
      */
     protected function isVerbose(): bool
     {
-        return $this->options->get('verbose')->supplied;
+        return $this->options->get('verbose')->provided;
     }
 
     /**
@@ -135,7 +135,7 @@ abstract class Command
     {
         $option = $this->options->getOrNull('time-limit');
 
-        $timeLimit = $option?->supplied
+        $timeLimit = $option?->provided
             ? $option->valueAsInt()
             : $this->definition->getTimeLimit();
 
@@ -152,7 +152,7 @@ abstract class Command
         // validate format
         $option = $this->options->getOrNull('memory-limit');
 
-        $memoryLimit = $option?->supplied
+        $memoryLimit = $option?->provided
             ? $option->value()
             : $this->definition->getMemoryLimit();
 
@@ -160,5 +160,4 @@ abstract class Command
             ini_set('memory_limit', $memoryLimit);
         }
     }
-
 }

@@ -91,7 +91,7 @@ final class CommandBuilderTest extends TestCase
         self::assertCount(self::$defaultOptionsCount, $parsed['options']);
 
         $argument = $parsed['arguments']['a'];
-        self::assertTrue($argument->supplied);
+        self::assertTrue($argument->provided);
         self::assertSame(['1'], $argument->values);
     }
 
@@ -129,7 +129,7 @@ final class CommandBuilderTest extends TestCase
         $parsed = $this->parse($builder, []);
 
         self::assertCount(1, $parsed['arguments']);
-        self::assertFalse($parsed['arguments']['a']->supplied);
+        self::assertFalse($parsed['arguments']['a']->provided);
     }
 
     public function test_argument_as_optional__invalid_value(): void
@@ -151,7 +151,7 @@ final class CommandBuilderTest extends TestCase
         self::assertCount(1, $parsed['arguments']);
 
         $argument = $parsed['arguments']['a'];
-        self::assertFalse($argument->supplied);
+        self::assertFalse($argument->provided);
         self::assertSame(['1'], $argument->values);
     }
 
@@ -166,8 +166,8 @@ final class CommandBuilderTest extends TestCase
 
         $argument_a = $parsed['arguments']['a'];
         $argument_b = $parsed['arguments']['b'];
-        self::assertTrue($argument_a->supplied);
-        self::assertTrue($argument_b->supplied);
+        self::assertTrue($argument_a->provided);
+        self::assertTrue($argument_b->provided);
         self::assertSame(['x'], $argument_a->values);
         self::assertSame(['y'], $argument_b->values);
     }
@@ -193,8 +193,8 @@ final class CommandBuilderTest extends TestCase
 
         $argument_a = $parsed['arguments']['a'];
         $argument_b = $parsed['arguments']['b'];
-        self::assertFalse($argument_a->supplied);
-        self::assertFalse($argument_b->supplied);
+        self::assertFalse($argument_a->provided);
+        self::assertFalse($argument_b->provided);
         self::assertSame(['1'], $argument_a->values);
         self::assertSame(['2'], $argument_b->values);
     }
@@ -337,7 +337,7 @@ final class CommandBuilderTest extends TestCase
         self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $option = $parsed['options']['all'];
-        self::assertTrue($option->supplied);
+        self::assertTrue($option->provided);
         self::assertSame([''], $option->values);
     }
 
@@ -350,7 +350,7 @@ final class CommandBuilderTest extends TestCase
         self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $option = $parsed['options']['all'];
-        self::assertTrue($option->supplied);
+        self::assertTrue($option->provided);
         self::assertSame(['d'], $option->values);
     }
 
@@ -396,7 +396,7 @@ final class CommandBuilderTest extends TestCase
         self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $option = $parsed['options']['all'];
-        self::assertTrue($option->supplied);
+        self::assertTrue($option->provided);
         self::assertSame(['text'], $option->values);
     }
 
@@ -409,7 +409,7 @@ final class CommandBuilderTest extends TestCase
         self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $option = $parsed['options']['all'];
-        self::assertTrue($option->supplied);
+        self::assertTrue($option->provided);
         self::assertSame(['text'], $option->values);
     }
 
@@ -422,7 +422,7 @@ final class CommandBuilderTest extends TestCase
         self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $option = $parsed['options']['all'];
-        self::assertTrue($option->supplied);
+        self::assertTrue($option->provided);
         self::assertSame(['1', '2'], $option->values);
     }
 
@@ -444,7 +444,7 @@ final class CommandBuilderTest extends TestCase
         self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $option = $parsed['options']['all'];
-        self::assertFalse($option->supplied);
+        self::assertFalse($option->provided);
         self::assertSame([], $option->values);
     }
 
@@ -457,7 +457,7 @@ final class CommandBuilderTest extends TestCase
         self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $option = $parsed['options']['all'];
-        self::assertFalse($option->supplied);
+        self::assertFalse($option->provided);
         self::assertSame(['3'], $option->values);
     }
 
@@ -470,7 +470,7 @@ final class CommandBuilderTest extends TestCase
         self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $option = $parsed['options']['all'];
-        self::assertTrue($option->supplied);
+        self::assertTrue($option->provided);
         self::assertSame(['1'], $option->values);
     }
 
@@ -485,7 +485,7 @@ final class CommandBuilderTest extends TestCase
 
         $optionAll = $parsed['options']['all'];
         $optionBee = $parsed['options']['bee'];
-        self::assertTrue($optionAll->supplied);
+        self::assertTrue($optionAll->provided);
         self::assertSame(['1', '2'], $optionAll->values);
         self::assertSame([''], $optionBee->values);
     }
@@ -517,7 +517,7 @@ final class CommandBuilderTest extends TestCase
         self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $option = $parsed['options']['all'];
-        self::assertTrue($option->supplied);
+        self::assertTrue($option->provided);
         self::assertSame([''], $option->values);
     }
 
@@ -530,7 +530,7 @@ final class CommandBuilderTest extends TestCase
         self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $option = $parsed['options']['all'];
-        self::assertTrue($option->supplied);
+        self::assertTrue($option->provided);
         self::assertSame(['text'], $option->values);
     }
 
@@ -552,7 +552,7 @@ final class CommandBuilderTest extends TestCase
         self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $option = $parsed['options']['all'];
-        self::assertTrue($option->supplied);
+        self::assertTrue($option->provided);
         self::assertSame(['d'],$option->values);
     }
 
@@ -576,8 +576,8 @@ final class CommandBuilderTest extends TestCase
 
         $optionAll = $parsed['options']['all'];
         $optionBee = $parsed['options']['bee'];
-        self::assertTrue($optionAll->supplied);
-        self::assertTrue($optionBee->supplied);
+        self::assertTrue($optionAll->provided);
+        self::assertTrue($optionBee->provided);
         self::assertSame([''], $optionAll->values);
         self::assertSame([''], $optionBee->values);
     }
@@ -593,8 +593,8 @@ final class CommandBuilderTest extends TestCase
 
         $optionAll = $parsed['options']['all'];
         $optionBee = $parsed['options']['bee'];
-        self::assertTrue($optionAll->supplied);
-        self::assertTrue($optionBee->supplied);
+        self::assertTrue($optionAll->provided);
+        self::assertTrue($optionBee->provided);
         self::assertSame(['1'], $optionAll->values);
         self::assertSame(['2'], $optionBee->values);
     }
@@ -608,7 +608,7 @@ final class CommandBuilderTest extends TestCase
         self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $optionAll = $parsed['options']['all'];
-        self::assertTrue($optionAll->supplied);
+        self::assertTrue($optionAll->provided);
         self::assertSame(['b'], $optionAll->values);
     }
 
@@ -623,8 +623,8 @@ final class CommandBuilderTest extends TestCase
 
         $optionAll = $parsed['options']['all'];
         $optionBee = $parsed['options']['bee'];
-        self::assertTrue($optionAll->supplied);
-        self::assertTrue($optionBee->supplied);
+        self::assertTrue($optionAll->provided);
+        self::assertTrue($optionBee->provided);
         self::assertSame(['1'],$optionAll->values);
         self::assertSame(['2'], $optionBee->values);
     }
@@ -638,7 +638,7 @@ final class CommandBuilderTest extends TestCase
         self::assertCount(self::$defaultOptionsCount + 1, $parsed['options']);
 
         $verbose = $parsed['options']['test'];
-        self::assertTrue($verbose->supplied);
+        self::assertTrue($verbose->provided);
         self::assertSame(['', '', ''],$verbose->values);
     }
 }
