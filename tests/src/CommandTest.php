@@ -6,6 +6,7 @@ use Closure;
 use Kirameki\Cli\Command;
 use Kirameki\Cli\CommandBuilder;
 use Kirameki\Cli\Exceptions\CodeOutOfRangeException;
+use Kirameki\Cli\Exceptions\DefinitionException;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\SignalEvent;
 use Kirameki\Process\ExitCode;
@@ -108,6 +109,9 @@ final class CommandTest extends TestCase
 
     public function test_setMemoryLimit_invalid_string(): void
     {
+        $this->expectExceptionMessage('Invalid memory limit format: 1T');
+        $this->expectException(DefinitionException::class);
+
         $command = $this->makeRuntimeCommand('1T');
         $command->execute();
     }

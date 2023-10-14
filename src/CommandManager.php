@@ -30,10 +30,10 @@ class CommandManager
     protected array $unresolved = [];
 
     public function __construct(
-        protected Container $container,
-        protected EventDispatcher $events,
-        protected Input $input = new Input(),
-        protected Output $output = new Output(),
+        protected readonly Container $container,
+        protected readonly EventDispatcher $events,
+        protected readonly Input $input = new Input(),
+        protected readonly Output $output = new Output(),
     )
     {
     }
@@ -74,7 +74,7 @@ class CommandManager
      */
     public function run(string $name, iterable $parameters = []): int
     {
-        $command = $this->resolve($name, $parameters);
+        $command = $this->resolve($name, Arr::from($parameters));
         $events = $this->events;
 
         $events->dispatch(new CommandExecuting($command));
@@ -88,10 +88,10 @@ class CommandManager
 
     /**
      * @param string|class-string<Command> $name
-     * @param iterable<int, string> $parameters
+     * @param list<string> $parameters
      * @return Command
      */
-    protected function resolve(string $name, iterable $parameters): Command
+    protected function resolve(string $name, array $parameters): Command
     {
         // Instantiate the commands once to get the alias names of all the commands.
         $this->registerAliasMap();
@@ -130,13 +130,13 @@ class CommandManager
 
     /**
      * @param class-string<Command> $class
-     * @param iterable<int, string> $parameters
+     * @param list<string> $parameters
      * @return Command
      */
-    protected function makeCommand(string $class, iterable $parameters): Command
+    protected function makeCommand(string $class, array $parameters): Command
     {
         $definition = $this->getDefinition($class);
-        $parsed = ParameterParser::parse($definition, Arr::from($parameters));
+        $parsed = ParameterParser::parse($definition, $parameters);
 
         return $this->container->make($class, [
             'container' => $this->container,
