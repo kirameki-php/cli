@@ -7,33 +7,38 @@ use Kirameki\Cli\Exceptions\CodeOutOfRangeException;
 use Kirameki\Cli\Parameters\Argument;
 use Kirameki\Cli\Parameters\Option;
 use Kirameki\Collections\Map;
-use Kirameki\Container\Container;
-use Kirameki\Core\Signal;
-use Kirameki\Core\SignalEvent;
 use Kirameki\Process\ExitCode;
+use Kirameki\Process\Signal;
+use Kirameki\Process\SignalEvent;
 use function ini_set;
 use function set_time_limit;
 
 abstract class Command
 {
     /**
-     * @param Container $container
-     * @param Input $input
-     * @param Output $output
-     * @param CommandDefinition $definition
-     * @param Map<string, Argument> $arguments
-     * @param Map<string, Option> $options
+     * @var CommandDefinition
      */
-    public function __construct(
-        protected readonly Container $container,
-        public readonly CommandDefinition $definition,
-        protected readonly Input $input,
-        protected readonly Output $output,
-        public readonly Map $arguments,
-        public readonly Map $options,
-    )
-    {
-    }
+    protected CommandDefinition $definition;
+
+    /**
+     * @var Map<string, Argument>
+     */
+    protected Map $arguments;
+
+    /**
+     * @var Map<string, Option>
+     */
+    protected Map $options;
+
+    /**
+     * @var Output
+     */
+    protected Output $output;
+
+    /**
+     * @var Input
+     */
+    protected Input $input;
 
     /**
      * Define the command and its arguments and options.
@@ -46,18 +51,39 @@ abstract class Command
     /**
      * Parse the raw parameters and run the command.
      *
+     *  Exit code for the given command.
+     *  Must be between 0 and 255.
+     *
+     * @param CommandDefinition $definition
+     * @param Map<string, Argument> $arguments
+     * @param Map<string, Option> $options
+     * @param Output $output
+     * @param Input $input
      * @return int
      */
-    public function execute(): int
+    public function execute(
+        CommandDefinition $definition,
+        Map $arguments,
+        Map $options,
+        Output $output = new Output(),
+        Input $input = new Input(),
+    ): int
     {
+        $this->definition = $definition;
+        $this->arguments = $arguments;
+        $this->options = $options;
+        $this->output = $output;
+        $this->input = $input;
+
         $this->applyRuntimeLimits();
 
-        $code = $this->container->call($this->run(...)) ?? ExitCode::SUCCESS;
+        $code = $this->run() ?? ExitCode::SUCCESS;
 
         if ($code < 0 || $code > 255) {
             throw new CodeOutOfRangeException("Exit code must be between 0 and 255, {$code} given.", [
                 'code' => $code,
                 'command' => $this,
+                'definition' => $this->definition,
                 'arguments' => $this->arguments,
                 'options' => $this->options,
             ]);
@@ -70,8 +96,6 @@ abstract class Command
      * The method which runs the user defined logic.
      *
      * @return int|null
-     * Exit code for the given command.
-     * Must be between 0 and 255.
      */
     abstract protected function run(): ?int;
 

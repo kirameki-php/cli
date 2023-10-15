@@ -5,12 +5,11 @@ namespace Tests\Kirameki\Cli\_Commands;
 use Closure;
 use Kirameki\Cli\Command;
 use Kirameki\Cli\CommandBuilder;
-use Kirameki\Cli\Input;
-use Kirameki\Cli\Output;
+use Kirameki\Cli\CommandDefinition;
+use Kirameki\Cli\Parameters\ParameterParser;
 use Kirameki\Collections\Map;
-use Kirameki\Container\Container;
-use Kirameki\Core\SignalEvent;
 use Kirameki\Process\ExitCode;
+use Kirameki\Process\SignalEvent;
 
 class TestableCommand extends Command
 {
@@ -29,25 +28,35 @@ class TestableCommand extends Command
      */
     public ?Closure $onSignal = null;
 
-    public static function make(?CommandBuilder $builder = null): self
-    {
-        $builder ??= new CommandBuilder();
-        self::define($builder);
-
-        return new self(
-            new Container(),
-            $builder->build(),
-            new Input(),
-            new Output(),
-            new Map(),
-            new Map(),
-        );
-    }
-
     public static function define(CommandBuilder $builder): void
     {
         $builder->name('test');
         $builder->description('testable command');
+        $builder->option('echo', 'e')
+            ->allowMultiple()
+            ->description('echo value')
+            ->requiresValue();
+    }
+
+    protected function getDefinition(): CommandDefinition
+    {
+        $builder = new CommandBuilder();
+        self::define($builder);
+        return $builder->build();
+    }
+
+    /**
+     * @param list<string> $parameters
+     */
+    public function testExecute(?CommandDefinition $definition = null, array $parameters = []): int
+    {
+        $definition ??= $this->getDefinition();
+        $parsed = ParameterParser::parse($definition, $parameters);
+        return $this->execute(
+            $definition,
+            new Map($parsed['arguments']),
+            new Map($parsed['options']),
+        );
     }
 
     protected function run(): ?int
@@ -56,6 +65,18 @@ class TestableCommand extends Command
             $this->onSignal($this->signal, $this->onSignal);
         }
 
+        $echoOption = $this->options->get('echo');
+        if ($echoOption->provided) {
+            foreach ($echoOption->values as $value) {
+                $this->output->line($value);
+            }
+        }
+
         return $this->exitCode;
+    }
+
+    public function checkIsVerbose(): bool
+    {
+        return $this->isVerbose();
     }
 }

@@ -3,7 +3,7 @@
 namespace Kirameki\Cli\Events;
 
 use Kirameki\Cli\Command;
-use Kirameki\Core\Event;
+use Kirameki\Event\Event;
 
 class CommandExecuted extends Event
 {

@@ -10,12 +10,15 @@ use Kirameki\Cli\Parameters\ParameterParser;
 use Kirameki\Collections\Map;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Container\Container;
-use Kirameki\Event\EventDispatcher;
+use Kirameki\Event\EventManager;
 use function array_key_exists;
 use function array_shift;
 use function assert;
 use function class_exists;
 use function is_subclass_of;
+use function preg_split;
+use const PREG_SPLIT_DELIM_CAPTURE;
+use const PREG_SPLIT_NO_EMPTY;
 
 class CommandManager
 {
@@ -31,9 +34,9 @@ class CommandManager
 
     public function __construct(
         protected readonly Container $container,
-        protected readonly EventDispatcher $events,
-        protected readonly Input $input = new Input(),
+        protected readonly EventManager $events,
         protected readonly Output $output = new Output(),
+        protected readonly Input $input = new Input(),
     )
     {
     }
@@ -54,7 +57,9 @@ class CommandManager
      */
     public function parseAndRun(string $input): int
     {
-        $args = preg_split('/("[^"]*")|\h+/', $input, -1, PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
+        // Splits $input into command name + parameters.
+        // Double-quoted strings are properly handled through the regex below.
+        $args = preg_split('/"([^"]*)"|\h+/', $input, -1, PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
         assert($args !== false);
 
         $name = array_shift($args);
@@ -74,38 +79,68 @@ class CommandManager
      */
     public function run(string $name, iterable $parameters = []): int
     {
-        $command = $this->resolve($name, Arr::from($parameters));
         $events = $this->events;
 
-        $events->dispatch(new CommandExecuting($command));
+        $command = $this->makeCommand($name);
+        $definition = $this->getDefinition($command::class);
+        $parsed = ParameterParser::parse($definition, Arr::from($parameters));
 
-        $exitCode = $command->execute();
+        $events->emit(new CommandExecuting($command));
 
-        $events->dispatch(new CommandExecuted($command, $exitCode));
+        $exitCode = $command->execute(
+            $definition,
+            new Map($parsed['arguments']),
+            new Map($parsed['options']),
+            $this->output,
+            $this->input,
+        );
+
+        $events->emit(new CommandExecuted($command, $exitCode));
 
         return $exitCode;
     }
 
     /**
      * @param string|class-string<Command> $name
-     * @param list<string> $parameters
      * @return Command
      */
-    protected function resolve(string $name, array $parameters): Command
+    protected function makeCommand(string $name): Command
     {
+        return $this->container->make($this->getCommandClass($name));
+    }
+
+    /**
+     * @param string|class-string<Command> $name
+     * @return class-string<Command>
+     */
+    protected function getCommandClass(string $name): string
+    {
+        if (class_exists($name) && is_subclass_of($name, Command::class)) {
+            return $name;
+        }
+
         // Instantiate the commands once to get the alias names of all the commands.
         $this->registerAliasMap();
 
-        $commandClass = $this->getCommandClass($name);
-
-        if (class_exists($commandClass) && is_subclass_of($commandClass, Command::class)) {
-            return $this->makeCommand($commandClass, $parameters);
+        if (array_key_exists($name, $this->aliasMap)) {
+            return $this->aliasMap[$name];
         }
 
         throw new CommandNotFoundException("Command: {$name} is not registered.", [
             'name' => $name,
             'registered' => $this->unresolved,
         ]);
+    }
+
+    /**
+     * @param class-string<Command> $command
+     * @return CommandDefinition
+     */
+    protected function getDefinition(string $command): CommandDefinition
+    {
+        $builder = new CommandBuilder();
+        $command::define($builder);
+        return $builder->build();
     }
 
     /**
@@ -119,43 +154,5 @@ class CommandManager
             $this->aliasMap[$name] = $class;
         }
         $this->unresolved = [];
-    }
-
-    protected function getCommandClass(string $name): string
-    {
-        return array_key_exists($name, $this->aliasMap)
-            ? $this->aliasMap[$name]
-            : $name;
-    }
-
-    /**
-     * @param class-string<Command> $class
-     * @param list<string> $parameters
-     * @return Command
-     */
-    protected function makeCommand(string $class, array $parameters): Command
-    {
-        $definition = $this->getDefinition($class);
-        $parsed = ParameterParser::parse($definition, $parameters);
-
-        return $this->container->make($class, [
-            'container' => $this->container,
-            'definition' => $definition,
-            'arguments' => new Map($parsed['arguments']),
-            'options' => new Map($parsed['options']),
-            'input' => $this->input,
-            'output' => $this->output,
-        ]);
-    }
-
-    /**
-     * @param class-string<Command> $command
-     * @return CommandDefinition
-     */
-    protected function getDefinition(string $command): CommandDefinition
-    {
-        $builder = new CommandBuilder();
-        $command::define($builder);
-        return $builder->build();
     }
 }

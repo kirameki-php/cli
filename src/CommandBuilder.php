@@ -102,8 +102,8 @@ class CommandBuilder
      */
     public function setMemoryLimit(?string $size): void
     {
-        if ($size !== null && !preg_match('/^\d+[KMG]$/i', $size)) {
-            throw new DefinitionException("Invalid memory limit format: {$size}", [
+        if ($size !== null && !preg_match('/^[0-9]+[KMG]$/i', $size)) {
+            throw new DefinitionException("Invalid memory limit format: {$size}. Format must be /[0-9]+[KMG]/i.", [
                 'name' => $this->name,
                 'size' => $size,
             ]);

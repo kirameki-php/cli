@@ -2,7 +2,7 @@
 
 namespace Kirameki\Cli\Definitions;
 
-class ArgumentDefinition extends ParameterDefinition
+readonly class ArgumentDefinition extends ParameterDefinition
 {
     /**
      * @param string $name
@@ -15,7 +15,7 @@ class ArgumentDefinition extends ParameterDefinition
         string $name,
         string $description = '',
         bool $allowMultiple = false,
-        public readonly bool $optional = false,
+        public bool $optional = false,
         string|array|null $default = null,
     )
     {

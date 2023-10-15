@@ -7,12 +7,12 @@ use Kirameki\Cli\Definitions\OptionDefinition;
 use function array_key_exists;
 use function array_keys;
 
-class CommandDefinition
+readonly class CommandDefinition
 {
     /**
      * @var list<string>
      */
-    protected readonly array $argumentIndexAliases;
+    protected array $argumentIndexAliases;
 
     /**
      * @param string $name
@@ -24,13 +24,13 @@ class CommandDefinition
      * @param int|null $timeLimit
      */
     public function __construct(
-        protected readonly string $name,
-        protected readonly string $description,
-        protected readonly array $arguments,
-        protected readonly array $options,
-        protected readonly array $shortNameAliases,
-        protected readonly ?string $memoryLimit = null,
-        protected readonly ?int $timeLimit = null,
+        protected string $name,
+        protected string $description,
+        protected array $arguments,
+        protected array $options,
+        protected array $shortNameAliases,
+        protected ?string $memoryLimit = null,
+        protected ?int $timeLimit = null,
     )
     {
         $this->argumentIndexAliases = array_keys($arguments);

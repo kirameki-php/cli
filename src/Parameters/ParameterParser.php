@@ -7,6 +7,7 @@ use Kirameki\Cli\Definitions\ArgumentDefinition;
 use Kirameki\Cli\Definitions\OptionDefinition;
 use Kirameki\Cli\Definitions\ParameterDefinition;
 use Kirameki\Cli\Exceptions\ParseException;
+use Kirameki\Collections\Vec;
 use function array_is_list;
 use function array_key_exists;
 use function array_keys;
@@ -46,8 +47,8 @@ class ParameterParser
      * @param array<string, list<string|null>> $optionValues
      */
     protected function __construct(
-        protected CommandDefinition $definition,
-        protected array $parameters,
+        protected readonly CommandDefinition $definition,
+        protected readonly array $parameters,
         protected int $argumentCursor = 0,
         protected int $parameterCursor = 0,
         protected array $argumentValues = [],
@@ -272,7 +273,7 @@ class ParameterParser
                 ? $this->mergeDefaults($defined, [null])
                 : $this->mergeDefaults($defined, $enteredValues);
 
-            $arguments[$name] = new Argument($defined, $mergedValues, $enteredValues);
+            $arguments[$name] = new Argument($defined, new Vec($mergedValues), $enteredValues !== []);
         }
 
         return $arguments;
@@ -287,7 +288,7 @@ class ParameterParser
         foreach ($this->definition->getOptions() as $name => $defined) {
             $enteredValues = $this->optionValues[$name] ?? [];
             $mergedValues = $this->mergeDefaults($defined, $enteredValues);
-            $options[$name] = new Option($defined, $mergedValues, $enteredValues);
+            $options[$name] = new Option($defined, new Vec($mergedValues), $enteredValues !== []);
         }
         return $options;
     }

@@ -3,13 +3,12 @@
 namespace Tests\Kirameki\Cli;
 
 use Closure;
-use Kirameki\Cli\Command;
 use Kirameki\Cli\CommandBuilder;
 use Kirameki\Cli\Exceptions\CodeOutOfRangeException;
 use Kirameki\Cli\Exceptions\DefinitionException;
 use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Core\SignalEvent;
 use Kirameki\Process\ExitCode;
+use Kirameki\Process\SignalEvent;
 use Tests\Kirameki\Cli\_Commands\TestableCommand;
 use function ini_get;
 use function posix_getpid;
@@ -26,22 +25,13 @@ final class CommandTest extends TestCase
     /**
      * @param int $signal
      * @param Closure(SignalEvent): mixed $callback
-     * @return Command
+     * @return TestableCommand
      */
-    protected function makeCommandWithSigResponder(int $signal, Closure $callback): Command
+    protected function makeCommandWithSigResponder(int $signal, Closure $callback): TestableCommand
     {
-        $command = TestableCommand::make();
+        $command = new TestableCommand();
         $command->signal = $signal;
         $command->onSignal = $callback;
-        return $command;
-    }
-
-    protected function makeRuntimeCommand(?string $memoryLimit = null, ?int $timeLimit = null): Command
-    {
-        $builder = new CommandBuilder();
-        $builder->setMemoryLimit($memoryLimit);
-        $builder->setTimeLimit($timeLimit);
-        $command = TestableCommand::make($builder);
         return $command;
     }
 
@@ -51,9 +41,9 @@ final class CommandTest extends TestCase
         $this->expectException(CodeOutOfRangeException::class);
 
         try {
-            $command = TestableCommand::make();
+            $command = new TestableCommand();
             $command->exitCode = -1;
-            $command->execute();
+            $command->testExecute();
         } catch (CodeOutOfRangeException $e) {
             self::assertSame(ExitCode::STATUS_OUT_OF_RANGE, $e->getExitCode());
             throw $e;
@@ -66,7 +56,7 @@ final class CommandTest extends TestCase
         $command = $this->makeCommandWithSigResponder(SIGUSR1, function() use (&$triggered) {
             $triggered += 1;
         });
-        $command->execute();
+        $command->testExecute();
         posix_kill(posix_getpid(), SIGUSR1);
 
         self::assertSame(1, $triggered);
@@ -83,7 +73,7 @@ final class CommandTest extends TestCase
                 $action->shouldTerminate(false);
             });
 
-            $command->execute();
+            $command->testExecute();
             posix_kill(posix_getpid(), $signal);
 
             self::assertSame($i + 1, $triggered);
@@ -97,22 +87,91 @@ final class CommandTest extends TestCase
         $this->expectException(LogicException::class);
 
         $command = $this->makeCommandWithSigResponder(SIGKILL, fn() => null);
-        $command->execute();
+        $command->testExecute();
     }
 
     public function test_setMemoryLimit_valid_size(): void
     {
-        $command = $this->makeRuntimeCommand('512M');
-        $command->execute();
-        self::assertSame('512M', ini_get('memory_limit'));
+        $command = new TestableCommand();
+        $builder = new CommandBuilder('test');
+        $command::define($builder);
+        $size = '512M';
+        $builder->setMemoryLimit($size);
+        $definition = $builder->build();
+        $this->assertSame($size, $definition->getMemoryLimit());
+        $command->testExecute($definition);
+        self::assertSame($size, ini_get('memory_limit'));
     }
 
     public function test_setMemoryLimit_invalid_string(): void
     {
-        $this->expectExceptionMessage('Invalid memory limit format: 1T');
+        $this->expectExceptionMessage('Invalid memory limit format: 1T. Format must be /[0-9]+[KMG]/i.');
         $this->expectException(DefinitionException::class);
 
-        $command = $this->makeRuntimeCommand('1T');
-        $command->execute();
+        $command = new TestableCommand();
+        $builder = new CommandBuilder('test');
+        $command::define($builder);
+        $builder->setMemoryLimit('1T');
+        $command->testExecute($builder->build());
+    }
+
+    public function test_setMemoryLimit_invalid_int(): void
+    {
+        $this->expectExceptionMessage('Invalid memory limit format: 123. Format must be /[0-9]+[KMG]/i.');
+        $this->expectException(DefinitionException::class);
+
+        $command = new TestableCommand();
+        $builder = new CommandBuilder('test');
+        $command::define($builder);
+        $builder->setMemoryLimit('123');
+        $command->testExecute($builder->build());
+    }
+
+    public function test_setMemoryLimit_from_option(): void
+    {
+        $command = new TestableCommand();
+        $builder = new CommandBuilder('test');
+        $command::define($builder);
+        $memoryLimit = '1G';
+        $definition = $builder->build();
+        $this->assertNull($definition->getMemoryLimit());
+        $command->testExecute($definition, ['--memory-limit', $memoryLimit]);
+    }
+
+    public function test_setTimeLimit_from_definition(): void
+    {
+        $command = new TestableCommand();
+        $builder = new CommandBuilder('test');
+        $command::define($builder);
+        $timeLimit = 9999;
+        $builder->setTimeLimit($timeLimit);
+        $definition = $builder->build();
+        $this->assertSame($timeLimit, $definition->getTimeLimit());
+        $command->testExecute($definition);
+    }
+
+    public function test_setTimeLimit_from_option(): void
+    {
+        $command = new TestableCommand();
+        $builder = new CommandBuilder('test');
+        $command::define($builder);
+        $timeLimit = 9999;
+        $definition = $builder->build();
+        $this->assertNull($definition->getTimeLimit());
+        $command->testExecute($definition, ['--time-limit', (string) $timeLimit]);
+    }
+
+    public function test_is_verbose(): void
+    {
+        $command = new TestableCommand();
+        $command->testExecute();
+        self::assertFalse($command->checkIsVerbose());
+    }
+
+    public function test_is_not_verbose(): void
+    {
+        $command = new TestableCommand();
+        $command->testExecute();
+        self::assertFalse($command->checkIsVerbose());
     }
 }

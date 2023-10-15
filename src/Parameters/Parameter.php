@@ -3,31 +3,26 @@
 namespace Kirameki\Cli\Parameters;
 
 use Kirameki\Cli\Definitions\ParameterDefinition;
+use Kirameki\Collections\Vec;
 use Kirameki\Core\Exceptions\RuntimeException;
 use function array_key_exists;
 
 /**
  * @template TDefinition as ParameterDefinition
  */
-abstract class Parameter
+abstract readonly class Parameter
 {
     /**
-     * @var bool
-     */
-    public readonly bool $provided;
-
-    /**
      * @param TDefinition $definition
-     * @param list<string> $values
-     * @param list<string|null> $enteredValues
+     * @param Vec<string> $values
+     * @param bool $provided
      */
     public function __construct(
-        public readonly ParameterDefinition $definition,
-        public readonly array $values,
-        protected readonly array $enteredValues,
+        public ParameterDefinition $definition,
+        public Vec $values,
+        public bool $provided,
     )
     {
-        $this->provided = $this->enteredValues !== [];
     }
 
     /**
@@ -36,7 +31,7 @@ abstract class Parameter
      */
     public function value(int $at = 0): string
     {
-        $values = $this->values;
+        $values = $this->values->all();
 
         if (!array_key_exists($at, $values)) {
             throw new RuntimeException("No values exists at [{$at}]", [

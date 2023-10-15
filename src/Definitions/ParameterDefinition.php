@@ -2,7 +2,7 @@
 
 namespace Kirameki\Cli\Definitions;
 
-abstract class ParameterDefinition
+abstract readonly class ParameterDefinition
 {
     /**
      * @param string $name
@@ -11,10 +11,10 @@ abstract class ParameterDefinition
      * @param string|list<string>|null $default
      */
     public function __construct(
-        public readonly string $name,
-        public readonly string $description = '',
-        public readonly bool $allowMultiple = false,
-        public readonly string|array|null $default = null,
+        public string $name,
+        public string $description = '',
+        public bool $allowMultiple = false,
+        public string|array|null $default = null,
     )
     {
     }

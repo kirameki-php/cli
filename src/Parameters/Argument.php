@@ -7,6 +7,6 @@ use Kirameki\Cli\Definitions\ArgumentDefinition;
 /**
  * @extends Parameter<ArgumentDefinition>
  */
-class Argument extends Parameter
+readonly class Argument extends Parameter
 {
 }

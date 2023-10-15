@@ -7,6 +7,6 @@ use Kirameki\Cli\Definitions\OptionDefinition;
 /**
  * @extends Parameter<OptionDefinition>
  */
-class Option extends Parameter
+readonly class Option extends Parameter
 {
 }

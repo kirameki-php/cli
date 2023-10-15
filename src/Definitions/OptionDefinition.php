@@ -2,7 +2,7 @@
 
 namespace Kirameki\Cli\Definitions;
 
-class OptionDefinition extends ParameterDefinition
+readonly class OptionDefinition extends ParameterDefinition
 {
     /**
      * @param string $name
