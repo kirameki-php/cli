@@ -176,7 +176,6 @@ class CommandManager
         if (count($this->registered) > 0) {
             $this->updateAliasMap();
             $this->exportAliasMap();
-            $this->registered = [];
         }
     }
 
@@ -224,7 +223,7 @@ class CommandManager
         ]));
     }
 
-    protected function getAliasMapCachePath(): string
+    public function getAliasMapCachePath(): string
     {
         return $this->cacheDir . '/command-aliases.php';
     }

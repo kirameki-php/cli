@@ -12,10 +12,19 @@ use Kirameki\Container\Container;
 use Kirameki\Event\EventManager;
 use Kirameki\Process\ExitCode;
 use Kirameki\Stream\MemoryStream;
+use PHPUnit\Framework\Attributes\After;
+use Tests\Kirameki\Cli\_Commands\AlternateCommand;
 use Tests\Kirameki\Cli\_Commands\TestableCommand;
 
 final class CommandManagerTest extends TestCase
 {
+    #[After]
+    protected function removeCache(): void
+    {
+        @unlink('/tmp/kirameki/command-aliases.php');
+        @rmdir('/tmp/kirameki');
+    }
+
     public function test_run_using_name(): void
     {
         $events = new EventManager();
@@ -111,5 +120,47 @@ final class CommandManagerTest extends TestCase
         $manager = new CommandManager(new Container(), new EventManager());
         $manager->register(TestableCommand::class);
         $manager->parseAndRun('');
+    }
+
+    public function test_importAliasMap_use_cache(): void
+    {
+        $manager = new CommandManager(new Container(), new EventManager());
+        $manager->register(TestableCommand::class);
+        $manager->run('test');
+        $manager->run('test');
+
+        $cacheFilePath = '/tmp/kirameki/command-aliases.php';
+        $this->assertFileExists($cacheFilePath);
+        $this->assertSame(['test' => TestableCommand::class], require $cacheFilePath);
+    }
+
+    public function test_importAliasMap_update_cache_added(): void
+    {
+        $manager = new CommandManager(new Container(), new EventManager(), devMode: true);
+        $manager->register(TestableCommand::class);
+        $manager->run('test');
+        $manager->register(AlternateCommand::class);
+        $manager->run('test');
+
+        $this->assertFileExists('/tmp/kirameki/command-aliases.php');
+        $this->assertSame([
+            'test' => TestableCommand::class,
+            'alt' => AlternateCommand::class,
+        ], require '/tmp/kirameki/command-aliases.php');
+    }
+
+    public function test_importAliasMap_update_cache_removed(): void
+    {
+        $manager = new CommandManager(new Container(), new EventManager(), devMode: true);
+        $manager->register(TestableCommand::class);
+        $manager->register(AlternateCommand::class);
+        $manager->run('test');
+
+        $manager = new CommandManager(new Container(), new EventManager(), devMode: true);
+        $manager->register(TestableCommand::class);
+        $manager->run('test');
+
+        $this->assertFileExists('/tmp/kirameki/command-aliases.php');
+        $this->assertSame(['test' => TestableCommand::class], require '/tmp/kirameki/command-aliases.php');
     }
 }
