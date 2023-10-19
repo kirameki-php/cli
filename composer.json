@@ -37,15 +37,13 @@
   "config": {
     "discard-changes": true,
     "preferred-install": "dist",
-    "sort-packages": true,
-    "allow-plugins": {
-      "phpstan/extension-installer": true
-    }
+    "sort-packages": true
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
   "scripts": {
     "test": "vendor/bin/phpunit --coverage-html coverage",
+    "ci-test": "vendor/bin/phpunit --coverage-clover ./coverage.xml",
     "analyze": "vendor/bin/phpstan analyse --memory-limit 1G"
   }
 }
