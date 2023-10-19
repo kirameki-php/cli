@@ -41,6 +41,16 @@ abstract class Command
     protected Input $input;
 
     /**
+     * @return CommandDefinition
+     */
+    public static function getDefinition(): CommandDefinition
+    {
+        $builder = new CommandBuilder();
+        static::define($builder);
+        return $builder->build();
+    }
+
+    /**
      * Define the command and its arguments and options.
      *
      * @param CommandBuilder $builder

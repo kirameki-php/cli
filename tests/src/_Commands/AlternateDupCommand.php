@@ -5,12 +5,12 @@ namespace Tests\Kirameki\Cli\_Commands;
 use Kirameki\Cli\Command;
 use Kirameki\Cli\CommandBuilder;
 
-class AlternateCommand extends Command
+class AlternateDupCommand extends Command
 {
     public static function define(CommandBuilder $builder): void
     {
         $builder->name('alt');
-        $builder->description('testable command alternate');
+        $builder->description('duplicate of command alternate for error checking');
     }
 
     protected function run(): ?int

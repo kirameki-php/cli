@@ -38,13 +38,6 @@ class TestableCommand extends Command
             ->requiresValue();
     }
 
-    protected function getDefinition(): CommandDefinition
-    {
-        $builder = new CommandBuilder();
-        self::define($builder);
-        return $builder->build();
-    }
-
     /**
      * @param list<string> $parameters
      */
