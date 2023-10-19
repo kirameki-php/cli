@@ -2,6 +2,7 @@
 
 namespace Kirameki\Cli;
 
+use Closure;
 use Kirameki\Cli\Output\AnsiDecorator;
 use Kirameki\Cli\Output\Decorator;
 use Kirameki\Cli\Output\ProgressBar;
@@ -129,5 +130,59 @@ class Output
     ): ProgressBar
     {
         return new ProgressBar($this, $start, $end, $width);
+    }
+
+    /**
+     * @param string $text
+     * @param Closure(): bool $callback
+     * @return void
+     */
+    public function spinner(string $text, Closure $callback): void
+    {
+        $this->info($text);
+        $callback();
+    }
+
+    /**
+     * @param string $text
+     * @param Closure(): mixed $callback
+     * @return void
+     */
+    public function status(string $text, Closure $callback): void
+    {
+        $this->info($text);
+        $callback();
+    }
+
+    /**
+     * @param list<list<string>> $contents
+     * @param list<string>|null $headers
+     */
+    public function table(array $contents, ?array $headers = null): void
+    {
+        $maxWidths = [];
+        $rows = [];
+
+        if ($headers) {
+            $rows[] = $headers;
+        }
+
+        foreach ($contents as $row) {
+            foreach ($row as $index => $cell) {
+                $maxWidths[$index] ??= 0;
+                $maxWidths[$index] = max($maxWidths[$index], strlen($cell));
+            }
+            $rows[] = $row;
+        }
+
+        $format = '';
+        foreach ($maxWidths as $maxWidth) {
+            $format .= "%-{$maxWidth}s  ";
+        }
+        $format = rtrim($format);
+
+        foreach ($rows as $row) {
+            $this->line(sprintf($format, ...$row));
+        }
     }
 }
